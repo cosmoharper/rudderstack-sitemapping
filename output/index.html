@@ -160,7 +160,7 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Robo
 .legend-line-conversion { border-top: 2px dashed var(--c-link-conversion); opacity: 0.5; }
 
 #tooltip {
-  position: fixed; z-index: 200; pointer-events: none; display: none;
+  position: fixed; z-index: 200; pointer-events: auto; display: none;
   background: var(--c-bg-tooltip); backdrop-filter: blur(10px);
   border: 1px solid var(--c-border-secondary); border-radius: 8px; padding: 14px 18px;
   max-width: 480px; font-size: 12px; line-height: 1.5;
@@ -911,6 +911,7 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal
 const tooltip = document.getElementById("tooltip");
 
 function showTooltip(event, d) {
+  cancelHideTooltip();
   let html = `<h4>${d.data.name}</h4>`;
   html += `<div class="url">${d.data.path}</div>`;
   html += `<div><strong>Pages:</strong> ${d.data.total_urls.toLocaleString()} total, ${d.data.url_count} direct</div>`;
@@ -953,6 +954,7 @@ function showTooltip(event, d) {
 }
 
 function showConversionTooltip(event, d) {
+  cancelHideTooltip();
   let html = `<h4>${d.name}</h4>`;
   html += `<div class="url">${d.url}</div>`;
   html += `<div><strong>Type:</strong> ${d.type} | <strong>Sources:</strong> ${d.source_count}</div>`;
@@ -976,7 +978,14 @@ function moveTooltip(event) {
   tooltip.style.top = y + "px";
 }
 
-function hideTooltip() { tooltip.style.display = "none"; }
+let _tooltipHideTimer = null;
+function hideTooltip() {
+  _tooltipHideTimer = setTimeout(() => { tooltip.style.display = "none"; }, 120);
+}
+function cancelHideTooltip() { if (_tooltipHideTimer) { clearTimeout(_tooltipHideTimer); _tooltipHideTimer = null; } }
+
+tooltip.addEventListener("mouseenter", cancelHideTooltip);
+tooltip.addEventListener("mouseleave", () => { tooltip.style.display = "none"; });
 
 // ============================================================
 // CONTROLS
