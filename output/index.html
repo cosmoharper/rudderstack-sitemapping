@@ -1365,20 +1365,113 @@ document.getElementById("btn-collapse").addEventListener("click", () => {
 // Zoom to Fit button
 document.getElementById("btn-fit").addEventListener("click", () => zoomToFit(true));
 
-// Search
+// Search — auto-expands collapsed branches when matches are found
 const searchBox = document.getElementById("search-box");
+let preSearchState = null;
+let searchDebounce = null;
+
+function getAllDescendants(node) {
+  const result = [];
+  function walk(n) {
+    result.push(n);
+    (n._allChildren || n.children || []).forEach(walk);
+  }
+  walk(node);
+  return result;
+}
+
+function saveCollapseState() {
+  const state = new Map();
+  getAllDescendants(root).forEach(d => {
+    if (d._allChildren) state.set(d.data.path, d._collapsed);
+  });
+  return state;
+}
+
+function restoreCollapseState(state) {
+  getAllDescendants(root).forEach(d => {
+    if (d._allChildren && state.has(d.data.path)) {
+      const wasCollapsed = state.get(d.data.path);
+      if (wasCollapsed) { d.children = null; d._collapsed = true; }
+      else { d.children = d._allChildren; d._collapsed = false; }
+    }
+  });
+}
+
 searchBox.addEventListener("input", () => {
+  clearTimeout(searchDebounce);
   const query = searchBox.value.toLowerCase().trim();
+
   if (!query) {
+    // Restore pre-search tree state
+    if (preSearchState) {
+      restoreCollapseState(preSearchState);
+      preSearchState = null;
+      update(root);
+    }
     nodeGroup.selectAll(".node circle").attr("opacity", 1);
     nodeGroup.selectAll(".node text").attr("opacity", 1);
     return;
   }
-  nodeGroup.selectAll(".node").each(function(d) {
-    const match = d.data.name.toLowerCase().includes(query) || d.data.path.toLowerCase().includes(query);
-    d3.select(this).select("circle").attr("opacity", match ? 1 : 0.15);
-    d3.select(this).selectAll("text").attr("opacity", match ? 1 : 0.15);
-  });
+
+  searchDebounce = setTimeout(() => {
+    // Save state on first search of this session
+    if (!preSearchState) preSearchState = saveCollapseState();
+
+    // Deep-search the entire tree including collapsed subtrees
+    const allNodes = getAllDescendants(root);
+    const matches = allNodes.filter(d =>
+      d.data.name.toLowerCase().includes(query) ||
+      d.data.path.toLowerCase().includes(query)
+    );
+
+    if (matches.length === 0) {
+      // No matches — just dim everything currently visible
+      nodeGroup.selectAll(".node").each(function() {
+        d3.select(this).select("circle").attr("opacity", 0.15);
+        d3.select(this).selectAll("text").attr("opacity", 0.15);
+      });
+      return;
+    }
+
+    // Expand ancestors of every match
+    let expanded = false;
+    matches.forEach(m => {
+      let n = m;
+      while (n.parent) {
+        if (n.parent._collapsed && n.parent._allChildren) {
+          n.parent.children = n.parent._allChildren;
+          n.parent._collapsed = false;
+          expanded = true;
+        }
+        n = n.parent;
+      }
+    });
+
+    if (expanded) update(root);
+
+    // Apply highlighting after tree animation settles
+    const delay = expanded ? 450 : 0;
+    setTimeout(() => {
+      const matchPaths = new Set(matches.map(m => m.data.path));
+      nodeGroup.selectAll(".node").each(function(d) {
+        const isMatch = matchPaths.has(d.data.path);
+        d3.select(this).select("circle").attr("opacity", isMatch ? 1 : 0.15);
+        d3.select(this).selectAll("text").attr("opacity", isMatch ? 1 : 0.15);
+      });
+
+      // Zoom to center on first match at a readable scale
+      if (expanded && matches.length > 0) {
+        const first = matches.find(m => m.y !== undefined);
+        if (first) {
+          const w = window.innerWidth, h = window.innerHeight - 80;
+          const scale = 0.7;
+          const t = d3.zoomIdentity.translate(w / 2, h / 2).scale(scale).translate(-first.y, -first.x);
+          svg.transition().duration(750).call(zoom.transform, t);
+        }
+      }
+    }, delay);
+  }, 300);
 });
 
 // ============================================================
