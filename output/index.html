@@ -7,57 +7,94 @@
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+  // Flash prevention: set theme before CSS parses
+  (function(){var p=localStorage.getItem('theme-preference')||'dark';var t=p==='system'?(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):p;document.documentElement.setAttribute('data-theme',t)})();
+</script>
 <style>
+:root, [data-theme="dark"] {
+  --c-bg-body: #1a1e27; --c-bg-surface: #252a35;
+  --c-bg-controls: rgba(26,30,39,0.97); --c-bg-tooltip: rgba(30,34,44,0.98);
+  --c-text-primary: #e0e0e0; --c-text-secondary: #ccc; --c-text-muted: #888;
+  --c-text-dim: #666; --c-text-faint: #555; --c-text-white: #fff; --c-text-on-surface: #fff;
+  --c-border-primary: #313845; --c-border-secondary: #3d4451;
+  --c-brand-blue: #1063e2; --c-brand-blue-dark: #0b56c6; --c-brand-blue-light: #76acf7;
+  --c-brand-amber: #f59e0b; --c-brand-green: #22c55e;
+  --c-brand-blue-shadow: rgba(16,99,226,0.4);
+  --c-node-label: #ccc; --c-node-count: #888; --c-node-expand: #fff;
+  --c-node-stroke-collapsed: #aaa; --c-node-link-icon: #76acf7;
+  --c-logo-text: #ffffff;
+  --c-shadow-light: rgba(0,0,0,0.4); --c-shadow-medium: rgba(0,0,0,0.5); --c-shadow-heavy: rgba(0,0,0,0.6);
+  --c-modal-overlay: rgba(0,0,0,0.6);
+  --c-link-tree: #3d4451; --c-link-internal: #1063e2; --c-link-cta: #f59e0b; --c-link-nav: #76acf7; --c-link-conversion: #1063e2;
+}
+[data-theme="light"] {
+  --c-bg-body: #f5f6f8; --c-bg-surface: #ffffff;
+  --c-bg-controls: rgba(245,246,248,0.97); --c-bg-tooltip: rgba(255,255,255,0.98);
+  --c-text-primary: #1a1e27; --c-text-secondary: #555; --c-text-muted: #777;
+  --c-text-dim: #999; --c-text-faint: #aaa; --c-text-white: #fff; --c-text-on-surface: #1a1e27;
+  --c-border-primary: #dde1e8; --c-border-secondary: #c8cdd6;
+  --c-brand-blue: #1063e2; --c-brand-blue-dark: #0b56c6; --c-brand-blue-light: #4a8fe8;
+  --c-brand-amber: #d97706; --c-brand-green: #16a34a;
+  --c-brand-blue-shadow: rgba(16,99,226,0.25);
+  --c-node-label: #444; --c-node-count: #888; --c-node-expand: #fff;
+  --c-node-stroke-collapsed: #999; --c-node-link-icon: #4a8fe8;
+  --c-logo-text: #1a1e27;
+  --c-shadow-light: rgba(0,0,0,0.08); --c-shadow-medium: rgba(0,0,0,0.12); --c-shadow-heavy: rgba(0,0,0,0.18);
+  --c-modal-overlay: rgba(0,0,0,0.3);
+  --c-link-tree: #c8cdd6; --c-link-internal: #1063e2; --c-link-cta: #d97706; --c-link-nav: #4a8fe8; --c-link-conversion: #1063e2;
+}
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1a1e27; color: #e0e0e0; overflow: hidden; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--c-bg-body); color: var(--c-text-primary); overflow: hidden; }
 
 #controls {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  background: rgba(26, 30, 39, 0.97); backdrop-filter: blur(10px);
-  border-bottom: 1px solid #313845; padding: 12px 20px;
+  background: var(--c-bg-controls); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--c-border-primary); padding: 12px 20px;
   display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
 }
 #controls .logo-area { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
-#controls .logo-area .site-map-label { font-size: 14px; font-weight: 600; color: #76acf7; letter-spacing: -0.3px; }
-#controls .stats { font-size: 12px; color: #888; white-space: nowrap; }
+#controls .logo-area svg { color: var(--c-logo-text); }
+#controls .logo-area .site-map-label { font-size: 14px; font-weight: 600; color: var(--c-brand-blue-light); letter-spacing: -0.3px; }
+#controls .stats { font-size: 12px; color: var(--c-text-muted); white-space: nowrap; }
 
 #filter-badge {
   position: fixed; top: auto; bottom: auto; left: 50%; transform: translateX(-50%);
   z-index: 150; display: none; padding: 6px 16px; border-radius: 20px;
-  background: #1063e2; color: #fff; font-size: 12px; font-weight: 600;
-  cursor: pointer; box-shadow: 0 4px 16px rgba(16, 99, 226, 0.4);
+  background: var(--c-brand-blue); color: var(--c-text-white); font-size: 12px; font-weight: 600;
+  cursor: pointer; box-shadow: 0 4px 16px var(--c-brand-blue-shadow);
   transition: opacity 0.2s;
 }
-#filter-badge:hover { background: #0b56c6; }
+#filter-badge:hover { background: var(--c-brand-blue-dark); }
 
 #search-box {
-  padding: 6px 12px; border: 1px solid #3d4451; border-radius: 6px;
-  background: #252a35; color: #e0e0e0; font-size: 13px; width: 260px;
+  padding: 6px 12px; border: 1px solid var(--c-border-secondary); border-radius: 6px;
+  background: var(--c-bg-surface); color: var(--c-text-primary); font-size: 13px; width: 260px;
   font-family: 'Inter', sans-serif;
 }
-#search-box:focus { outline: none; border-color: #1063e2; }
+#search-box:focus { outline: none; border-color: var(--c-brand-blue); }
 
 .toggle-btn {
-  padding: 5px 12px; border: 1px solid #3d4451; border-radius: 6px;
-  background: #252a35; color: #ccc; font-size: 12px; cursor: pointer;
+  padding: 5px 12px; border: 1px solid var(--c-border-secondary); border-radius: 6px;
+  background: var(--c-bg-surface); color: var(--c-text-secondary); font-size: 12px; cursor: pointer;
   transition: all 0.2s; white-space: nowrap; font-family: 'Inter', sans-serif;
   position: relative;
 }
-.toggle-btn:hover { border-color: #1063e2; color: #fff; }
-.toggle-btn.active { background: #1063e2; border-color: #1063e2; color: #fff; }
+.toggle-btn:hover { border-color: var(--c-brand-blue); color: var(--c-text-on-surface); }
+.toggle-btn.active { background: var(--c-brand-blue); border-color: var(--c-brand-blue); color: var(--c-text-white); }
 .toggle-btn .btn-tip {
   display: none; position: absolute; top: calc(100% + 8px); left: 50%;
   transform: translateX(-50%); z-index: 250;
-  background: #1a1e27; border: 1px solid #3d4451; border-radius: 6px;
-  padding: 8px 12px; font-size: 11px; line-height: 1.5; color: #ccc;
+  background: var(--c-bg-body); border: 1px solid var(--c-border-secondary); border-radius: 6px;
+  padding: 8px 12px; font-size: 11px; line-height: 1.5; color: var(--c-text-secondary);
   white-space: normal; width: 220px; text-align: left;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.4); pointer-events: none;
+  box-shadow: 0 6px 20px var(--c-shadow-light); pointer-events: none;
   font-weight: 400;
 }
 .toggle-btn .btn-tip::before {
   content: ''; position: absolute; top: -5px; left: 50%; transform: translateX(-50%);
   border-left: 5px solid transparent; border-right: 5px solid transparent;
-  border-bottom: 5px solid #3d4451;
+  border-bottom: 5px solid var(--c-border-secondary);
 }
 .toggle-btn:hover .btn-tip { display: block; }
 /* Keep left-side tooltips from overflowing viewport */
@@ -67,110 +104,139 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Robo
 .toggle-btn .btn-tip.tip-right { left: auto; right: 0; transform: none; }
 .toggle-btn .btn-tip.tip-right::before { left: auto; right: 20px; transform: none; }
 
+/* Theme toggle */
+.theme-toggle {
+  display: flex; border: 1px solid var(--c-border-secondary); border-radius: 6px; overflow: hidden; margin-left: auto;
+}
+.theme-toggle button {
+  padding: 5px 8px; border: none; background: var(--c-bg-surface); color: var(--c-text-secondary);
+  font-size: 12px; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s;
+  display: flex; align-items: center; gap: 0; white-space: nowrap; line-height: 1;
+}
+.theme-toggle button:not(:last-child) { border-right: 1px solid var(--c-border-secondary); }
+.theme-toggle button:hover { color: var(--c-text-on-surface); }
+.theme-toggle button.active { background: var(--c-brand-blue); color: var(--c-text-white); }
+.theme-toggle button svg { width: 14px; height: 14px; fill: currentColor; }
+
 #legend {
   position: fixed; bottom: 20px; left: 20px; z-index: 100;
-  background: rgba(26, 30, 39, 0.97); backdrop-filter: blur(10px);
-  border: 1px solid #313845; border-radius: 8px; padding: 14px 18px;
+  background: var(--c-bg-controls); backdrop-filter: blur(10px);
+  border: 1px solid var(--c-border-primary); border-radius: 8px; padding: 14px 18px;
   font-size: 12px;
 }
-#legend h3 { font-size: 13px; margin-bottom: 8px; color: #1063e2; }
+#legend h3 { font-size: 13px; margin-bottom: 8px; color: var(--c-brand-blue); }
 .legend-item { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
 .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.legend-dot-crawled { background: var(--c-brand-blue); }
+.legend-dot-sitemap { background: var(--c-brand-blue-light); }
+.legend-dot-cta { background: var(--c-brand-amber); }
+.legend-dot-conversion { background: var(--c-brand-blue-dark); border-radius: 3px; }
+.legend-line { display: inline-block; width: 30px; }
+.legend-line-tree { border-top: 2px solid var(--c-link-tree); }
+.legend-line-internal { border-top: 2px dashed var(--c-link-internal); }
+.legend-line-cta { border-top: 2px dashed var(--c-link-cta); }
+.legend-line-nav { border-top: 2px dashed var(--c-link-nav); }
+.legend-line-conversion { border-top: 2px dashed var(--c-link-conversion); opacity: 0.5; }
 
 #tooltip {
   position: fixed; z-index: 200; pointer-events: none; display: none;
-  background: rgba(30, 34, 44, 0.98); backdrop-filter: blur(10px);
-  border: 1px solid #3d4451; border-radius: 8px; padding: 14px 18px;
+  background: var(--c-bg-tooltip); backdrop-filter: blur(10px);
+  border: 1px solid var(--c-border-secondary); border-radius: 8px; padding: 14px 18px;
   max-width: 480px; font-size: 12px; line-height: 1.5;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+  box-shadow: 0 8px 30px var(--c-shadow-medium);
 }
-#tooltip h4 { color: #1063e2; font-size: 14px; margin-bottom: 6px; word-break: break-all; }
-#tooltip .url { color: #888; font-size: 11px; margin-bottom: 8px; word-break: break-all; }
+#tooltip h4 { color: var(--c-brand-blue); font-size: 14px; margin-bottom: 6px; word-break: break-all; }
+#tooltip .url { color: var(--c-text-muted); font-size: 11px; margin-bottom: 8px; word-break: break-all; }
 #tooltip .cta-list { margin-top: 6px; }
-#tooltip .cta-item { background: #252a35; border-left: 3px solid #f59e0b; padding: 4px 8px; margin: 3px 0; border-radius: 0 4px 4px 0; }
-#tooltip .cta-item .cta-text { color: #f59e0b; font-weight: 600; }
-#tooltip .cta-item .cta-target { color: #666; font-size: 10px; }
-#tooltip .cta-item .cta-count { color: #76acf7; font-size: 10px; font-weight: 600; }
-#tooltip .conversion-info { margin-top: 8px; padding: 6px 8px; background: #252a35; border-left: 3px solid #1063e2; border-radius: 0 4px 4px 0; }
-#tooltip .form-fields { color: #76acf7; font-size: 11px; }
-#tooltip .tracking-event { color: #22c55e; font-size: 11px; }
+#tooltip .cta-item { background: var(--c-bg-surface); border-left: 3px solid var(--c-brand-amber); padding: 4px 8px; margin: 3px 0; border-radius: 0 4px 4px 0; }
+#tooltip .cta-item .cta-text { color: var(--c-brand-amber); font-weight: 600; }
+#tooltip .cta-item .cta-target { color: var(--c-text-dim); font-size: 10px; }
+#tooltip .cta-item .cta-count { color: var(--c-brand-blue-light); font-size: 10px; font-weight: 600; }
+#tooltip .conversion-info { margin-top: 8px; padding: 6px 8px; background: var(--c-bg-surface); border-left: 3px solid var(--c-brand-blue); border-radius: 0 4px 4px 0; }
+#tooltip .form-fields { color: var(--c-brand-blue-light); font-size: 11px; }
+#tooltip .tracking-event { color: var(--c-brand-green); font-size: 11px; }
 
 /* Modal */
 #modal-overlay {
   position: fixed; inset: 0; z-index: 300; display: none;
-  background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);
+  background: var(--c-modal-overlay); backdrop-filter: blur(4px);
   align-items: center; justify-content: center;
 }
 #modal-overlay.visible { display: flex; }
 #modal {
-  background: #252a35; border: 1px solid #3d4451; border-radius: 12px;
+  background: var(--c-bg-surface); border: 1px solid var(--c-border-secondary); border-radius: 12px;
   width: 640px; max-height: 80vh; overflow-y: auto; padding: 0;
-  box-shadow: 0 16px 60px rgba(0,0,0,0.6);
+  box-shadow: 0 16px 60px var(--c-shadow-heavy);
 }
 #modal .modal-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 20px 24px 16px; border-bottom: 1px solid #313845;
-  position: sticky; top: 0; background: #252a35; z-index: 1; border-radius: 12px 12px 0 0;
+  padding: 20px 24px 16px; border-bottom: 1px solid var(--c-border-primary);
+  position: sticky; top: 0; background: var(--c-bg-surface); z-index: 1; border-radius: 12px 12px 0 0;
 }
-#modal .modal-header h2 { font-size: 18px; font-weight: 700; color: #fff; }
-#modal .modal-close { background: none; border: none; color: #888; font-size: 20px; cursor: pointer; padding: 4px 8px; border-radius: 4px; }
-#modal .modal-close:hover { color: #fff; background: #313845; }
+#modal .modal-header h2 { font-size: 18px; font-weight: 700; color: var(--c-text-on-surface); }
+#modal .modal-close { background: none; border: none; color: var(--c-text-muted); font-size: 20px; cursor: pointer; padding: 4px 8px; border-radius: 4px; }
+#modal .modal-close:hover { color: var(--c-text-on-surface); background: var(--c-border-primary); }
 #modal .modal-body { padding: 20px 24px; }
 #modal .modal-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
 #modal .modal-tag { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
-#modal .modal-tag.type { background: #1a1e27; color: #76acf7; }
-#modal .modal-tag.count { background: #1a1e27; color: #f59e0b; }
-#modal .modal-tag.event { background: #1a1e27; color: #22c55e; }
+#modal .modal-tag.type { background: var(--c-bg-body); color: var(--c-brand-blue-light); }
+#modal .modal-tag.count { background: var(--c-bg-body); color: var(--c-brand-amber); }
+#modal .modal-tag.event { background: var(--c-bg-body); color: var(--c-brand-green); }
 #modal .modal-section { margin-bottom: 16px; }
-#modal .modal-section h3 { font-size: 13px; font-weight: 600; color: #76acf7; margin-bottom: 8px; }
-#modal .modal-url { color: #1063e2; text-decoration: none; font-size: 13px; }
+#modal .modal-section h3 { font-size: 13px; font-weight: 600; color: var(--c-brand-blue-light); margin-bottom: 8px; }
+#modal .modal-url { color: var(--c-brand-blue); text-decoration: none; font-size: 13px; }
 #modal .modal-url:hover { text-decoration: underline; }
 #modal .field-list { display: flex; flex-wrap: wrap; gap: 6px; }
-#modal .field-chip { padding: 3px 8px; background: #1a1e27; border: 1px solid #3d4451; border-radius: 4px; font-size: 11px; color: #ccc; font-family: 'Inter', monospace; }
+#modal .field-chip { padding: 3px 8px; background: var(--c-bg-body); border: 1px solid var(--c-border-secondary); border-radius: 4px; font-size: 11px; color: var(--c-text-secondary); font-family: 'Inter', monospace; }
 #modal .source-group { margin-bottom: 10px; }
-#modal .source-group-header { font-size: 12px; font-weight: 600; color: #e0e0e0; margin-bottom: 4px; }
+#modal .source-group-header { font-size: 12px; font-weight: 600; color: var(--c-text-primary); margin-bottom: 4px; }
 #modal .source-page { display: flex; align-items: center; gap: 8px; padding: 3px 0; font-size: 11px; }
-#modal .source-page a { color: #76acf7; text-decoration: none; }
+#modal .source-page a { color: var(--c-brand-blue-light); text-decoration: none; }
 #modal .source-page a:hover { text-decoration: underline; }
-#modal .source-page .cta-label { color: #f59e0b; font-size: 10px; }
+#modal .source-page .cta-label { color: var(--c-brand-amber); font-size: 10px; }
 #modal .modal-open-btn {
   display: inline-block; margin-top: 12px; padding: 8px 20px; border-radius: 6px;
-  background: #1063e2; color: #fff; text-decoration: none; font-size: 13px; font-weight: 600;
+  background: var(--c-brand-blue); color: var(--c-text-white); text-decoration: none; font-size: 13px; font-weight: 600;
   transition: background 0.2s;
 }
-#modal .modal-open-btn:hover { background: #0b56c6; }
+#modal .modal-open-btn:hover { background: var(--c-brand-blue-dark); }
 
 .node { cursor: pointer; }
 .node circle { transition: all 0.15s; }
 .node:hover circle { filter: brightness(1.3); }
-.node text { font-size: 11px; fill: #ccc; pointer-events: none; font-family: 'Inter', sans-serif; }
-.node text.count-label { font-size: 9px; fill: #888; }
-.node text.expand-icon { font-size: 10px; fill: #fff; font-weight: bold; pointer-events: none; }
-.node text.link-icon { font-size: 11px; fill: #76acf7; pointer-events: all; cursor: pointer; opacity: 0; transition: opacity 0.15s; }
+.node text { font-size: 11px; fill: var(--c-node-label); pointer-events: none; font-family: 'Inter', sans-serif; }
+.node text.count-label { font-size: 9px; fill: var(--c-node-count); }
+.node text.expand-icon { font-size: 10px; fill: var(--c-node-expand); font-weight: bold; pointer-events: none; }
+.node text.link-icon { font-size: 11px; fill: var(--c-node-link-icon); pointer-events: all; cursor: pointer; opacity: 0; transition: opacity 0.15s; }
 .node:hover text.link-icon { opacity: 1; }
 
 .link { fill: none; stroke-opacity: 0.25; }
-.link.tree-link { stroke: #3d4451; stroke-width: 1.2; }
-.link.internal-link { stroke: #1063e2; stroke-width: 0.8; stroke-dasharray: 4,3; stroke-opacity: 0.15; }
-.link.cta-link { stroke: #f59e0b; stroke-width: 1.2; stroke-dasharray: 6,3; stroke-opacity: 0.25; }
-.link.nav-link { stroke: #76acf7; stroke-width: 0.6; stroke-dasharray: 2,3; stroke-opacity: 0.1; }
+.link.tree-link { stroke: var(--c-link-tree); stroke-width: 1.2; }
+.link.internal-link { stroke: var(--c-link-internal); stroke-width: 0.8; stroke-dasharray: 4,3; stroke-opacity: 0.15; }
+.link.cta-link { stroke: var(--c-link-cta); stroke-width: 1.2; stroke-dasharray: 6,3; stroke-opacity: 0.25; }
+.link.nav-link { stroke: var(--c-link-nav); stroke-width: 0.6; stroke-dasharray: 2,3; stroke-opacity: 0.1; }
 
 .conversion-node rect { cursor: pointer; transition: all 0.15s; }
 .conversion-node:hover rect { filter: brightness(1.2); }
-.conversion-node.active-filter rect { stroke: #f59e0b; stroke-width: 2.5; filter: brightness(1.15); }
+.conversion-node.active-filter rect { stroke: var(--c-brand-amber); stroke-width: 2.5; filter: brightness(1.15); }
 .conversion-node text { font-family: 'Inter', sans-serif; pointer-events: none; }
 
-.conversion-link { fill: none; stroke: #1063e2; stroke-width: 0.8; stroke-dasharray: 6,4; stroke-opacity: 0.08; }
-.conversion-link.highlighted { stroke: #f59e0b; stroke-width: 1.2; stroke-opacity: 0.5; }
+.conversion-link { fill: none; stroke: var(--c-link-conversion); stroke-width: 0.8; stroke-dasharray: 6,4; stroke-opacity: 0.08; }
+.conversion-link.highlighted { stroke: var(--c-brand-amber); stroke-width: 1.2; stroke-opacity: 0.5; }
 
 .highlight .link.internal-link, .highlight .link.cta-link { stroke-opacity: 0.8; }
+
+/* Smooth theme transition */
+body, #controls, #legend, #tooltip, #modal, .toggle-btn, .theme-toggle button, #search-box {
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
 </style>
 </head>
 <body>
 
 <div id="controls">
   <div class="logo-area">
-    <svg width="130" height="20" viewBox="0 0 130 20" xmlns="http://www.w3.org/2000/svg"><text x="0" y="15" font-family="Inter, sans-serif" font-weight="700" font-size="16" fill="#ffffff" letter-spacing="-0.5">RudderStack</text></svg>
+    <svg width="130" height="20" viewBox="0 0 130 20" xmlns="http://www.w3.org/2000/svg"><text x="0" y="15" font-family="Inter, sans-serif" font-weight="700" font-size="16" fill="currentColor" letter-spacing="-0.5">RudderStack</text></svg>
     <span class="site-map-label">Site Map</span>
   </div>
   <input id="search-box" type="text" placeholder="Search pages... (e.g. 'product', 'blog')">
@@ -183,21 +249,26 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Robo
   <button class="toggle-btn" id="btn-collapse">Collapse All<span class="btn-tip tip-left">Collapse the entire tree back to just the root node.</span></button>
   <button class="toggle-btn" id="btn-fit">Zoom to Fit<span class="btn-tip">Reset zoom and pan so the entire visible tree fits on screen.</span></button>
   <span class="stats" id="stats-text"></span>
+  <div class="theme-toggle">
+    <button id="theme-light" title="Light"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="3.5" fill="none" stroke="currentColor" stroke-width="1.5"/><g stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="10" y1="2" x2="10" y2="4"/><line x1="10" y1="16" x2="10" y2="18"/><line x1="2" y1="10" x2="4" y2="10"/><line x1="16" y1="10" x2="18" y2="10"/><line x1="4.3" y1="4.3" x2="5.7" y2="5.7"/><line x1="14.3" y1="14.3" x2="15.7" y2="15.7"/><line x1="4.3" y1="15.7" x2="5.7" y2="14.3"/><line x1="14.3" y1="5.7" x2="15.7" y2="4.3"/></g></svg></button>
+    <button id="theme-dark" title="Dark"><svg viewBox="0 0 20 20"><path d="M15.1 12.5A6.5 6.5 0 0 1 7.5 4.9 7 7 0 1 0 15.1 12.5z"/></svg></button>
+    <button id="theme-system" title="System"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2.5" y="3" width="15" height="10" rx="1.5"/><line x1="7" y1="16" x2="13" y2="16"/><line x1="10" y1="13" x2="10" y2="16"/></svg></button>
+  </div>
 </div>
 
 <div id="filter-badge">Filtered by: <span id="filter-name"></span> &times;</div>
 
 <div id="legend">
   <h3>Legend</h3>
-  <div class="legend-item"><span class="legend-dot" style="background: #1063e2"></span> Crawled page (with data)</div>
-  <div class="legend-item"><span class="legend-dot" style="background: #76acf7"></span> Sitemap page (not crawled)</div>
-  <div class="legend-item"><span class="legend-dot" style="background: #f59e0b"></span> Page with CTAs</div>
-  <div class="legend-item"><span style="display:inline-block;width:30px;border-top:2px solid #3d4451">&nbsp;</span> Tree structure</div>
-  <div class="legend-item"><span style="display:inline-block;width:30px;border-top:2px dashed #1063e2">&nbsp;</span> Internal link</div>
-  <div class="legend-item"><span style="display:inline-block;width:30px;border-top:2px dashed #f59e0b">&nbsp;</span> CTA link</div>
-  <div class="legend-item"><span style="display:inline-block;width:30px;border-top:2px dashed #76acf7">&nbsp;</span> Navigation link</div>
-  <div class="legend-item" id="legend-conversion" style="display:none"><span class="legend-dot" style="background: #0b56c6; border-radius: 3px;"></span> Conversion endpoint</div>
-  <div class="legend-item" id="legend-conversion-link" style="display:none"><span style="display:inline-block;width:30px;border-top:2px dashed #1063e2;opacity:0.5">&nbsp;</span> Conversion path</div>
+  <div class="legend-item"><span class="legend-dot legend-dot-crawled"></span> Crawled page (with data)</div>
+  <div class="legend-item"><span class="legend-dot legend-dot-sitemap"></span> Sitemap page (not crawled)</div>
+  <div class="legend-item"><span class="legend-dot legend-dot-cta"></span> Page with CTAs</div>
+  <div class="legend-item"><span class="legend-line legend-line-tree">&nbsp;</span> Tree structure</div>
+  <div class="legend-item"><span class="legend-line legend-line-internal">&nbsp;</span> Internal link</div>
+  <div class="legend-item"><span class="legend-line legend-line-cta">&nbsp;</span> CTA link</div>
+  <div class="legend-item"><span class="legend-line legend-line-nav">&nbsp;</span> Navigation link</div>
+  <div class="legend-item" id="legend-conversion" style="display:none"><span class="legend-dot legend-dot-conversion"></span> Conversion endpoint</div>
+  <div class="legend-item" id="legend-conversion-link" style="display:none"><span class="legend-line legend-line-conversion">&nbsp;</span> Conversion path</div>
 </div>
 
 <div id="tooltip"></div>
@@ -216,6 +287,42 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Robo
 <svg id="diagram"></svg>
 
 <script>
+// ============================================================
+// THEME ENGINE
+// ============================================================
+const THEME_COLORS = {};
+const TV = [
+  'bg-body','bg-surface','bg-controls','bg-tooltip',
+  'text-primary','text-secondary','text-muted','text-dim','text-faint','text-white','text-on-surface',
+  'border-primary','border-secondary',
+  'brand-blue','brand-blue-dark','brand-blue-light','brand-amber','brand-green','brand-blue-shadow',
+  'node-label','node-count','node-expand','node-stroke-collapsed','node-link-icon',
+  'logo-text','shadow-light','shadow-medium','shadow-heavy','modal-overlay',
+  'link-tree','link-internal','link-cta','link-nav','link-conversion'
+];
+function readCSSColors() {
+  const s = getComputedStyle(document.documentElement);
+  TV.forEach(v => { THEME_COLORS[v] = s.getPropertyValue('--c-' + v).trim(); });
+}
+function getEffective(p) { return p === 'system' ? (matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light') : p; }
+function applyTheme(pref) {
+  document.documentElement.setAttribute('data-theme', getEffective(pref));
+  localStorage.setItem('theme-preference', pref);
+  readCSSColors();
+  document.querySelectorAll('.theme-toggle button').forEach(b => b.classList.remove('active'));
+  const ab = document.getElementById('theme-' + pref);
+  if (ab) ab.classList.add('active');
+  if (typeof updateThemeColors === 'function') updateThemeColors();
+}
+const _savedPref = localStorage.getItem('theme-preference') || 'dark';
+applyTheme(_savedPref);
+document.getElementById('theme-light').addEventListener('click', () => applyTheme('light'));
+document.getElementById('theme-dark').addEventListener('click', () => applyTheme('dark'));
+document.getElementById('theme-system').addEventListener('click', () => applyTheme('system'));
+matchMedia('(prefers-color-scheme:dark)').addEventListener('change', () => {
+  if (localStorage.getItem('theme-preference') === 'system') applyTheme('system');
+});
+
 // Load data and render
 fetch('diagram_data.json?v=' + Date.now()).then(r => r.json()).then(DATA => {
 
@@ -392,8 +499,8 @@ function update(source) {
 
   nodeUpdate.select("circle")
     .attr("r", d => { if (d.depth === 0) return 8; const total = d.data.total_urls || 1; return Math.max(4, Math.min(12, Math.sqrt(total) * 1.2)); })
-    .attr("fill", d => { if (d.data.ctas && d.data.ctas.length > 0) return "#f59e0b"; if (d.data.has_crawl_data) return "#1063e2"; return "#76acf7"; })
-    .attr("stroke", d => d._collapsed && d._allChildren ? "#aaa" : "none")
+    .attr("fill", d => { if (d.data.ctas && d.data.ctas.length > 0) return THEME_COLORS['brand-amber']; if (d.data.has_crawl_data) return THEME_COLORS['brand-blue']; return THEME_COLORS['brand-blue-light']; })
+    .attr("stroke", d => d._collapsed && d._allChildren ? THEME_COLORS['node-stroke-collapsed'] : "none")
     .attr("stroke-width", 2);
 
   nodeUpdate.select(".expand-icon").text(d => { if (!d._allChildren || d._allChildren.length === 0) return ""; return d._collapsed ? "+" : ""; });
@@ -481,16 +588,16 @@ function updateConversionLayer() {
   convEnter.append("rect")
     .attr("x", -80).attr("y", -22).attr("width", 160).attr("height", 44)
     .attr("rx", 8).attr("ry", 8)
-    .attr("fill", "#0b56c6").attr("stroke", "#1063e2").attr("stroke-width", 1.5);
+    .attr("fill", THEME_COLORS['brand-blue-dark']).attr("stroke", THEME_COLORS['brand-blue']).attr("stroke-width", 1.5);
 
   convEnter.append("text")
     .attr("text-anchor", "middle").attr("dy", "-0.15em")
-    .attr("fill", "#fff").attr("font-size", "12px").attr("font-weight", "600")
+    .attr("fill", THEME_COLORS['text-white']).attr("font-size", "12px").attr("font-weight", "600")
     .text(d => d.name);
 
   convEnter.append("text")
     .attr("text-anchor", "middle").attr("dy", "1.2em")
-    .attr("fill", "#76acf7").attr("font-size", "10px")
+    .attr("fill", THEME_COLORS['brand-blue-light']).attr("font-size", "10px")
     .text(d => `${d.source_count} source pages`);
 
   // Update positions
@@ -630,7 +737,7 @@ function showConversionModal(endpoint) {
     html += `<span class="modal-tag event">${endpoint.tracking_event}</span>`;
   }
   if (endpoint.form_id) {
-    html += `<span class="modal-tag" style="background:#1a1e27; color:#76acf7;">form_id: ${endpoint.form_id}</span>`;
+    html += `<span class="modal-tag" style="background:${THEME_COLORS['bg-body']}; color:${THEME_COLORS['brand-blue-light']};">form_id: ${endpoint.form_id}</span>`;
   }
   html += `</div>`;
 
@@ -647,12 +754,12 @@ function showConversionModal(endpoint) {
   // Tracking
   if (endpoint.tracking_event) {
     html += `<div class="modal-section"><h3>Tracking</h3>`;
-    html += `<div style="color:#22c55e; font-size:13px;"><strong>Event:</strong> ${endpoint.tracking_event}</div>`;
+    html += `<div style="color:${THEME_COLORS['brand-green']}; font-size:13px;"><strong>Event:</strong> ${endpoint.tracking_event}</div>`;
     if (endpoint.form_id) {
-      html += `<div style="color:#76acf7; font-size:13px; margin-top:4px;"><strong>form_id:</strong> <code style="background:#1a1e27; padding:2px 6px; border-radius:3px; font-family:monospace;">${endpoint.form_id}</code></div>`;
+      html += `<div style="color:${THEME_COLORS['brand-blue-light']}; font-size:13px; margin-top:4px;"><strong>form_id:</strong> <code style="background:${THEME_COLORS['bg-body']}; padding:2px 6px; border-radius:3px; font-family:monospace;">${endpoint.form_id}</code></div>`;
     }
     if (endpoint.tracking_detail) {
-      html += `<div style="color:#888; font-size:12px; margin-top:4px;">${endpoint.tracking_detail}</div>`;
+      html += `<div style="color:${THEME_COLORS['text-muted']}; font-size:12px; margin-top:4px;">${endpoint.tracking_detail}</div>`;
     }
     html += `</div>`;
   }
@@ -675,7 +782,7 @@ function showConversionModal(endpoint) {
 
     sortedGroups.forEach(([dir, pages]) => {
       html += `<div class="source-group">`;
-      html += `<div class="source-group-header">${dir} <span style="color:#76acf7; font-weight:400;">(${pages.length} page${pages.length > 1 ? "s" : ""})</span></div>`;
+      html += `<div class="source-group-header">${dir} <span style="color:${THEME_COLORS['brand-blue-light']}; font-weight:400;">(${pages.length} page${pages.length > 1 ? "s" : ""})</span></div>`;
 
       // If many pages in directory, show summary + first few
       const showLimit = pages.length > 6 ? 4 : pages.length;
@@ -687,7 +794,7 @@ function showConversionModal(endpoint) {
         html += `</div>`;
       });
       if (pages.length > showLimit) {
-        html += `<div style="font-size:10px; color:#666; margin-top:2px; padding-left:4px;">...and ${pages.length - showLimit} more in ${dir}</div>`;
+        html += `<div style="font-size:10px; color:${THEME_COLORS['text-dim']}; margin-top:2px; padding-left:4px;">...and ${pages.length - showLimit} more in ${dir}</div>`;
       }
       html += `</div>`;
     });
@@ -721,7 +828,7 @@ function showTooltip(event, d) {
   html += `<div><strong>Pages:</strong> ${d.data.total_urls.toLocaleString()} total, ${d.data.url_count} direct</div>`;
 
   if (d._collapsed && d._allChildren) {
-    html += `<div style="color:#888; margin-top:4px;">Click to expand ${d._allChildren.length} children</div>`;
+    html += `<div style="color:${THEME_COLORS['text-muted']}; margin-top:4px;">Click to expand ${d._allChildren.length} children</div>`;
   }
 
   if (d.data.has_crawl_data) {
@@ -741,7 +848,7 @@ function showTooltip(event, d) {
       else if (cta.href_sample) html += `<span class="cta-target">&rarr; ${cta.unique_targets} different targets (e.g. ${cta.href_sample[0]})</span>`;
       html += `</div>`;
     });
-    if (consolidated.length > maxShow) html += `<div style="color:#888; font-size:10px; margin-top:4px;">...and ${consolidated.length - maxShow} more CTA types</div>`;
+    if (consolidated.length > maxShow) html += `<div style="color:${THEME_COLORS['text-muted']}; font-size:10px; margin-top:4px;">...and ${consolidated.length - maxShow} more CTA types</div>`;
     html += `</div>`;
   } else if (d.data.ctas && d.data.ctas.length > 0) {
     html += `<div class="cta-list"><strong>CTAs (${d.data.ctas.length}):</strong>`;
@@ -751,7 +858,7 @@ function showTooltip(event, d) {
     html += `</div>`;
   }
 
-  html += `<div style="color:#555; font-size:10px; margin-top:8px;">Double-click to open URL</div>`;
+  html += `<div style="color:${THEME_COLORS['text-faint']}; font-size:10px; margin-top:8px;">Double-click to open URL</div>`;
   tooltip.innerHTML = html;
   tooltip.style.display = "block";
   moveTooltip(event);
@@ -762,11 +869,11 @@ function showConversionTooltip(event, d) {
   html += `<div class="url">${d.url}</div>`;
   html += `<div><strong>Type:</strong> ${d.type} | <strong>Sources:</strong> ${d.source_count}</div>`;
   if (d.tracking_event) {
-    html += `<div style="color:#22c55e; margin-top:4px;"><strong>Event:</strong> ${d.tracking_event}`;
-    if (d.form_id) html += ` <span style="color:#76acf7;">(form_id: ${d.form_id})</span>`;
+    html += `<div style="color:${THEME_COLORS['brand-green']}; margin-top:4px;"><strong>Event:</strong> ${d.tracking_event}`;
+    if (d.form_id) html += ` <span style="color:${THEME_COLORS['brand-blue-light']};">(form_id: ${d.form_id})</span>`;
     html += `</div>`;
   }
-  html += `<div style="color:#555; font-size:10px; margin-top:8px;">Click for details &amp; to filter tree</div>`;
+  html += `<div style="color:${THEME_COLORS['text-faint']}; font-size:10px; margin-top:8px;">Click for details &amp; to filter tree</div>`;
   tooltip.innerHTML = html;
   tooltip.style.display = "block";
   moveTooltip(event);
@@ -856,6 +963,28 @@ update(root);
 window.addEventListener("resize", () => {
   svg.attr("width", window.innerWidth).attr("height", window.innerHeight);
 });
+
+// ============================================================
+// THEME: Re-apply D3 colors when theme changes
+// ============================================================
+window.updateThemeColors = function() {
+  readCSSColors();
+  // Node circles
+  nodeGroup.selectAll(".node circle")
+    .attr("fill", d => {
+      if (d.data.ctas && d.data.ctas.length > 0) return THEME_COLORS['brand-amber'];
+      if (d.data.has_crawl_data) return THEME_COLORS['brand-blue'];
+      return THEME_COLORS['brand-blue-light'];
+    })
+    .attr("stroke", d => d._collapsed && d._allChildren ? THEME_COLORS['node-stroke-collapsed'] : "none");
+  // Conversion cards
+  conversionGroup.selectAll(".conversion-node rect")
+    .attr("fill", THEME_COLORS['brand-blue-dark']).attr("stroke", THEME_COLORS['brand-blue']);
+  conversionGroup.selectAll(".conversion-node text").each(function() {
+    const el = d3.select(this);
+    el.attr("fill", el.attr("dy") === "-0.15em" ? THEME_COLORS['text-white'] : THEME_COLORS['brand-blue-light']);
+  });
+};
 
 }); // end fetch
 </script>
