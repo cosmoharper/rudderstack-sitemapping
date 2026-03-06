@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script>
-  // Flash prevention: set theme before CSS parses
-  (function(){var p=localStorage.getItem('theme-preference')||'dark';var t=p==='system'?(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):p;document.documentElement.setAttribute('data-theme',t)})();
+  // Flash prevention: set theme + legend mode before CSS parses
+  (function(){var p=localStorage.getItem('theme-preference')||'dark';var t=p==='system'?(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):p;document.documentElement.setAttribute('data-theme',t);var lm=localStorage.getItem('legend-mode')||'business';document.documentElement.setAttribute('data-legend-mode',lm)})();
 </script>
 <style>
 :root, [data-theme="dark"] {
@@ -27,6 +27,10 @@
   --c-shadow-light: rgba(0,0,0,0.4); --c-shadow-medium: rgba(0,0,0,0.5); --c-shadow-heavy: rgba(0,0,0,0.6);
   --c-modal-overlay: rgba(0,0,0,0.6);
   --c-link-tree: #3d4451; --c-link-internal: #1063e2; --c-link-cta: #f59e0b; --c-link-nav: #76acf7; --c-link-conversion: #1063e2;
+  --c-section-product: #3b82f6; --c-section-docs: #14b8a6; --c-section-blog: #a855f7;
+  --c-section-learn: #22c55e; --c-section-customers: #f59e0b; --c-section-competitors: #ef4444;
+  --c-section-integrations: #6366f1; --c-section-events: #ec4899;
+  --c-section-core: #e2e8f0; --c-section-other: #6b7280;
 }
 [data-theme="light"] {
   --c-bg-body: #f5f6f8; --c-bg-surface: #ffffff;
@@ -43,6 +47,10 @@
   --c-shadow-light: rgba(0,0,0,0.08); --c-shadow-medium: rgba(0,0,0,0.12); --c-shadow-heavy: rgba(0,0,0,0.18);
   --c-modal-overlay: rgba(0,0,0,0.3);
   --c-link-tree: #c8cdd6; --c-link-internal: #1063e2; --c-link-cta: #d97706; --c-link-nav: #4a8fe8; --c-link-conversion: #1063e2;
+  --c-section-product: #2563eb; --c-section-docs: #0d9488; --c-section-blog: #9333ea;
+  --c-section-learn: #16a34a; --c-section-customers: #d97706; --c-section-competitors: #dc2626;
+  --c-section-integrations: #4f46e5; --c-section-events: #db2777;
+  --c-section-core: #334155; --c-section-other: #9ca3af;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--c-bg-body); color: var(--c-text-primary); overflow: hidden; }
@@ -124,7 +132,20 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Robo
   border: 1px solid var(--c-border-primary); border-radius: 8px; padding: 14px 18px;
   font-size: 12px;
 }
-#legend h3 { font-size: 13px; margin-bottom: 8px; color: var(--c-brand-blue); }
+#legend h3 { font-size: 13px; margin-bottom: 8px; color: var(--c-brand-blue); display: flex; align-items: center; gap: 0; }
+.legend-mode-toggle {
+  display: inline-flex; border: 1px solid var(--c-border-secondary); border-radius: 4px;
+  overflow: hidden; margin-left: 10px;
+}
+.legend-mode-toggle button {
+  padding: 2px 8px; border: none; background: transparent; color: var(--c-text-muted);
+  font-size: 10px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif;
+  transition: all 0.2s; line-height: 1.4;
+}
+.legend-mode-toggle button:not(:last-child) { border-right: 1px solid var(--c-border-secondary); }
+.legend-mode-toggle button:hover { color: var(--c-text-on-surface); }
+.legend-mode-toggle button.active { background: var(--c-brand-blue); color: var(--c-text-white); }
+.legend-section-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
 .legend-item { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
 .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 .legend-dot-crawled { background: var(--c-brand-blue); }
@@ -202,7 +223,7 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Robo
 #modal .modal-open-btn:hover { background: var(--c-brand-blue-dark); }
 
 .node { cursor: pointer; }
-.node circle { transition: all 0.15s; }
+.node circle { transition: all 0.3s ease; }
 .node:hover circle { filter: brightness(1.3); }
 .node text { font-size: 11px; fill: var(--c-node-label); pointer-events: none; font-family: 'Inter', sans-serif; }
 .node text.count-label { font-size: 9px; fill: var(--c-node-count); }
@@ -226,8 +247,12 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Robo
 
 .highlight .link.internal-link, .highlight .link.cta-link { stroke-opacity: 0.8; }
 
+/* Flash prevention for legend mode */
+[data-legend-mode="business"] #legend-technical { display: none !important; }
+[data-legend-mode="technical"] #legend-business { display: none !important; }
+
 /* Smooth theme transition */
-body, #controls, #legend, #tooltip, #modal, .toggle-btn, .theme-toggle button, #search-box {
+body, #controls, #legend, #tooltip, #modal, .toggle-btn, .theme-toggle button, .legend-mode-toggle button, #search-box {
   transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
 }
 </style>
@@ -259,16 +284,44 @@ body, #controls, #legend, #tooltip, #modal, .toggle-btn, .theme-toggle button, #
 <div id="filter-badge">Filtered by: <span id="filter-name"></span> &times;</div>
 
 <div id="legend">
-  <h3>Legend</h3>
-  <div class="legend-item"><span class="legend-dot legend-dot-crawled"></span> Crawled page (with data)</div>
-  <div class="legend-item"><span class="legend-dot legend-dot-sitemap"></span> Sitemap page (not crawled)</div>
-  <div class="legend-item"><span class="legend-dot legend-dot-cta"></span> Page with CTAs</div>
-  <div class="legend-item"><span class="legend-line legend-line-tree">&nbsp;</span> Tree structure</div>
-  <div class="legend-item"><span class="legend-line legend-line-internal">&nbsp;</span> Internal link</div>
-  <div class="legend-item"><span class="legend-line legend-line-cta">&nbsp;</span> CTA link</div>
-  <div class="legend-item"><span class="legend-line legend-line-nav">&nbsp;</span> Navigation link</div>
-  <div class="legend-item" id="legend-conversion" style="display:none"><span class="legend-dot legend-dot-conversion"></span> Conversion endpoint</div>
-  <div class="legend-item" id="legend-conversion-link" style="display:none"><span class="legend-line legend-line-conversion">&nbsp;</span> Conversion path</div>
+  <h3>Legend
+    <span class="legend-mode-toggle">
+      <button id="legend-mode-business" class="active">Business</button>
+      <button id="legend-mode-technical">Technical</button>
+    </span>
+  </h3>
+  <!-- Business mode (default) -->
+  <div id="legend-business">
+    <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-product)"></span> Product</div>
+    <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-docs)"></span> Documentation</div>
+    <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-blog)"></span> Blog</div>
+    <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-learn)"></span> Learning Center</div>
+    <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-customers)"></span> Customer Stories</div>
+    <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-competitors)"></span> Competitors</div>
+    <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-integrations)"></span> Integrations</div>
+    <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-events)"></span> Events &amp; Webinars</div>
+    <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-core)"></span> Core Pages</div>
+    <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-other)"></span> Other</div>
+    <div style="height:4px"></div>
+    <div class="legend-item"><span class="legend-line legend-line-tree">&nbsp;</span> Tree structure</div>
+    <div class="legend-item"><span class="legend-line legend-line-internal">&nbsp;</span> Internal link</div>
+    <div class="legend-item"><span class="legend-line legend-line-cta">&nbsp;</span> CTA link</div>
+    <div class="legend-item"><span class="legend-line legend-line-nav">&nbsp;</span> Navigation link</div>
+    <div class="legend-item legend-conv-item" style="display:none"><span class="legend-dot legend-dot-conversion"></span> Conversion endpoint</div>
+    <div class="legend-item legend-conv-item" style="display:none"><span class="legend-line legend-line-conversion">&nbsp;</span> Conversion path</div>
+  </div>
+  <!-- Technical mode (hidden by default) -->
+  <div id="legend-technical" style="display:none">
+    <div class="legend-item"><span class="legend-dot legend-dot-crawled"></span> Crawled page (with data)</div>
+    <div class="legend-item"><span class="legend-dot legend-dot-sitemap"></span> Sitemap page (not crawled)</div>
+    <div class="legend-item"><span class="legend-dot legend-dot-cta"></span> Page with CTAs</div>
+    <div class="legend-item"><span class="legend-line legend-line-tree">&nbsp;</span> Tree structure</div>
+    <div class="legend-item"><span class="legend-line legend-line-internal">&nbsp;</span> Internal link</div>
+    <div class="legend-item"><span class="legend-line legend-line-cta">&nbsp;</span> CTA link</div>
+    <div class="legend-item"><span class="legend-line legend-line-nav">&nbsp;</span> Navigation link</div>
+    <div class="legend-item" id="legend-conversion" style="display:none"><span class="legend-dot legend-dot-conversion"></span> Conversion endpoint</div>
+    <div class="legend-item" id="legend-conversion-link" style="display:none"><span class="legend-line legend-line-conversion">&nbsp;</span> Conversion path</div>
+  </div>
 </div>
 
 <div id="tooltip"></div>
@@ -298,7 +351,10 @@ const TV = [
   'brand-blue','brand-blue-dark','brand-blue-light','brand-amber','brand-green','brand-blue-shadow',
   'node-label','node-count','node-expand','node-stroke-collapsed','node-link-icon',
   'logo-text','shadow-light','shadow-medium','shadow-heavy','modal-overlay',
-  'link-tree','link-internal','link-cta','link-nav','link-conversion'
+  'link-tree','link-internal','link-cta','link-nav','link-conversion',
+  'section-product','section-docs','section-blog','section-learn',
+  'section-customers','section-competitors','section-integrations',
+  'section-events','section-core','section-other'
 ];
 function readCSSColors() {
   const s = getComputedStyle(document.documentElement);
@@ -427,6 +483,38 @@ let activeConvFilter = null;
 // Double-click timer
 let clickTimer = null;
 
+// Legend mode: business (color by section) vs technical (color by crawl status)
+let legendMode = localStorage.getItem('legend-mode') || 'business';
+
+const SECTION_RULES = [
+  { key: 'product',      match: p => p.startsWith('/product/') },
+  { key: 'docs',         match: p => p.startsWith('/docs/') },
+  { key: 'blog',         match: p => p.startsWith('/blog/') },
+  { key: 'learn',        match: p => p.startsWith('/learn/') || p.startsWith('/guides/') || p.startsWith('/knowledge-base/') },
+  { key: 'customers',    match: p => p.startsWith('/customers/') },
+  { key: 'competitors',  match: p => p.startsWith('/competitors/') },
+  { key: 'integrations', match: p => p.startsWith('/integration/') },
+  { key: 'events',       match: p => p.startsWith('/webinars/') || p.startsWith('/events/') },
+  { key: 'core',         match: p => ['/','/pricing/','/about/','/contact/','/request-demo/','/enterprise-quote/','/interactive-demo/','/careers/','/security/','/partners/','/partnerships/','/resource-center/'].includes(p) },
+];
+
+function getSection(path) {
+  for (const rule of SECTION_RULES) {
+    if (rule.match(path)) return rule.key;
+  }
+  return 'other';
+}
+
+function getNodeFill(d) {
+  if (legendMode === 'business') {
+    const section = getSection(d.data.path || '/');
+    return THEME_COLORS['section-' + section] || THEME_COLORS['section-other'];
+  }
+  if (d.data.ctas && d.data.ctas.length > 0) return THEME_COLORS['brand-amber'];
+  if (d.data.has_crawl_data) return THEME_COLORS['brand-blue'];
+  return THEME_COLORS['brand-blue-light'];
+}
+
 function update(source) {
   treeLayout(root);
   updatePathLookup();
@@ -499,7 +587,7 @@ function update(source) {
 
   nodeUpdate.select("circle")
     .attr("r", d => { if (d.depth === 0) return 8; const total = d.data.total_urls || 1; return Math.max(4, Math.min(12, Math.sqrt(total) * 1.2)); })
-    .attr("fill", d => { if (d.data.ctas && d.data.ctas.length > 0) return THEME_COLORS['brand-amber']; if (d.data.has_crawl_data) return THEME_COLORS['brand-blue']; return THEME_COLORS['brand-blue-light']; })
+    .attr("fill", d => getNodeFill(d))
     .attr("stroke", d => d._collapsed && d._allChildren ? THEME_COLORS['node-stroke-collapsed'] : "none")
     .attr("stroke-width", 2);
 
@@ -900,8 +988,11 @@ function toggleBtn(id, getter, setter) {
     if (id === "btn-tree") {
       linkGroup.selectAll(".tree-link").transition().duration(300).attr("opacity", showTree ? 1 : 0);
     } else if (id === "btn-conversion") {
+      // Technical mode legend items
       document.getElementById("legend-conversion").style.display = showConversion ? "" : "none";
       document.getElementById("legend-conversion-link").style.display = showConversion ? "" : "none";
+      // Business mode legend items
+      document.querySelectorAll(".legend-conv-item").forEach(el => { el.style.display = showConversion ? "" : "none"; });
       if (showConversion) {
         updateConversionLayer();
       } else {
@@ -965,17 +1056,32 @@ window.addEventListener("resize", () => {
 });
 
 // ============================================================
+// LEGEND MODE TOGGLE
+// ============================================================
+function applyLegendMode(mode) {
+  legendMode = mode;
+  localStorage.setItem('legend-mode', mode);
+  document.documentElement.setAttribute('data-legend-mode', mode);
+  document.getElementById('legend-mode-business').classList.toggle('active', mode === 'business');
+  document.getElementById('legend-mode-technical').classList.toggle('active', mode === 'technical');
+  document.getElementById('legend-business').style.display = mode === 'business' ? '' : 'none';
+  document.getElementById('legend-technical').style.display = mode === 'technical' ? '' : 'none';
+  nodeGroup.selectAll('.node circle')
+    .transition().duration(500)
+    .attr('fill', d => getNodeFill(d));
+}
+
+document.getElementById('legend-mode-business').addEventListener('click', () => applyLegendMode('business'));
+document.getElementById('legend-mode-technical').addEventListener('click', () => applyLegendMode('technical'));
+
+// ============================================================
 // THEME: Re-apply D3 colors when theme changes
 // ============================================================
 window.updateThemeColors = function() {
   readCSSColors();
   // Node circles
   nodeGroup.selectAll(".node circle")
-    .attr("fill", d => {
-      if (d.data.ctas && d.data.ctas.length > 0) return THEME_COLORS['brand-amber'];
-      if (d.data.has_crawl_data) return THEME_COLORS['brand-blue'];
-      return THEME_COLORS['brand-blue-light'];
-    })
+    .attr("fill", d => getNodeFill(d))
     .attr("stroke", d => d._collapsed && d._allChildren ? THEME_COLORS['node-stroke-collapsed'] : "none");
   // Conversion cards
   conversionGroup.selectAll(".conversion-node rect")
