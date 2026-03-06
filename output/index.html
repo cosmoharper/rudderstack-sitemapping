@@ -168,8 +168,9 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Robo
 }
 #tooltip h4 { color: var(--c-brand-blue); font-size: 14px; margin-bottom: 6px; word-break: break-all; }
 #tooltip .url { font-size: 11px; margin-bottom: 8px; word-break: break-all; }
-#tooltip .url a { color: var(--c-text-muted); text-decoration: none; transition: color 0.15s; }
-#tooltip .url a:hover { color: var(--c-brand-blue); text-decoration: underline; }
+#tooltip .url a { color: var(--c-brand-blue-light); text-decoration: underline; cursor: pointer; transition: color 0.15s; }
+#tooltip .url a:hover { color: var(--c-brand-blue); }
+#tooltip .url a::after { content: ' ↗'; font-size: 10px; }
 #tooltip .cta-list { margin-top: 6px; }
 #tooltip .cta-item { background: var(--c-bg-surface); border-left: 3px solid var(--c-brand-amber); padding: 4px 8px; margin: 3px 0; border-radius: 0 4px 4px 0; }
 #tooltip .cta-item .cta-text { color: var(--c-brand-amber); font-weight: 600; }
@@ -996,6 +997,16 @@ function cancelHideTooltip() { if (_tooltipHideTimer) { clearTimeout(_tooltipHid
 
 tooltip.addEventListener("mouseenter", cancelHideTooltip);
 tooltip.addEventListener("mouseleave", () => { tooltip.style.display = "none"; });
+
+// Handle link clicks inside tooltip — use event delegation for robustness
+tooltip.addEventListener("click", (e) => {
+  const link = e.target.closest("a[href]");
+  if (link) {
+    e.preventDefault();
+    e.stopPropagation();
+    window.open(link.href, "_blank");
+  }
+});
 
 // ============================================================
 // CONTROLS
