@@ -1,0 +1,255 @@
+{
+  "header_nav": [
+    {
+      "label": "Products",
+      "href": null,
+      "children": [
+        {
+          "label": "Customer Data Platform",
+          "href": "/product/data-cloud-cdp/"
+        },
+        {
+          "label": "Event Stream",
+          "href": "/product/event-stream/"
+        },
+        {
+          "label": "Profiles",
+          "href": "/product/profiles/"
+        },
+        {
+          "label": "Reverse ETL",
+          "href": "/product/reverse-etl/"
+        },
+        {
+          "label": "Transformations",
+          "href": "/product/transformations/"
+        },
+        {
+          "label": "Data Compliance Toolkit",
+          "href": "/product/compliance-toolkit/"
+        },
+        {
+          "label": "Data Quality Toolkit",
+          "href": "/product/data-quality-toolkit/"
+        }
+      ]
+    },
+    {
+      "label": "Solutions",
+      "href": null,
+      "children": [
+        {
+          "label": "Customer 360",
+          "href": "/learn/customer-360/"
+        },
+        {
+          "label": "Personalization",
+          "href": "/learn/what-is-personalization/"
+        },
+        {
+          "label": "Identity Resolution",
+          "href": "/product/sdk-identity-resolution/"
+        },
+        {
+          "label": "Data Apps",
+          "href": "/product/rudderstack-data-apps/"
+        }
+      ]
+    },
+    {
+      "label": "Integrations",
+      "href": null,
+      "children": [
+        {
+          "label": "Integration Library",
+          "href": "/integration/"
+        }
+      ]
+    },
+    {
+      "label": "Docs",
+      "href": null,
+      "children": [
+        {
+          "label": "Documentation",
+          "href": "/docs/"
+        },
+        {
+          "label": "Get Started",
+          "href": "/docs/get-started/"
+        },
+        {
+          "label": "Sources",
+          "href": "/docs/sources/"
+        },
+        {
+          "label": "Destinations",
+          "href": "/docs/destinations/"
+        }
+      ]
+    },
+    {
+      "label": "Resources",
+      "href": null,
+      "children": [
+        {
+          "label": "Blog",
+          "href": "/blog/"
+        },
+        {
+          "label": "Learning Center",
+          "href": "/learn/"
+        },
+        {
+          "label": "Case Studies",
+          "href": "/customers/"
+        },
+        {
+          "label": "Events",
+          "href": "/events/"
+        },
+        {
+          "label": "Community",
+          "href": "/join-rudderstack-slack-community/"
+        }
+      ]
+    },
+    {
+      "label": "Pricing",
+      "href": "/pricing/",
+      "children": []
+    }
+  ],
+  "footer_nav": [
+    {
+      "label": "Company",
+      "href": null,
+      "children": [
+        {
+          "label": "About",
+          "href": "/about/"
+        },
+        {
+          "label": "Contact us",
+          "href": "/contact/"
+        },
+        {
+          "label": "Partner with us",
+          "href": "/partners/"
+        },
+        {
+          "label": "\ud83d\ude80   We\u2019re hiring!",
+          "href": "/careers/"
+        },
+        {
+          "label": "Privacy policy",
+          "href": "/privacy-policy/"
+        },
+        {
+          "label": "Terms of service",
+          "href": "/master-service-agreement/"
+        },
+        {
+          "label": "Vulnerability disclosure policy",
+          "href": "/vulnerability-disclosure-policy/"
+        }
+      ]
+    },
+    {
+      "label": "Products",
+      "href": null,
+      "children": [
+        {
+          "label": "Integrations library",
+          "href": "/integration/"
+        },
+        {
+          "label": "Customer Data Platform",
+          "href": "/product/data-cloud-cdp/"
+        },
+        {
+          "label": "Event Stream",
+          "href": "/product/event-stream/"
+        },
+        {
+          "label": "Profiles",
+          "href": "/product/profiles/"
+        },
+        {
+          "label": "Reverse ETL",
+          "href": "/product/reverse-etl/"
+        },
+        {
+          "label": "Transformations",
+          "href": "/product/transformations/"
+        },
+        {
+          "label": "Data Compliance Toolkit",
+          "href": "/product/compliance-toolkit/"
+        },
+        {
+          "label": "Data Quality Toolkit",
+          "href": "/product/data-quality-toolkit/"
+        },
+        {
+          "label": "Security",
+          "href": "/security/"
+        },
+        {
+          "label": "System status",
+          "href": "https://status.rudderstack.com/"
+        }
+      ]
+    },
+    {
+      "label": "Read our documentation",
+      "href": null,
+      "children": [
+        {
+          "label": "Go to Docs",
+          "href": "/docs/"
+        }
+      ]
+    },
+    {
+      "label": "Resources",
+      "href": null,
+      "children": [
+        {
+          "label": "Blog",
+          "href": "/blog/"
+        },
+        {
+          "label": "Live tech sessions",
+          "href": "/events/"
+        },
+        {
+          "label": "Technical documentation",
+          "href": "/docs/"
+        },
+        {
+          "label": "Learning center",
+          "href": "/learn/"
+        },
+        {
+          "label": "Case studies",
+          "href": "/customers/"
+        },
+        {
+          "label": "Segment comparison",
+          "href": "/rudderstack-vs-segment/"
+        }
+      ]
+    },
+    {
+      "label": "Join the conversation",
+      "href": null,
+      "children": [
+        {
+          "label": "Join our Community",
+          "href": "/join-rudderstack-slack-community/"
+        }
+      ]
+    }
+  ]
+}

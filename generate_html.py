@@ -2,6 +2,7 @@
 """Generate the interactive HTML diagram data payload."""
 
 import json
+import os
 from collections import defaultdict
 from urllib.parse import urlparse
 
@@ -11,6 +12,15 @@ with open("data/all_urls.json") as f:
 
 with open("data/crawl_results.json") as f:
     crawl_results = json.load(f)
+
+# Load nav structure (optional — falls back gracefully)
+nav_data = {"header_nav": [], "footer_nav": []}
+if os.path.exists("data/nav_structure.json"):
+    with open("data/nav_structure.json") as f:
+        nav_data = json.load(f)
+    print(f"Loaded nav structure: {len(nav_data['header_nav'])} header, {len(nav_data['footer_nav'])} footer sections")
+else:
+    print("Warning: data/nav_structure.json not found — nav layers will be empty")
 
 # Build a compact tree for the visualization
 def parse_path(url):
@@ -194,7 +204,7 @@ for endpoint in CONVERSION_ENDPOINTS:
     endpoint["source_pages"] = source_pages
     endpoint["source_count"] = len(source_pages)
 
-# Build link edges (only for crawled pages, filtered to non-nav links to reduce clutter)
+# Build link edges (only for crawled pages)
 edges = []
 seen = set()
 for source_url, data in crawl_results.items():
@@ -221,25 +231,126 @@ for source_url, data in crawl_results.items():
                 "is_cta": is_cta,
             })
 
-# Write the data payload
+# ============================================================
+# INBOUND LINK COUNTS
+# ============================================================
+inbound_counts = defaultdict(int)
+for edge in edges:
+    inbound_counts[edge["target"]] += 1
+
+def attach_inbound(node):
+    """Attach inbound link count to each tree node."""
+    path = node["path"].rstrip("/") or "/"
+    node["inbound_count"] = inbound_counts.get(path, 0)
+    for child in node.get("children", []):
+        attach_inbound(child)
+
+attach_inbound(tree)
+
+total_with_inbound = sum(1 for v in inbound_counts.values() if v > 0)
+print(f"Inbound link counts: {len(inbound_counts)} pages have inbound links")
+
+# ============================================================
+# ORPHAN PAGE DETECTION
+# ============================================================
+# Collect all paths in the tree
+all_paths = set()
+def collect_paths(node):
+    path = node["path"].rstrip("/") or "/"
+    all_paths.add(path)
+    for child in node.get("children", []):
+        collect_paths(child)
+collect_paths(tree)
+
+# Pages that are link targets
+all_targets = set(e["target"] for e in edges)
+
+# Orphans = pages in sitemap with zero inbound internal links (exclude root)
+orphan_paths = sorted(all_paths - all_targets - {"/"})
+print(f"Orphan pages (no inbound links from crawled pages): {len(orphan_paths)} of {len(all_paths)}")
+
+# Mark orphans on tree nodes
+orphan_set = set(orphan_paths)
+def mark_orphans(node):
+    path = node["path"].rstrip("/") or "/"
+    node["is_orphan"] = path in orphan_set
+    for child in node.get("children", []):
+        mark_orphans(child)
+mark_orphans(tree)
+
+# ============================================================
+# CROSS-SECTION LINK MATRIX
+# ============================================================
+SECTION_RULES = [
+    ("product",      lambda p: p.startswith("/product/")),
+    ("docs",         lambda p: p.startswith("/docs/")),
+    ("blog",         lambda p: p.startswith("/blog/")),
+    ("learn",        lambda p: p.startswith("/learn/") or p.startswith("/guides/") or p.startswith("/knowledge-base/")),
+    ("customers",    lambda p: p.startswith("/customers/")),
+    ("competitors",  lambda p: p.startswith("/competitors/")),
+    ("integrations", lambda p: p.startswith("/integration/")),
+    ("events",       lambda p: p.startswith("/webinars/") or p.startswith("/events/")),
+    ("core",         lambda p: p in ["/", "/pricing", "/about", "/contact", "/request-demo",
+                                      "/enterprise-quote", "/interactive-demo", "/careers",
+                                      "/security", "/partners", "/partnerships", "/resource-center"]),
+]
+
+def get_section(path):
+    path = path.rstrip("/") or "/"
+    for key, match_fn in SECTION_RULES:
+        if match_fn(path):
+            return key
+    return "other"
+
+# Build cross-section matrix: only count cross-section links (not within same section)
+section_matrix = defaultdict(lambda: defaultdict(int))
+for edge in edges:
+    src_sec = get_section(edge["source"])
+    tgt_sec = get_section(edge["target"])
+    if src_sec != tgt_sec:
+        section_matrix[src_sec][tgt_sec] += 1
+
+# Convert to serializable format: sorted list of top flows
+cross_section_flows = []
+for src_sec, targets in section_matrix.items():
+    for tgt_sec, count in targets.items():
+        cross_section_flows.append({
+            "source": src_sec,
+            "target": tgt_sec,
+            "count": count,
+        })
+cross_section_flows.sort(key=lambda x: -x["count"])
+
+print(f"Cross-section link flows: {len(cross_section_flows)} unique section pairs")
+for flow in cross_section_flows[:10]:
+    print(f"  {flow['source']} -> {flow['target']}: {flow['count']}")
+
+# ============================================================
+# WRITE DATA PAYLOAD
+# ============================================================
 payload = {
     "tree": tree,
     "edges": edges,
     "conversion_endpoints": CONVERSION_ENDPOINTS,
+    "header_nav": nav_data.get("header_nav", []),
+    "footer_nav": nav_data.get("footer_nav", []),
+    "cross_section_flows": cross_section_flows,
     "stats": {
         "total_pages": len(all_urls),
         "pages_crawled": len([d for d in crawl_results.values() if d["status"] == "ok"]),
         "total_links": len(edges),
         "total_ctas": sum(len(d.get("ctas", [])) for d in crawl_results.values()),
+        "orphan_count": len(orphan_paths),
     }
 }
 
 with open("output/diagram_data.json", "w") as f:
     json.dump(payload, f)
 
-print(f"Tree nodes at root level: {len(tree['children'])}")
+print(f"\nTree nodes at root level: {len(tree['children'])}")
 print(f"Link edges: {len(edges)}")
 print(f"Conversion endpoints: {len(CONVERSION_ENDPOINTS)}")
 for ep in CONVERSION_ENDPOINTS:
     print(f"  {ep['name']}: {ep['source_count']} source pages")
+print(f"Orphan pages: {len(orphan_paths)}")
 print(f"Data payload written to output/diagram_data.json")

@@ -154,9 +154,6 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Robo
 .legend-dot-conversion { background: var(--c-brand-blue-dark); border-radius: 3px; }
 .legend-line { display: inline-block; width: 30px; }
 .legend-line-tree { border-top: 2px solid var(--c-link-tree); }
-.legend-line-internal { border-top: 2px dashed var(--c-link-internal); }
-.legend-line-cta { border-top: 2px dashed var(--c-link-cta); }
-.legend-line-nav { border-top: 2px dashed var(--c-link-nav); }
 .legend-line-conversion { border-top: 2px dashed var(--c-link-conversion); opacity: 0.5; }
 
 #tooltip {
@@ -236,9 +233,6 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Robo
 
 .link { fill: none; stroke-opacity: 0.25; }
 .link.tree-link { stroke: var(--c-link-tree); stroke-width: 1.2; }
-.link.internal-link { stroke: var(--c-link-internal); stroke-width: 0.8; stroke-dasharray: 4,3; stroke-opacity: 0.15; }
-.link.cta-link { stroke: var(--c-link-cta); stroke-width: 1.2; stroke-dasharray: 6,3; stroke-opacity: 0.25; }
-.link.nav-link { stroke: var(--c-link-nav); stroke-width: 0.6; stroke-dasharray: 2,3; stroke-opacity: 0.1; }
 
 .conversion-node rect { cursor: pointer; transition: all 0.15s; }
 .conversion-node:hover rect { filter: brightness(1.2); }
@@ -248,11 +242,32 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Robo
 .conversion-link { fill: none; stroke: var(--c-link-conversion); stroke-width: 0.8; stroke-dasharray: 6,4; stroke-opacity: 0.08; }
 .conversion-link.highlighted { stroke: var(--c-brand-amber); stroke-width: 1.2; stroke-opacity: 0.5; }
 
-.highlight .link.internal-link, .highlight .link.cta-link { stroke-opacity: 0.8; }
-
 /* Flash prevention for legend mode */
 [data-legend-mode="business"] #legend-technical { display: none !important; }
 [data-legend-mode="technical"] #legend-business { display: none !important; }
+
+/* Inbound badges */
+.inbound-badge { pointer-events: none; }
+
+/* Cross-section panel */
+#xsection-panel {
+  position: fixed; bottom: 20px; right: 20px; z-index: 100;
+  background: var(--c-bg-controls); backdrop-filter: blur(10px);
+  border: 1px solid var(--c-border-primary); border-radius: 8px; padding: 14px 18px;
+  font-size: 11px; max-height: 400px; overflow-y: auto; min-width: 220px;
+}
+#xsection-panel h3 { font-size: 13px; margin-bottom: 8px; color: var(--c-brand-blue); }
+.xsection-row { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; gap: 12px; }
+.xsection-flow { display: flex; align-items: center; gap: 4px; }
+.xsection-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.xsection-arrow { color: var(--c-text-dim); font-size: 10px; }
+.xsection-count { color: var(--c-text-muted); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* Dynamic legend items for new features */
+.legend-item.legend-dynamic { display: none; }
+.legend-item.legend-dynamic.visible { display: flex; }
+.legend-orphan-ring { width: 10px; height: 10px; border-radius: 50%; display: inline-block; border: 2px dashed var(--c-section-competitors); flex-shrink: 0; }
+.legend-inbound-badge { display: inline-block; width: 14px; height: 14px; border-radius: 50%; background: var(--c-brand-amber); color: var(--c-text-white); font-size: 8px; font-weight: 700; text-align: center; line-height: 14px; flex-shrink: 0; }
 
 /* Smooth theme transition */
 body, #controls, #legend, #tooltip, #modal, .toggle-btn, .theme-toggle button, .legend-mode-toggle button, #search-box {
@@ -268,10 +283,12 @@ body, #controls, #legend, #tooltip, #modal, .toggle-btn, .theme-toggle button, .
     <span class="site-map-label">Site Map</span>
   </div>
   <input id="search-box" type="text" placeholder="Search pages... (e.g. 'product', 'blog')">
-  <button class="toggle-btn active" id="btn-tree">Tree Links<span class="btn-tip tip-right">Toggle the parent–child tree lines that show the URL hierarchy. These are the solid grey lines connecting nodes.</span></button>
-  <button class="toggle-btn" id="btn-internal">Internal Links<span class="btn-tip tip-left">Show dashed blue lines for all internal &lt;a&gt; links found on crawled pages. Links only appear between nodes that are both visible — expand branches to reveal more connections.</span></button>
-  <button class="toggle-btn" id="btn-ctas">CTA Links<span class="btn-tip">Show dashed amber lines for call-to-action links (buttons, "Get Started", "Request Demo", etc.). Links only appear between visible nodes — expand branches to see more.</span></button>
-  <button class="toggle-btn" id="btn-nav">Nav Links<span class="btn-tip">Show faint dashed lines for links inside &lt;nav&gt; elements (header/footer menus). Links only appear between visible nodes — expand branches to see more.</span></button>
+  <button class="toggle-btn active" id="btn-tree">Tree Links<span class="btn-tip tip-right">Toggle the parent&#8211;child tree lines that show the URL hierarchy. These are the solid grey lines connecting nodes.</span></button>
+  <button class="toggle-btn" id="btn-header-nav">Header Nav<span class="btn-tip">Show the website header navigation structure &#8212; menu items and dropdown hierarchy. Reveals how the site&#8217;s information architecture is organized for users.</span></button>
+  <button class="toggle-btn" id="btn-footer-nav">Footer Nav<span class="btn-tip">Show the website footer navigation links organized by category. Footers often expose different pages like legal, careers, and alternative content paths.</span></button>
+  <button class="toggle-btn" id="btn-inbound">Inbound Links<span class="btn-tip tip-left">Show a count badge on each node indicating how many other pages link to it. Higher counts = more important/connected pages.</span></button>
+  <button class="toggle-btn" id="btn-orphans">Orphans<span class="btn-tip tip-left">Highlight pages with zero inbound internal links from crawled pages. These are potential SEO dead ends &#8212; they exist in the sitemap but no crawled page links to them.</span></button>
+  <button class="toggle-btn" id="btn-xsection">Cross-Links<span class="btn-tip tip-left">Show a summary of how content sections link to each other (e.g. Blog&#8594;Product: 87 links). More useful than individual link lines.</span></button>
   <button class="toggle-btn" id="btn-conversion">Conversion Layer<span class="btn-tip">Show the 5 key conversion endpoints (Signup, Demo, Quote, Contact, Interactive Demo) as cards to the right of the tree, with lines showing which pages link to them. Click a card for details.</span></button>
   <button class="toggle-btn" id="btn-expand-all">Expand All (L2)<span class="btn-tip tip-right">Expand the tree to show the first two levels of the URL hierarchy. Deeper nodes stay collapsed to keep things manageable.</span></button>
   <button class="toggle-btn" id="btn-collapse">Collapse All<span class="btn-tip tip-left">Collapse the entire tree back to just the root node.</span></button>
@@ -307,11 +324,12 @@ body, #controls, #legend, #tooltip, #modal, .toggle-btn, .theme-toggle button, .
     <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-other)"></span> Other</div>
     <div style="height:4px"></div>
     <div class="legend-item"><span class="legend-line legend-line-tree">&nbsp;</span> Tree structure</div>
-    <div class="legend-item"><span class="legend-line legend-line-internal">&nbsp;</span> Internal link</div>
-    <div class="legend-item"><span class="legend-line legend-line-cta">&nbsp;</span> CTA link</div>
-    <div class="legend-item"><span class="legend-line legend-line-nav">&nbsp;</span> Navigation link</div>
     <div class="legend-item legend-conv-item" style="display:none"><span class="legend-dot legend-dot-conversion"></span> Conversion endpoint</div>
     <div class="legend-item legend-conv-item" style="display:none"><span class="legend-line legend-line-conversion">&nbsp;</span> Conversion path</div>
+    <div class="legend-item legend-dynamic" id="legend-biz-headernav"><span class="legend-section-dot" style="background:var(--c-section-docs)"></span> Header Nav overlay</div>
+    <div class="legend-item legend-dynamic" id="legend-biz-footernav"><span class="legend-section-dot" style="background:var(--c-section-events)"></span> Footer Nav overlay</div>
+    <div class="legend-item legend-dynamic" id="legend-biz-inbound"><span class="legend-inbound-badge">5</span> Inbound link count</div>
+    <div class="legend-item legend-dynamic" id="legend-biz-orphan"><span class="legend-orphan-ring"></span> Orphan page (0 inbound)</div>
   </div>
   <!-- Technical mode (hidden by default) -->
   <div id="legend-technical" style="display:none">
@@ -319,15 +337,21 @@ body, #controls, #legend, #tooltip, #modal, .toggle-btn, .theme-toggle button, .
     <div class="legend-item"><span class="legend-dot legend-dot-sitemap"></span> Sitemap page (not crawled)</div>
     <div class="legend-item"><span class="legend-dot legend-dot-cta"></span> Page with CTAs</div>
     <div class="legend-item"><span class="legend-line legend-line-tree">&nbsp;</span> Tree structure</div>
-    <div class="legend-item"><span class="legend-line legend-line-internal">&nbsp;</span> Internal link</div>
-    <div class="legend-item"><span class="legend-line legend-line-cta">&nbsp;</span> CTA link</div>
-    <div class="legend-item"><span class="legend-line legend-line-nav">&nbsp;</span> Navigation link</div>
     <div class="legend-item" id="legend-conversion" style="display:none"><span class="legend-dot legend-dot-conversion"></span> Conversion endpoint</div>
     <div class="legend-item" id="legend-conversion-link" style="display:none"><span class="legend-line legend-line-conversion">&nbsp;</span> Conversion path</div>
+    <div class="legend-item legend-dynamic" id="legend-tech-headernav"><span class="legend-section-dot" style="background:var(--c-section-docs)"></span> Header Nav overlay</div>
+    <div class="legend-item legend-dynamic" id="legend-tech-footernav"><span class="legend-section-dot" style="background:var(--c-section-events)"></span> Footer Nav overlay</div>
+    <div class="legend-item legend-dynamic" id="legend-tech-inbound"><span class="legend-inbound-badge">5</span> Inbound link count</div>
+    <div class="legend-item legend-dynamic" id="legend-tech-orphan"><span class="legend-orphan-ring"></span> Orphan page (0 inbound)</div>
   </div>
 </div>
 
 <div id="tooltip"></div>
+
+<div id="xsection-panel" style="display:none">
+  <h3>Cross-Section Links</h3>
+  <div id="xsection-content"></div>
+</div>
 
 <!-- Modal -->
 <div id="modal-overlay">
@@ -472,13 +496,15 @@ function zoomToFit(animated) {
 // RENDER
 // ============================================================
 const linkGroup = g.append("g").attr("class", "links");
-const internalLinkGroup = g.append("g").attr("class", "internal-links");
+const headerNavGroup = g.append("g").attr("class", "header-nav-layer");
+const footerNavGroup = g.append("g").attr("class", "footer-nav-layer");
 const nodeGroup = g.append("g").attr("class", "nodes");
 const conversionLinkGroup = g.append("g").attr("class", "conversion-links");
 const conversionGroup = g.append("g").attr("class", "conversion-nodes");
 
 // Toggle states
-let showTree = true, showInternal = false, showCTAs = false, showNav = false, showConversion = false;
+let showTree = true, showConversion = false;
+let showHeaderNav = false, showFooterNav = false, showInbound = false, showOrphans = false, showCrossSection = false;
 
 // Conversion filter state
 let activeConvFilter = null;
@@ -613,8 +639,46 @@ function update(source) {
     .on("mouseover", (event, d) => showTooltip(event, d))
     .on("mouseout", hideTooltip);
 
-  // ---- INTERNAL LINKS ----
-  updateInternalLinks();
+  // ---- INBOUND BADGES ----
+  nodeUpdate.selectAll(".inbound-badge").remove();
+  if (showInbound) {
+    nodeUpdate.filter(d => (d.data.inbound_count || 0) > 0)
+      .append("text")
+      .attr("class", "inbound-badge")
+      .attr("x", 0)
+      .attr("y", d => {
+        const r = d.depth === 0 ? 8 : Math.max(4, Math.min(12, Math.sqrt(d.data.total_urls || 1) * 1.2));
+        return -(r + 6);
+      })
+      .attr("text-anchor", "middle")
+      .attr("font-size", "8px").attr("font-weight", "700")
+      .attr("fill", THEME_COLORS['brand-amber'])
+      .text(d => d.data.inbound_count);
+  }
+
+  // ---- ORPHAN HIGHLIGHTING ----
+  if (showOrphans) {
+    nodeUpdate.select("circle")
+      .attr("stroke", d => d.data.is_orphan ? THEME_COLORS['section-competitors'] : (d._collapsed && d._allChildren ? THEME_COLORS['node-stroke-collapsed'] : "none"))
+      .attr("stroke-width", d => d.data.is_orphan ? 2.5 : (d._collapsed && d._allChildren ? 2 : 0))
+      .attr("stroke-dasharray", d => d.data.is_orphan ? "3,2" : "none")
+      .attr("opacity", d => d.data.is_orphan ? 1 : 0.2);
+    nodeUpdate.select(".label").attr("opacity", d => d.data.is_orphan ? 1 : 0.2);
+    nodeUpdate.select(".count-label").attr("opacity", d => d.data.is_orphan ? 1 : 0.2);
+  } else {
+    nodeUpdate.select("circle")
+      .attr("opacity", 1)
+      .attr("stroke-dasharray", "none")
+      .attr("fill", d => getNodeFill(d))
+      .attr("stroke", d => d._collapsed && d._allChildren ? THEME_COLORS['node-stroke-collapsed'] : "none")
+      .attr("stroke-width", d => d._collapsed && d._allChildren ? 2 : 0);
+    nodeUpdate.select(".label").attr("opacity", 1);
+    nodeUpdate.select(".count-label").attr("opacity", 1);
+  }
+
+  // ---- NAV LAYERS ----
+  updateHeaderNavLayer();
+  updateFooterNavLayer();
 
   // ---- CONVERSION LAYER ----
   if (showConversion) updateConversionLayer();
@@ -629,26 +693,219 @@ function update(source) {
   }
 }
 
-function updateInternalLinks() {
-  const visibleEdges = DATA.edges.filter(e => {
-    const sNode = pathToNode[e.source];
-    const tNode = pathToNode[e.target];
-    if (!sNode || !tNode) return false;
-    if (!showInternal && !showCTAs && !showNav) return false;
-    if (e.is_cta && !showCTAs) return false;
-    if (e.is_nav && !e.is_cta && !showNav) return false;
-    if (!e.is_cta && !e.is_nav && !showInternal) return false;
-    return true;
+// ============================================================
+// HEADER NAV LAYER
+// ============================================================
+function updateHeaderNavLayer() {
+  headerNavGroup.selectAll("*").remove();
+  if (!showHeaderNav) return;
+
+  const navData = DATA.header_nav || [];
+  if (!navData.length) return;
+
+  const rootY = root.y || 0;
+  const navColX = rootY + 110;
+  const navSubX = rootY + 260;
+
+  let totalItems = 0;
+  navData.forEach(section => { totalItems += 1 + (section.children || []).length; });
+  const itemHeight = 22;
+  const startY = root.x - (totalItems * itemHeight) / 2;
+
+  let yPos = startY;
+
+  navData.forEach(section => {
+    const sg = headerNavGroup.append("g")
+      .attr("transform", `translate(${navColX}, ${yPos})`);
+
+    sg.append("rect")
+      .attr("x", -4).attr("y", -9).attr("width", 100).attr("height", 18)
+      .attr("rx", 3).attr("fill", THEME_COLORS['section-docs']).attr("opacity", 0.15);
+
+    sg.append("text")
+      .attr("font-size", "10px").attr("fill", THEME_COLORS['section-docs'])
+      .attr("font-weight", "600").attr("dy", "0.3em")
+      .text(section.label);
+
+    headerNavGroup.append("path")
+      .attr("class", "link")
+      .attr("d", `M${rootY + 8},${root.x} C${navColX - 30},${root.x} ${navColX - 30},${yPos} ${navColX - 4},${yPos}`)
+      .attr("stroke", THEME_COLORS['section-docs']).attr("stroke-width", 1)
+      .attr("stroke-dasharray", "3,2").attr("opacity", 0.4).attr("fill", "none");
+
+    const sectionY = yPos;
+    yPos += itemHeight;
+
+    (section.children || []).forEach(child => {
+      const cg = headerNavGroup.append("g")
+        .attr("transform", `translate(${navSubX}, ${yPos})`);
+
+      cg.append("text")
+        .attr("font-size", "9px").attr("fill", THEME_COLORS['text-muted'])
+        .attr("dy", "0.3em")
+        .text(child.label);
+
+      headerNavGroup.append("path")
+        .attr("class", "link")
+        .attr("d", `M${navColX + 96},${sectionY} C${navSubX - 15},${sectionY} ${navSubX - 15},${yPos} ${navSubX - 4},${yPos}`)
+        .attr("stroke", THEME_COLORS['section-docs']).attr("stroke-width", 0.8)
+        .attr("stroke-dasharray", "2,2").attr("opacity", 0.3).attr("fill", "none");
+
+      const targetPath = child.href;
+      if (targetPath) {
+        const cleanPath = targetPath.replace(/\/$/, '') || '/';
+        const treeNode = pathToNode[cleanPath] || pathToNode[cleanPath + '/'];
+        if (treeNode) {
+          const tx = treeNode.y, ty = treeNode.x;
+          const sx = navSubX + (child.label || '').length * 5.5;
+          headerNavGroup.append("path")
+            .attr("class", "link")
+            .attr("d", `M${sx},${yPos} C${(sx+tx)/2},${yPos} ${(sx+tx)/2},${ty} ${tx-14},${ty}`)
+            .attr("stroke", THEME_COLORS['section-docs']).attr("stroke-width", 0.6)
+            .attr("stroke-dasharray", "4,3").attr("opacity", 0.2).attr("fill", "none");
+        }
+      }
+
+      yPos += itemHeight;
+    });
+
+    yPos += 6;
+  });
+}
+
+// ============================================================
+// FOOTER NAV LAYER
+// ============================================================
+function updateFooterNavLayer() {
+  footerNavGroup.selectAll("*").remove();
+  if (!showFooterNav) return;
+
+  const navData = DATA.footer_nav || [];
+  if (!navData.length) return;
+
+  const rootY = root.y || 0;
+  const navColX = rootY + 110;
+  const navSubX = rootY + 260;
+
+  // Offset below header nav if both are visible
+  let totalHeaderItems = 0;
+  if (showHeaderNav && DATA.header_nav) {
+    DATA.header_nav.forEach(s => { totalHeaderItems += 1 + (s.children || []).length; });
+    totalHeaderItems += DATA.header_nav.length; // gap between sections
+  }
+
+  let totalItems = 0;
+  navData.forEach(section => { totalItems += 1 + (section.children || []).length; });
+  const itemHeight = 22;
+  const headerOffset = showHeaderNav ? (totalHeaderItems * itemHeight) / 2 + 40 : 0;
+  const startY = root.x + headerOffset - (totalItems * itemHeight) / 2 + (showHeaderNav ? (totalItems * itemHeight) / 2 + 20 : 0);
+
+  let yPos = startY;
+
+  navData.forEach(section => {
+    const sg = footerNavGroup.append("g")
+      .attr("transform", `translate(${navColX}, ${yPos})`);
+
+    sg.append("rect")
+      .attr("x", -4).attr("y", -9).attr("width", 100).attr("height", 18)
+      .attr("rx", 3).attr("fill", THEME_COLORS['section-events']).attr("opacity", 0.15);
+
+    sg.append("text")
+      .attr("font-size", "10px").attr("fill", THEME_COLORS['section-events'])
+      .attr("font-weight", "600").attr("dy", "0.3em")
+      .text(section.label);
+
+    footerNavGroup.append("path")
+      .attr("class", "link")
+      .attr("d", `M${rootY + 8},${root.x} C${navColX - 30},${root.x} ${navColX - 30},${yPos} ${navColX - 4},${yPos}`)
+      .attr("stroke", THEME_COLORS['section-events']).attr("stroke-width", 1)
+      .attr("stroke-dasharray", "3,2").attr("opacity", 0.4).attr("fill", "none");
+
+    const sectionY = yPos;
+    yPos += itemHeight;
+
+    (section.children || []).forEach(child => {
+      const cg = footerNavGroup.append("g")
+        .attr("transform", `translate(${navSubX}, ${yPos})`);
+
+      cg.append("text")
+        .attr("font-size", "9px").attr("fill", THEME_COLORS['text-muted'])
+        .attr("dy", "0.3em")
+        .text(child.label);
+
+      footerNavGroup.append("path")
+        .attr("class", "link")
+        .attr("d", `M${navColX + 96},${sectionY} C${navSubX - 15},${sectionY} ${navSubX - 15},${yPos} ${navSubX - 4},${yPos}`)
+        .attr("stroke", THEME_COLORS['section-events']).attr("stroke-width", 0.8)
+        .attr("stroke-dasharray", "2,2").attr("opacity", 0.3).attr("fill", "none");
+
+      const targetPath = child.href;
+      if (targetPath) {
+        const cleanPath = targetPath.replace(/\/$/, '') || '/';
+        const treeNode = pathToNode[cleanPath] || pathToNode[cleanPath + '/'];
+        if (treeNode) {
+          const tx = treeNode.y, ty = treeNode.x;
+          const sx = navSubX + (child.label || '').length * 5.5;
+          footerNavGroup.append("path")
+            .attr("class", "link")
+            .attr("d", `M${sx},${yPos} C${(sx+tx)/2},${yPos} ${(sx+tx)/2},${ty} ${tx-14},${ty}`)
+            .attr("stroke", THEME_COLORS['section-events']).attr("stroke-width", 0.6)
+            .attr("stroke-dasharray", "4,3").attr("opacity", 0.2).attr("fill", "none");
+        }
+      }
+
+      yPos += itemHeight;
+    });
+
+    yPos += 6;
+  });
+}
+
+// ============================================================
+// CROSS-SECTION PANEL
+// ============================================================
+function updateCrossSectionPanel() {
+  const panel = document.getElementById("xsection-panel");
+  const content = document.getElementById("xsection-content");
+
+  if (!showCrossSection) {
+    panel.style.display = "none";
+    return;
+  }
+
+  panel.style.display = "";
+  const flows = (DATA.cross_section_flows || []).slice(0, 15);
+
+  const sectionNames = {
+    product: "Product", docs: "Docs", blog: "Blog", learn: "Learn",
+    customers: "Customers", competitors: "Competitors", integrations: "Integrations",
+    events: "Events", core: "Core", other: "Other"
+  };
+
+  let html = "";
+  flows.forEach(flow => {
+    const srcColor = THEME_COLORS["section-" + flow.source] || THEME_COLORS["section-other"];
+    const tgtColor = THEME_COLORS["section-" + flow.target] || THEME_COLORS["section-other"];
+    const srcName = sectionNames[flow.source] || flow.source;
+    const tgtName = sectionNames[flow.target] || flow.target;
+
+    html += `<div class="xsection-row">
+      <div class="xsection-flow">
+        <span class="xsection-dot" style="background:${srcColor}"></span>
+        <span>${srcName}</span>
+        <span class="xsection-arrow">\u2192</span>
+        <span class="xsection-dot" style="background:${tgtColor}"></span>
+        <span>${tgtName}</span>
+      </div>
+      <span class="xsection-count">${flow.count}</span>
+    </div>`;
   });
 
-  const iLink = internalLinkGroup.selectAll(".edge-link")
-    .data(visibleEdges, d => d.source + "->" + d.target);
-  iLink.exit().transition().duration(300).attr("opacity", 0).remove();
-  const iLinkEnter = iLink.enter().append("path")
-    .attr("class", d => { if (d.is_cta) return "link edge-link cta-link"; if (d.is_nav) return "link edge-link nav-link"; return "link edge-link internal-link"; })
-    .attr("opacity", 0);
-  iLink.merge(iLinkEnter).transition().duration(400).attr("opacity", 1)
-    .attr("d", d => { const s = pathToNode[d.source]; const t = pathToNode[d.target]; if (!s || !t) return ""; const sx = s.y, sy = s.x, tx = t.y, ty = t.x; const mx = (sx + tx) / 2; return `M${sx},${sy} C${mx},${sy} ${mx},${ty} ${tx},${ty}`; });
+  if (!flows.length) {
+    html = '<div style="color:var(--c-text-muted)">No cross-section flow data available.</div>';
+  }
+
+  content.innerHTML = html;
 }
 
 // ============================================================
@@ -1029,17 +1286,71 @@ function toggleBtn(id, getter, setter) {
         clearConversionLayer();
         clearConvFilter();
       }
-    } else {
-      updateInternalLinks();
     }
   });
 }
 
 toggleBtn("btn-tree", () => showTree, v => showTree = v);
-toggleBtn("btn-internal", () => showInternal, v => showInternal = v);
-toggleBtn("btn-ctas", () => showCTAs, v => showCTAs = v);
-toggleBtn("btn-nav", () => showNav, v => showNav = v);
 toggleBtn("btn-conversion", () => showConversion, v => showConversion = v);
+
+// Dynamic legend helper
+function updateDynamicLegend() {
+  const items = {
+    'headernav': showHeaderNav,
+    'footernav': showFooterNav,
+    'inbound': showInbound,
+    'orphan': showOrphans
+  };
+  Object.entries(items).forEach(([key, active]) => {
+    const bizEl = document.getElementById('legend-biz-' + key);
+    const techEl = document.getElementById('legend-tech-' + key);
+    if (bizEl) bizEl.classList.toggle('visible', active);
+    if (techEl) techEl.classList.toggle('visible', active);
+  });
+}
+
+document.getElementById("btn-header-nav").addEventListener("click", () => {
+  showHeaderNav = !showHeaderNav;
+  document.getElementById("btn-header-nav").classList.toggle("active");
+  updateHeaderNavLayer();
+  updateDynamicLegend();
+});
+
+document.getElementById("btn-footer-nav").addEventListener("click", () => {
+  showFooterNav = !showFooterNav;
+  document.getElementById("btn-footer-nav").classList.toggle("active");
+  updateFooterNavLayer();
+  updateDynamicLegend();
+});
+
+document.getElementById("btn-inbound").addEventListener("click", () => {
+  showInbound = !showInbound;
+  document.getElementById("btn-inbound").classList.toggle("active");
+  update(root);
+  updateDynamicLegend();
+});
+
+document.getElementById("btn-orphans").addEventListener("click", () => {
+  showOrphans = !showOrphans;
+  document.getElementById("btn-orphans").classList.toggle("active");
+  update(root);
+  updateDynamicLegend();
+  // Update stats when orphans shown
+  if (showOrphans) {
+    const orphanCount = root.descendants().filter(d => d.data.is_orphan).length;
+    document.getElementById('stats-text').textContent =
+      `${stats.total_pages.toLocaleString()} pages | ${stats.pages_crawled} crawled | ${stats.total_links.toLocaleString()} links | ${stats.total_ctas} CTAs | ${orphanCount} orphans`;
+  } else {
+    document.getElementById('stats-text').textContent =
+      `${stats.total_pages.toLocaleString()} pages | ${stats.pages_crawled} crawled | ${stats.total_links.toLocaleString()} links | ${stats.total_ctas} CTAs`;
+  }
+});
+
+document.getElementById("btn-xsection").addEventListener("click", () => {
+  showCrossSection = !showCrossSection;
+  document.getElementById("btn-xsection").classList.toggle("active");
+  updateCrossSectionPanel();
+});
 
 // Expand all to level 2
 document.getElementById("btn-expand-all").addEventListener("click", () => {
@@ -1112,7 +1423,12 @@ window.updateThemeColors = function() {
   // Node circles
   nodeGroup.selectAll(".node circle")
     .attr("fill", d => getNodeFill(d))
-    .attr("stroke", d => d._collapsed && d._allChildren ? THEME_COLORS['node-stroke-collapsed'] : "none");
+    .attr("stroke", d => {
+      if (showOrphans && d.data.is_orphan) return THEME_COLORS['section-competitors'];
+      return d._collapsed && d._allChildren ? THEME_COLORS['node-stroke-collapsed'] : "none";
+    });
+  // Inbound badges
+  nodeGroup.selectAll(".inbound-badge").attr("fill", THEME_COLORS['brand-amber']);
   // Conversion cards
   conversionGroup.selectAll(".conversion-node rect")
     .attr("fill", THEME_COLORS['brand-blue-dark']).attr("stroke", THEME_COLORS['brand-blue']);
@@ -1120,6 +1436,10 @@ window.updateThemeColors = function() {
     const el = d3.select(this);
     el.attr("fill", el.attr("dy") === "-0.15em" ? THEME_COLORS['text-white'] : THEME_COLORS['brand-blue-light']);
   });
+  // Re-render nav layers and cross-section panel with new colors
+  if (showHeaderNav) updateHeaderNavLayer();
+  if (showFooterNav) updateFooterNavLayer();
+  if (showCrossSection) updateCrossSectionPanel();
 };
 
 }); // end fetch
