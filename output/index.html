@@ -167,7 +167,9 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Robo
   box-shadow: 0 8px 30px var(--c-shadow-medium);
 }
 #tooltip h4 { color: var(--c-brand-blue); font-size: 14px; margin-bottom: 6px; word-break: break-all; }
-#tooltip .url { color: var(--c-text-muted); font-size: 11px; margin-bottom: 8px; word-break: break-all; }
+#tooltip .url { font-size: 11px; margin-bottom: 8px; word-break: break-all; }
+#tooltip .url a { color: var(--c-text-muted); text-decoration: none; transition: color 0.15s; }
+#tooltip .url a:hover { color: var(--c-brand-blue); text-decoration: underline; }
 #tooltip .cta-list { margin-top: 6px; }
 #tooltip .cta-item { background: var(--c-bg-surface); border-left: 3px solid var(--c-brand-amber); padding: 4px 8px; margin: 3px 0; border-radius: 0 4px 4px 0; }
 #tooltip .cta-item .cta-text { color: var(--c-brand-amber); font-weight: 600; }
@@ -919,7 +921,8 @@ function positionTooltipNearNode(event) {
 function showTooltip(event, d) {
   cancelHideTooltip();
   let html = `<h4>${d.data.name}</h4>`;
-  html += `<div class="url">${d.data.path}</div>`;
+  const fullUrl = "https://www.rudderstack.com" + d.data.path;
+  html += `<div class="url"><a href="${fullUrl}" target="_blank" rel="noopener">${d.data.path}</a></div>`;
   html += `<div><strong>Pages:</strong> ${d.data.total_urls.toLocaleString()} total, ${d.data.url_count} direct</div>`;
 
   if (d._collapsed && d._allChildren) {
@@ -953,7 +956,7 @@ function showTooltip(event, d) {
     html += `</div>`;
   }
 
-  html += `<div style="color:${THEME_COLORS['text-faint']}; font-size:10px; margin-top:8px;">Double-click to open URL</div>`;
+  html += `<div style="color:${THEME_COLORS['text-faint']}; font-size:10px; margin-top:8px;">Click URL to open page</div>`;
   tooltip.innerHTML = html;
   tooltip.style.display = "block";
   positionTooltipNearNode(event);
@@ -962,7 +965,8 @@ function showTooltip(event, d) {
 function showConversionTooltip(event, d) {
   cancelHideTooltip();
   let html = `<h4>${d.name}</h4>`;
-  html += `<div class="url">${d.url}</div>`;
+  const convUrl = d.url.startsWith("http") ? d.url : "https://www.rudderstack.com" + d.url;
+  html += `<div class="url"><a href="${convUrl}" target="_blank" rel="noopener">${d.url}</a></div>`;
   html += `<div><strong>Type:</strong> ${d.type} | <strong>Sources:</strong> ${d.source_count}</div>`;
   if (d.tracking_event) {
     html += `<div style="color:${THEME_COLORS['brand-green']}; margin-top:4px;"><strong>Event:</strong> ${d.tracking_event}`;
