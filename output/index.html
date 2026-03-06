@@ -608,7 +608,6 @@ function update(source) {
 
   nodeUpdate
     .on("mouseover", (event, d) => showTooltip(event, d))
-    .on("mousemove", (event) => moveTooltip(event))
     .on("mouseout", hideTooltip);
 
   // ---- INTERNAL LINKS ----
@@ -700,7 +699,6 @@ function updateConversionLayer() {
   // Events on conversion nodes
   conversionGroup.selectAll(".conversion-node")
     .on("mouseover", (event, d) => showConversionTooltip(event, d))
-    .on("mousemove", (event) => moveTooltip(event))
     .on("mouseout", hideTooltip)
     .on("click", (event, d) => {
       event.stopPropagation();
@@ -910,6 +908,14 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal
 // ============================================================
 const tooltip = document.getElementById("tooltip");
 
+function positionTooltipNearNode(event) {
+  const x = event.clientX + 12;
+  const y = event.clientY - 20;
+  const tw = 480, th = 300;
+  tooltip.style.left = (x + tw > window.innerWidth ? event.clientX - tw - 12 : x) + "px";
+  tooltip.style.top = (y + th > window.innerHeight ? Math.max(4, event.clientY - th) : Math.max(4, y)) + "px";
+}
+
 function showTooltip(event, d) {
   cancelHideTooltip();
   let html = `<h4>${d.data.name}</h4>`;
@@ -950,7 +956,7 @@ function showTooltip(event, d) {
   html += `<div style="color:${THEME_COLORS['text-faint']}; font-size:10px; margin-top:8px;">Double-click to open URL</div>`;
   tooltip.innerHTML = html;
   tooltip.style.display = "block";
-  moveTooltip(event);
+  positionTooltipNearNode(event);
 }
 
 function showConversionTooltip(event, d) {
@@ -966,7 +972,7 @@ function showConversionTooltip(event, d) {
   html += `<div style="color:${THEME_COLORS['text-faint']}; font-size:10px; margin-top:8px;">Click for details &amp; to filter tree</div>`;
   tooltip.innerHTML = html;
   tooltip.style.display = "block";
-  moveTooltip(event);
+  positionTooltipNearNode(event);
 }
 
 function moveTooltip(event) {
@@ -980,7 +986,7 @@ function moveTooltip(event) {
 
 let _tooltipHideTimer = null;
 function hideTooltip() {
-  _tooltipHideTimer = setTimeout(() => { tooltip.style.display = "none"; }, 120);
+  _tooltipHideTimer = setTimeout(() => { tooltip.style.display = "none"; }, 300);
 }
 function cancelHideTooltip() { if (_tooltipHideTimer) { clearTimeout(_tooltipHideTimer); _tooltipHideTimer = null; } }
 
