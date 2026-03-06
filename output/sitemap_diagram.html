@@ -279,7 +279,7 @@ body, #controls, #legend, #tooltip, #modal, .toggle-btn, .theme-toggle button, .
 
 <div id="controls">
   <div class="logo-area">
-    <svg width="130" height="20" viewBox="0 0 130 20" xmlns="http://www.w3.org/2000/svg"><text x="0" y="15" font-family="Inter, sans-serif" font-weight="700" font-size="16" fill="currentColor" letter-spacing="-0.5">RudderStack</text></svg>
+    <svg width="180" height="26" viewBox="0 0 180 26" xmlns="http://www.w3.org/2000/svg"><path d="M1,1 L1,24 L24,24 A23,23 0 0,0 1,1 Z" fill="#1A63EE"/><text x="30" y="21" font-family="Inter, system-ui, sans-serif" font-weight="400" font-size="21" fill="#1A63EE" letter-spacing="-0.3">rudderstack</text></svg>
     <span class="site-map-label">Site Map</span>
   </div>
   <input id="search-box" type="text" placeholder="Search pages... (e.g. 'product', 'blog')">
@@ -696,169 +696,167 @@ function update(source) {
 // ============================================================
 // HEADER NAV LAYER
 // ============================================================
-function updateHeaderNavLayer() {
-  headerNavGroup.selectAll("*").remove();
-  if (!showHeaderNav) return;
-
-  const navData = DATA.header_nav || [];
-  if (!navData.length) return;
+function buildNavSectionGroups(navData, color) {
+  // Shared logic: resolve each nav section to its target L1 tree nodes
+  // and compute vertical positions clustered near those targets.
 
   const rootY = root.y || 0;
-  const navColX = rootY + 110;
-  const navSubX = rootY + 260;
+  const l1Map = {};
+  (root.children || []).forEach(child => { l1Map[child.data.name] = child; });
 
-  let totalItems = 0;
-  navData.forEach(section => { totalItems += 1 + (section.children || []).length; });
-  const itemHeight = 22;
-  const startY = root.x - (totalItems * itemHeight) / 2;
+  function getL1Name(href) {
+    if (!href) return null;
+    return href.replace(/^\//, '').replace(/\/$/, '').split('/')[0] || null;
+  }
 
-  let yPos = startY;
+  const sectionGroups = [];
 
   navData.forEach(section => {
-    const sg = headerNavGroup.append("g")
-      .attr("transform", `translate(${navColX}, ${yPos})`);
+    const children = section.children || [];
+    const targetL1Map = new Map();
+    const resolvedChildren = [];
 
-    sg.append("rect")
-      .attr("x", -4).attr("y", -9).attr("width", 100).attr("height", 18)
-      .attr("rx", 3).attr("fill", THEME_COLORS['section-docs']).attr("opacity", 0.15);
-
-    sg.append("text")
-      .attr("font-size", "10px").attr("fill", THEME_COLORS['section-docs'])
-      .attr("font-weight", "600").attr("dy", "0.3em")
-      .text(section.label);
-
-    headerNavGroup.append("path")
-      .attr("class", "link")
-      .attr("d", `M${rootY + 8},${root.x} C${navColX - 30},${root.x} ${navColX - 30},${yPos} ${navColX - 4},${yPos}`)
-      .attr("stroke", THEME_COLORS['section-docs']).attr("stroke-width", 1)
-      .attr("stroke-dasharray", "3,2").attr("opacity", 0.4).attr("fill", "none");
-
-    const sectionY = yPos;
-    yPos += itemHeight;
-
-    (section.children || []).forEach(child => {
-      const cg = headerNavGroup.append("g")
-        .attr("transform", `translate(${navSubX}, ${yPos})`);
-
-      cg.append("text")
-        .attr("font-size", "9px").attr("fill", THEME_COLORS['text-muted'])
-        .attr("dy", "0.3em")
-        .text(child.label);
-
-      headerNavGroup.append("path")
-        .attr("class", "link")
-        .attr("d", `M${navColX + 96},${sectionY} C${navSubX - 15},${sectionY} ${navSubX - 15},${yPos} ${navSubX - 4},${yPos}`)
-        .attr("stroke", THEME_COLORS['section-docs']).attr("stroke-width", 0.8)
-        .attr("stroke-dasharray", "2,2").attr("opacity", 0.3).attr("fill", "none");
-
-      const targetPath = child.href;
-      if (targetPath) {
-        const cleanPath = targetPath.replace(/\/$/, '') || '/';
-        const treeNode = pathToNode[cleanPath] || pathToNode[cleanPath + '/'];
-        if (treeNode) {
-          const tx = treeNode.y, ty = treeNode.x;
-          const sx = navSubX + (child.label || '').length * 5.5;
-          headerNavGroup.append("path")
-            .attr("class", "link")
-            .attr("d", `M${sx},${yPos} C${(sx+tx)/2},${yPos} ${(sx+tx)/2},${ty} ${tx-14},${ty}`)
-            .attr("stroke", THEME_COLORS['section-docs']).attr("stroke-width", 0.6)
-            .attr("stroke-dasharray", "4,3").attr("opacity", 0.2).attr("fill", "none");
-        }
+    children.forEach(child => {
+      const l1Name = getL1Name(child.href);
+      if (l1Name && l1Map[l1Name]) {
+        targetL1Map.set(l1Name, l1Map[l1Name]);
+        resolvedChildren.push({ label: child.label, href: child.href, l1Name, l1Node: l1Map[l1Name] });
+      } else {
+        resolvedChildren.push({ label: child.label, href: child.href, l1Name: null, l1Node: null });
       }
-
-      yPos += itemHeight;
     });
 
-    yPos += 6;
+    // Handle direct-link sections like Pricing
+    if (section.href && !children.length) {
+      const l1Name = getL1Name(section.href);
+      if (l1Name && l1Map[l1Name]) {
+        targetL1Map.set(l1Name, l1Map[l1Name]);
+      }
+    }
+
+    if (targetL1Map.size === 0 && resolvedChildren.length === 0) return;
+
+    const targetNodes = [...targetL1Map.values()];
+    let centerY;
+    if (targetNodes.length > 0) {
+      centerY = targetNodes.reduce((s, n) => s + n.x, 0) / targetNodes.length;
+    } else {
+      centerY = root.x;
+    }
+
+    sectionGroups.push({
+      section,
+      resolvedChildren,
+      targetNodes,
+      centerY,
+    });
   });
+
+  // Sort by vertical position
+  sectionGroups.sort((a, b) => a.centerY - b.centerY);
+
+  // Compute heights
+  const lineH = 16;
+  const headerH = 20;
+  const padBottom = 6;
+  sectionGroups.forEach(sg => {
+    sg.height = headerH + sg.resolvedChildren.length * lineH + padBottom;
+  });
+
+  // Resolve overlaps — push apart any overlapping groups
+  for (let i = 1; i < sectionGroups.length; i++) {
+    const prev = sectionGroups[i - 1];
+    const curr = sectionGroups[i];
+    const gap = 10;
+    const prevBottom = prev.centerY + prev.height / 2 + gap;
+    const currTop = curr.centerY - curr.height / 2;
+    if (currTop < prevBottom) {
+      curr.centerY = prevBottom + curr.height / 2;
+    }
+  }
+
+  return { sectionGroups, lineH, headerH, padBottom };
+}
+
+function renderNavLayer(group, navData, color, showFlag) {
+  group.selectAll("*").remove();
+  if (!showFlag) return;
+  if (!navData || !navData.length) return;
+
+  const rootY = root.y || 0;
+  const navX = rootY + 100; // horizontal position of nav cards
+  const cardW = 160;
+
+  const { sectionGroups, lineH, headerH, padBottom } = buildNavSectionGroups(navData, color);
+
+  sectionGroups.forEach(sg => {
+    const { section, resolvedChildren, targetNodes, centerY } = sg;
+    const topY = centerY - sg.height / 2;
+
+    // --- Card background ---
+    const card = group.append("g").attr("transform", `translate(${navX}, ${topY})`);
+    card.append("rect")
+      .attr("x", -8).attr("y", -4)
+      .attr("width", cardW).attr("height", sg.height)
+      .attr("rx", 5)
+      .attr("fill", color).attr("opacity", 0.07)
+      .attr("stroke", color).attr("stroke-width", 0.6).attr("stroke-opacity", 0.2);
+
+    // --- Section label ---
+    card.append("text")
+      .attr("x", 4).attr("y", headerH / 2)
+      .attr("font-size", "10px").attr("fill", color)
+      .attr("font-weight", "700").attr("dy", "0.3em")
+      .text(section.label);
+
+    // --- Children list ---
+    resolvedChildren.forEach((child, idx) => {
+      const cy = headerH + idx * lineH + lineH / 2;
+      card.append("text")
+        .attr("x", 12).attr("y", cy)
+        .attr("font-size", "8.5px").attr("fill", THEME_COLORS['text-muted'])
+        .attr("dy", "0.3em")
+        .text(child.label);
+    });
+
+    // --- Connector: root → card ---
+    const labelAbsY = topY + headerH / 2;
+    group.append("path")
+      .attr("d", `M${rootY + 8},${root.x} C${navX - 30},${root.x} ${navX - 30},${labelAbsY} ${navX - 8},${labelAbsY}`)
+      .attr("stroke", color).attr("stroke-width", 1)
+      .attr("stroke-dasharray", "4,3").attr("opacity", 0.3).attr("fill", "none");
+
+    // --- Connectors: card → target L1 tree nodes ---
+    targetNodes.forEach(tn => {
+      const sx = navX + cardW - 8;
+      const sy = topY + sg.height / 2;
+      const tx = tn.y - 14;
+      const ty = tn.x;
+      const midX = sx + (tx - sx) * 0.45;
+
+      group.append("path")
+        .attr("d", `M${sx},${sy} C${midX},${sy} ${midX},${ty} ${tx},${ty}`)
+        .attr("stroke", color).attr("stroke-width", 1)
+        .attr("stroke-dasharray", "4,3").attr("opacity", 0.3).attr("fill", "none");
+
+      // Small dot at the target end
+      group.append("circle")
+        .attr("cx", tx + 1).attr("cy", ty)
+        .attr("r", 2.5)
+        .attr("fill", color).attr("opacity", 0.5);
+    });
+  });
+}
+
+function updateHeaderNavLayer() {
+  renderNavLayer(headerNavGroup, DATA.header_nav, THEME_COLORS['section-docs'], showHeaderNav);
 }
 
 // ============================================================
 // FOOTER NAV LAYER
 // ============================================================
 function updateFooterNavLayer() {
-  footerNavGroup.selectAll("*").remove();
-  if (!showFooterNav) return;
-
-  const navData = DATA.footer_nav || [];
-  if (!navData.length) return;
-
-  const rootY = root.y || 0;
-  const navColX = rootY + 110;
-  const navSubX = rootY + 260;
-
-  // Offset below header nav if both are visible
-  let totalHeaderItems = 0;
-  if (showHeaderNav && DATA.header_nav) {
-    DATA.header_nav.forEach(s => { totalHeaderItems += 1 + (s.children || []).length; });
-    totalHeaderItems += DATA.header_nav.length; // gap between sections
-  }
-
-  let totalItems = 0;
-  navData.forEach(section => { totalItems += 1 + (section.children || []).length; });
-  const itemHeight = 22;
-  const headerOffset = showHeaderNav ? (totalHeaderItems * itemHeight) / 2 + 40 : 0;
-  const startY = root.x + headerOffset - (totalItems * itemHeight) / 2 + (showHeaderNav ? (totalItems * itemHeight) / 2 + 20 : 0);
-
-  let yPos = startY;
-
-  navData.forEach(section => {
-    const sg = footerNavGroup.append("g")
-      .attr("transform", `translate(${navColX}, ${yPos})`);
-
-    sg.append("rect")
-      .attr("x", -4).attr("y", -9).attr("width", 100).attr("height", 18)
-      .attr("rx", 3).attr("fill", THEME_COLORS['section-events']).attr("opacity", 0.15);
-
-    sg.append("text")
-      .attr("font-size", "10px").attr("fill", THEME_COLORS['section-events'])
-      .attr("font-weight", "600").attr("dy", "0.3em")
-      .text(section.label);
-
-    footerNavGroup.append("path")
-      .attr("class", "link")
-      .attr("d", `M${rootY + 8},${root.x} C${navColX - 30},${root.x} ${navColX - 30},${yPos} ${navColX - 4},${yPos}`)
-      .attr("stroke", THEME_COLORS['section-events']).attr("stroke-width", 1)
-      .attr("stroke-dasharray", "3,2").attr("opacity", 0.4).attr("fill", "none");
-
-    const sectionY = yPos;
-    yPos += itemHeight;
-
-    (section.children || []).forEach(child => {
-      const cg = footerNavGroup.append("g")
-        .attr("transform", `translate(${navSubX}, ${yPos})`);
-
-      cg.append("text")
-        .attr("font-size", "9px").attr("fill", THEME_COLORS['text-muted'])
-        .attr("dy", "0.3em")
-        .text(child.label);
-
-      footerNavGroup.append("path")
-        .attr("class", "link")
-        .attr("d", `M${navColX + 96},${sectionY} C${navSubX - 15},${sectionY} ${navSubX - 15},${yPos} ${navSubX - 4},${yPos}`)
-        .attr("stroke", THEME_COLORS['section-events']).attr("stroke-width", 0.8)
-        .attr("stroke-dasharray", "2,2").attr("opacity", 0.3).attr("fill", "none");
-
-      const targetPath = child.href;
-      if (targetPath) {
-        const cleanPath = targetPath.replace(/\/$/, '') || '/';
-        const treeNode = pathToNode[cleanPath] || pathToNode[cleanPath + '/'];
-        if (treeNode) {
-          const tx = treeNode.y, ty = treeNode.x;
-          const sx = navSubX + (child.label || '').length * 5.5;
-          footerNavGroup.append("path")
-            .attr("class", "link")
-            .attr("d", `M${sx},${yPos} C${(sx+tx)/2},${yPos} ${(sx+tx)/2},${ty} ${tx-14},${ty}`)
-            .attr("stroke", THEME_COLORS['section-events']).attr("stroke-width", 0.6)
-            .attr("stroke-dasharray", "4,3").attr("opacity", 0.2).attr("fill", "none");
-        }
-      }
-
-      yPos += itemHeight;
-    });
-
-    yPos += 6;
-  });
+  renderNavLayer(footerNavGroup, DATA.footer_nav, THEME_COLORS['section-events'], showFooterNav);
 }
 
 // ============================================================
