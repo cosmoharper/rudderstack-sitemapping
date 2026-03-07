@@ -213,6 +213,10 @@ class LinkExtractor(HTMLParser):
         self.nav_links = []
         self.in_nav = False
         self.nav_depth = 0
+        self.in_header = False
+        self.header_depth = 0
+        self.in_footer = False
+        self.footer_depth = 0
         self.tag_stack = []
 
     def handle_starttag(self, tag, attrs):
@@ -222,6 +226,12 @@ class LinkExtractor(HTMLParser):
         if tag == "nav":
             self.in_nav = True
             self.nav_depth += 1
+        if tag == "header":
+            self.in_header = True
+            self.header_depth += 1
+        if tag == "footer":
+            self.in_footer = True
+            self.footer_depth += 1
 
         if tag == "a":
             self.in_a = True
@@ -238,6 +248,16 @@ class LinkExtractor(HTMLParser):
             if self.nav_depth <= 0:
                 self.in_nav = False
                 self.nav_depth = 0
+        if tag == "header":
+            self.header_depth -= 1
+            if self.header_depth <= 0:
+                self.in_header = False
+                self.header_depth = 0
+        if tag == "footer":
+            self.footer_depth -= 1
+            if self.footer_depth <= 0:
+                self.in_footer = False
+                self.footer_depth = 0
 
         if tag == "a" and self.in_a:
             self.in_a = False
@@ -250,10 +270,19 @@ class LinkExtractor(HTMLParser):
 
             # Only track internal links
             if href and "rudderstack.com" in href:
+                # Determine page region
+                if self.in_header:
+                    location = "header"
+                elif self.in_footer:
+                    location = "footer"
+                else:
+                    location = "body"
+
                 link_info = {
                     "href": href.split("?")[0].split("#")[0],  # Clean URL
                     "text": link_text[:200] if link_text else "",
                     "is_nav": self.in_nav,
+                    "location": location,
                 }
                 self.links.append(link_info)
 
@@ -280,6 +309,7 @@ class LinkExtractor(HTMLParser):
                         "text": link_text[:200] if link_text else "",
                         "type": cta_type,
                         "classes": self.a_classes[:200],
+                        "location": location,
                     })
 
             self.a_href = None

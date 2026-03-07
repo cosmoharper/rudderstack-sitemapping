@@ -59,7 +59,7 @@ for url_obj in all_urls:
     if crawl and crawl["status"] == "ok":
         current["has_crawl_data"] = True
         current["ctas"] = [
-            {"text": c["text"], "href": c["href"], "type": c["type"]}
+            {"text": c["text"], "href": c["href"], "type": c["type"], "location": c.get("location", "body")}
             for c in crawl.get("ctas", [])
         ]
         current["link_count"] = crawl.get("link_count", 0)
@@ -101,14 +101,18 @@ def consolidate_ctas(node):
     by_text = defaultdict(list)
     for cta in all_ctas:
         text = cta.get("text", "(no text)").strip()
-        by_text[text].append(cta["href"])
+        by_text[text].append(cta)
 
     consolidated = []
-    for text, hrefs in sorted(by_text.items(), key=lambda x: -len(x[1])):
+    for text, ctas_list in sorted(by_text.items(), key=lambda x: -len(x[1])):
+        hrefs = [c["href"] for c in ctas_list]
         unique_hrefs = list(set(hrefs))
+        locations = [c.get("location", "body") for c in ctas_list]
+        body_count = sum(1 for loc in locations if loc == "body")
         entry = {
             "text": text,
-            "count": len(hrefs),  # total pages with this CTA text
+            "count": len(ctas_list),  # total pages with this CTA text
+            "body_count": body_count,
             "unique_targets": len(unique_hrefs),
         }
         if len(unique_hrefs) == 1:
@@ -196,13 +200,16 @@ for endpoint in CONVERSION_ENDPOINTS:
             href = cta["href"]
             if any(t in href for t in targets):
                 path = urlparse(source_url).path.rstrip("/") or "/"
+                location = cta.get("location", "body")
                 source_pages.append({
                     "path": path,
                     "cta_text": cta.get("text", ""),
+                    "location": location,
                 })
                 break  # one match per source page is enough
     endpoint["source_pages"] = source_pages
     endpoint["source_count"] = len(source_pages)
+    endpoint["body_source_count"] = sum(1 for sp in source_pages if sp.get("location") == "body")
 
 # Build link edges (only for crawled pages)
 edges = []
@@ -229,6 +236,7 @@ for source_url, data in crawl_results.items():
                 "text": link.get("text", "")[:80],
                 "is_nav": link.get("is_nav", False),
                 "is_cta": is_cta,
+                "location": link.get("location", "body"),
             })
 
 # ============================================================
@@ -351,6 +359,6 @@ print(f"\nTree nodes at root level: {len(tree['children'])}")
 print(f"Link edges: {len(edges)}")
 print(f"Conversion endpoints: {len(CONVERSION_ENDPOINTS)}")
 for ep in CONVERSION_ENDPOINTS:
-    print(f"  {ep['name']}: {ep['source_count']} source pages")
+    print(f"  {ep['name']}: {ep['source_count']} total ({ep['body_source_count']} body, {ep['source_count'] - ep['body_source_count']} nav)")
 print(f"Orphan pages: {len(orphan_paths)}")
 print(f"Data payload written to output/diagram_data.json")
