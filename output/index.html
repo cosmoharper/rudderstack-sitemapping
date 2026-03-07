@@ -240,6 +240,36 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Robo
 }
 #modal .modal-open-btn:hover { background: var(--c-brand-blue-dark); }
 
+/* CSV Export Button */
+.csv-export-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border: 1px solid var(--c-border-secondary); border-radius: 5px;
+  background: var(--c-bg-surface); color: var(--c-text-secondary); font-size: 11px; font-weight: 600;
+  cursor: pointer; transition: all 0.15s; font-family: 'Inter', sans-serif; white-space: nowrap;
+}
+.csv-export-btn:hover { border-color: var(--c-brand-blue); color: var(--c-brand-blue); background: var(--c-bg-body); }
+.csv-export-btn-sm { padding: 2px 6px; font-size: 10px; }
+
+/* Data Table in Modal */
+.data-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 8px; }
+.data-table thead { position: sticky; top: 0; z-index: 1; }
+.data-table th {
+  text-align: left; padding: 6px 10px; background: var(--c-bg-body); color: var(--c-text-muted);
+  font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--c-border-primary);
+}
+.data-table td {
+  padding: 4px 10px; border-bottom: 1px solid var(--c-border-primary); color: var(--c-text-secondary);
+  font-size: 11px; vertical-align: top; max-width: 240px; overflow: hidden; text-overflow: ellipsis;
+}
+.data-table tr:nth-child(even) td { background: var(--c-bg-body); }
+.data-table tr:hover td { background: var(--c-border-primary); }
+.data-table td a { color: var(--c-brand-blue-light); text-decoration: none; font-family: 'Inter', monospace; font-size: 10.5px; }
+.data-table td a:hover { text-decoration: underline; }
+.data-table td .cta-label { color: var(--c-brand-amber); font-size: 10px; }
+.data-table td .section-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+.data-table-wrap { max-height: 50vh; overflow-y: auto; border: 1px solid var(--c-border-primary); border-radius: 6px; }
+
 .node { cursor: pointer; }
 .node circle { transition: all 0.3s ease; }
 .node:hover circle { filter: brightness(1.3); }
@@ -1101,6 +1131,31 @@ document.getElementById("filter-badge").addEventListener("click", () => {
 });
 
 // ============================================================
+// CSV EXPORT UTILITY
+// ============================================================
+function downloadCSV(filename, headers, rows) {
+  const escape = (val) => {
+    const s = String(val == null ? '' : val);
+    if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+      return '"' + s.replace(/"/g, '""') + '"';
+    }
+    return s;
+  };
+  const csv = [headers.map(escape).join(',')]
+    .concat(rows.map(row => row.map(escape).join(',')))
+    .join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ============================================================
 // MODAL
 // ============================================================
 const modalOverlay = document.getElementById("modal-overlay");
@@ -1112,7 +1167,7 @@ function showConversionModal(endpoint) {
 
   let html = "";
 
-  // Meta tags
+  // Meta tags + export button
   html += `<div class="modal-meta">`;
   html += `<span class="modal-tag type">${endpoint.type}</span>`;
   html += `<span class="modal-tag count">${endpoint.source_count} source pages</span>`;
@@ -1122,6 +1177,7 @@ function showConversionModal(endpoint) {
   if (endpoint.form_id) {
     html += `<span class="modal-tag" style="background:${THEME_COLORS['bg-body']}; color:${THEME_COLORS['brand-blue-light']};">form_id: ${endpoint.form_id}</span>`;
   }
+  html += `<button class="csv-export-btn" id="modal-csv-export">⬇ Export CSV</button>`;
   html += `</div>`;
 
   // URL
@@ -1147,42 +1203,32 @@ function showConversionModal(endpoint) {
     html += `</div>`;
   }
 
-  // Source pages grouped by directory
+  // Source pages as table
   if (endpoint.source_pages && endpoint.source_pages.length > 0) {
     html += `<div class="modal-section"><h3>Source Pages (${endpoint.source_pages.length})</h3>`;
+    html += `<div class="data-table-wrap"><table class="data-table">`;
+    html += `<thead><tr><th>Source Page</th><th>CTA Text</th><th>Section</th></tr></thead><tbody>`;
 
-    // Group by first path segment
-    const groups = {};
-    endpoint.source_pages.forEach(sp => {
-      const parts = sp.path.replace(/^\//, "").split("/");
-      const dir = "/" + (parts[0] || "") + "/";
-      if (!groups[dir]) groups[dir] = [];
-      groups[dir].push(sp);
+    // Sort by section then path
+    const sorted = [...endpoint.source_pages].sort((a, b) => {
+      const sa = getSection(normalizePath(a.path));
+      const sb = getSection(normalizePath(b.path));
+      if (sa !== sb) return sa.localeCompare(sb);
+      return a.path.localeCompare(b.path);
     });
 
-    // Sort groups by count descending
-    const sortedGroups = Object.entries(groups).sort((a, b) => b[1].length - a[1].length);
-
-    sortedGroups.forEach(([dir, pages]) => {
-      html += `<div class="source-group">`;
-      html += `<div class="source-group-header">${dir} <span style="color:${THEME_COLORS['brand-blue-light']}; font-weight:400;">(${pages.length} page${pages.length > 1 ? "s" : ""})</span></div>`;
-
-      // If many pages in directory, show summary + first few
-      const showLimit = pages.length > 6 ? 4 : pages.length;
-      pages.slice(0, showLimit).forEach(sp => {
-        const pageUrl = "https://www.rudderstack.com" + sp.path;
-        html += `<div class="source-page">`;
-        html += `<a href="${pageUrl}" target="_blank">${sp.path}</a>`;
-        if (sp.cta_text) html += `<span class="cta-label">"${sp.cta_text}"</span>`;
-        html += `</div>`;
-      });
-      if (pages.length > showLimit) {
-        html += `<div style="font-size:10px; color:${THEME_COLORS['text-dim']}; margin-top:2px; padding-left:4px;">...and ${pages.length - showLimit} more in ${dir}</div>`;
-      }
-      html += `</div>`;
+    sorted.forEach(sp => {
+      const pageUrl = "https://www.rudderstack.com" + sp.path;
+      const sec = getSection(normalizePath(sp.path));
+      const secColor = THEME_COLORS['section-' + sec] || THEME_COLORS['section-other'];
+      html += `<tr>`;
+      html += `<td><a href="${pageUrl}" target="_blank">${sp.path}</a></td>`;
+      html += `<td>${sp.cta_text ? `<span class="cta-label">"${sp.cta_text}"</span>` : ''}</td>`;
+      html += `<td><span class="section-dot" style="background:${secColor}"></span>${SECTION_NAMES[sec] || sec}</td>`;
+      html += `</tr>`;
     });
 
-    html += `</div>`;
+    html += `</tbody></table></div></div>`;
   }
 
   // Open button
@@ -1190,6 +1236,16 @@ function showConversionModal(endpoint) {
 
   document.getElementById("modal-body").innerHTML = html;
   modalOverlay.classList.add("visible");
+
+  // Wire up CSV export
+  document.getElementById("modal-csv-export").addEventListener("click", () => {
+    const rows = (endpoint.source_pages || []).map(sp => {
+      const sec = getSection(normalizePath(sp.path));
+      return [sp.path, sp.cta_text || '', SECTION_NAMES[sec] || sec, 'https://www.rudderstack.com' + sp.path];
+    });
+    const safeName = endpoint.name.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+    downloadCSV(safeName + '_source_pages.csv', ['source_page', 'cta_text', 'section', 'full_url'], rows);
+  });
 }
 
 function closeModal() {
@@ -1257,7 +1313,9 @@ function showTooltip(event, d) {
     const inbound = inboundMap[d.data.path] || [];
     const nonNavInbound = inbound.filter(e => !e.is_nav);
     html += `<div class="context-section inbound-section">`;
-    html += `<div class="context-section-title">⬅ Inbound Links (${nonNavInbound.length})</div>`;
+    html += `<div class="context-section-title">⬅ Inbound Links (${nonNavInbound.length})`;
+    if (nonNavInbound.length > 0) html += ` <button class="csv-export-btn csv-export-btn-sm" data-export="inbound" data-path="${d.data.path}">⬇ CSV</button>`;
+    html += `</div>`;
     if (nonNavInbound.length > 0) {
       // Group by source section for a summary
       const bySrcSection = {};
@@ -1305,7 +1363,9 @@ function showTooltip(event, d) {
     const xIn = inbound.filter(e => getSection(e.source) !== thisSection);
 
     html += `<div class="context-section xsection-section">`;
-    html += `<div class="context-section-title">↔ Cross-Section Links</div>`;
+    html += `<div class="context-section-title">↔ Cross-Section Links`;
+    if (xOut.length > 0 || xIn.length > 0) html += ` <button class="csv-export-btn csv-export-btn-sm" data-export="xsection" data-path="${d.data.path}">⬇ CSV</button>`;
+    html += `</div>`;
     html += `<div class="context-item"><span class="link-source">Section: <span class="xsection-dot-inline" style="background:${thisColor}"></span><strong>${SECTION_NAMES[thisSection] || thisSection}</strong></span></div>`;
 
     if (xOut.length > 0) {
@@ -1399,8 +1459,37 @@ function cancelHideTooltip() { if (_tooltipHideTimer) { clearTimeout(_tooltipHid
 tooltip.addEventListener("mouseenter", cancelHideTooltip);
 tooltip.addEventListener("mouseleave", () => { tooltip.style.display = "none"; });
 
-// Handle link clicks inside tooltip — use event delegation for robustness
+// Handle link clicks and CSV export inside tooltip — event delegation
 tooltip.addEventListener("click", (e) => {
+  // CSV export buttons
+  const exportBtn = e.target.closest("[data-export]");
+  if (exportBtn) {
+    e.preventDefault();
+    e.stopPropagation();
+    const exportType = exportBtn.dataset.export;
+    const path = exportBtn.dataset.path;
+    const nodeName = path.replace(/^\//, '').replace(/\/$/, '').replace(/\//g, '_') || 'root';
+
+    if (exportType === 'inbound') {
+      const inbound = (inboundMap[path] || []).filter(e => !e.is_nav);
+      const rows = inbound.map(e => [
+        e.source, e.text || '', e.is_cta ? 'yes' : 'no', e.is_nav ? 'yes' : 'no',
+        SECTION_NAMES[getSection(e.source)] || getSection(e.source)
+      ]);
+      downloadCSV(nodeName + '_inbound_links.csv', ['source_page', 'anchor_text', 'is_cta', 'is_nav', 'source_section'], rows);
+    } else if (exportType === 'xsection') {
+      const thisSection = getSection(path);
+      const outbound = (outboundMap[path] || []).filter(e => getSection(e.target) !== thisSection);
+      const inbound = (inboundMap[path] || []).filter(e => getSection(e.source) !== thisSection);
+      const rows = [];
+      outbound.forEach(e => rows.push(['outbound', e.target, e.text || '', SECTION_NAMES[getSection(e.target)] || getSection(e.target), e.is_cta ? 'yes' : 'no']));
+      inbound.forEach(e => rows.push(['inbound', e.source, e.text || '', SECTION_NAMES[getSection(e.source)] || getSection(e.source), e.is_cta ? 'yes' : 'no']));
+      downloadCSV(nodeName + '_cross_section_links.csv', ['direction', 'page', 'anchor_text', 'section', 'is_cta'], rows);
+    }
+    return;
+  }
+
+  // Link clicks
   const link = e.target.closest("a[href]");
   if (link) {
     e.preventDefault();
