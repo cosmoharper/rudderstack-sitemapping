@@ -160,7 +160,7 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Robo
   position: fixed; z-index: 200; pointer-events: auto; display: none;
   background: var(--c-bg-tooltip); backdrop-filter: blur(10px);
   border: 1px solid var(--c-border-secondary); border-radius: 8px; padding: 14px 18px;
-  max-width: 480px; font-size: 12px; line-height: 1.5;
+  max-width: 480px; max-height: 70vh; overflow-y: auto; font-size: 12px; line-height: 1.5;
   box-shadow: 0 8px 30px var(--c-shadow-medium);
 }
 #tooltip h4 { color: var(--c-brand-blue); font-size: 14px; margin-bottom: 6px; word-break: break-all; }
@@ -176,6 +176,24 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Robo
 #tooltip .conversion-info { margin-top: 8px; padding: 6px 8px; background: var(--c-bg-surface); border-left: 3px solid var(--c-brand-blue); border-radius: 0 4px 4px 0; }
 #tooltip .form-fields { color: var(--c-brand-blue-light); font-size: 11px; }
 #tooltip .tracking-event { color: var(--c-brand-green); font-size: 11px; }
+#tooltip .context-section { margin-top: 8px; }
+#tooltip .context-section-title { font-weight: 600; font-size: 11px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+#tooltip .inbound-section .context-section-title { color: var(--c-brand-amber); }
+#tooltip .xsection-section .context-section-title { color: var(--c-section-integrations); }
+#tooltip .orphan-section .context-section-title { color: var(--c-section-competitors); }
+#tooltip .context-item { background: var(--c-bg-surface); padding: 3px 8px; margin: 2px 0; border-radius: 0 4px 4px 0; font-size: 11px; line-height: 1.4; }
+#tooltip .inbound-section .context-item { border-left: 3px solid var(--c-brand-amber); }
+#tooltip .xsection-section .context-item { border-left: 3px solid var(--c-section-integrations); }
+#tooltip .orphan-section .context-item { border-left: 3px solid var(--c-section-competitors); }
+#tooltip .context-item .link-source { color: var(--c-text-secondary); }
+#tooltip .context-item .link-text { color: var(--c-text-dim); font-size: 10px; }
+#tooltip .context-item .link-tag { font-size: 9px; font-weight: 600; padding: 0 4px; border-radius: 3px; margin-left: 4px; }
+#tooltip .context-item .link-tag-cta { background: var(--c-brand-amber); color: var(--c-bg-body); }
+#tooltip .context-item .link-tag-nav { background: var(--c-brand-blue-light); color: var(--c-bg-body); }
+#tooltip .context-summary { color: var(--c-text-muted); font-size: 10px; margin-top: 4px; }
+#tooltip .xsection-dot-inline { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 3px; vertical-align: middle; }
+#tooltip .orphan-warning { color: var(--c-section-competitors); font-weight: 600; }
+#tooltip .orphan-ok { color: var(--c-brand-green); }
 
 /* Modal */
 #modal-overlay {
@@ -284,8 +302,8 @@ body, #controls, #legend, #tooltip, #modal, .toggle-btn, .theme-toggle button, .
   </div>
   <input id="search-box" type="text" placeholder="Search pages... (e.g. 'product', 'blog')">
   <button class="toggle-btn active" id="btn-tree">Tree Links<span class="btn-tip tip-right">Toggle the parent&#8211;child tree lines that show the URL hierarchy. These are the solid grey lines connecting nodes.</span></button>
-  <button class="toggle-btn" id="btn-header-nav">Header Nav<span class="btn-tip">Show the website header navigation structure &#8212; menu items and dropdown hierarchy. Reveals how the site&#8217;s information architecture is organized for users.</span></button>
-  <button class="toggle-btn" id="btn-footer-nav">Footer Nav<span class="btn-tip">Show the website footer navigation links organized by category. Footers often expose different pages like legal, careers, and alternative content paths.</span></button>
+  <button class="toggle-btn" id="btn-header-nav" style="display:none">Header Nav</button>
+  <button class="toggle-btn" id="btn-footer-nav" style="display:none">Footer Nav</button>
   <button class="toggle-btn" id="btn-inbound">Inbound Links<span class="btn-tip tip-left">Show a count badge on each node indicating how many other pages link to it. Higher counts = more important/connected pages.</span></button>
   <button class="toggle-btn" id="btn-orphans">Orphans<span class="btn-tip tip-left">Highlight pages with zero inbound internal links from crawled pages. These are potential SEO dead ends &#8212; they exist in the sitemap but no crawled page links to them.</span></button>
   <button class="toggle-btn" id="btn-xsection">Cross-Links<span class="btn-tip tip-left">Show a summary of how content sections link to each other (e.g. Blog&#8594;Product: 87 links). More useful than individual link lines.</span></button>
@@ -459,6 +477,33 @@ function updatePathLookup() {
     pathToNode[d.data.path] = d;
   });
 }
+
+// ============================================================
+// EDGE LOOKUP MAPS (pre-built for O(1) tooltip lookups)
+// ============================================================
+const inboundMap = {};   // target path → array of edge objects pointing TO this node
+const outboundMap = {};  // source path → array of edge objects going FROM this node
+
+function normalizePath(p) {
+  // Node paths always end with '/', edge paths usually don't — normalize to trailing slash
+  if (!p) return '/';
+  return p.endsWith('/') ? p : p + '/';
+}
+
+(DATA.edges || []).forEach(edge => {
+  const src = normalizePath(edge.source);
+  const tgt = normalizePath(edge.target);
+  if (!inboundMap[tgt]) inboundMap[tgt] = [];
+  inboundMap[tgt].push({ source: src, target: tgt, text: edge.text, is_nav: edge.is_nav, is_cta: edge.is_cta });
+  if (!outboundMap[src]) outboundMap[src] = [];
+  outboundMap[src].push({ source: src, target: tgt, text: edge.text, is_nav: edge.is_nav, is_cta: edge.is_cta });
+});
+
+const SECTION_NAMES = {
+  product: "Product", docs: "Docs", blog: "Blog", learn: "Learn",
+  customers: "Customers", competitors: "Competitors", integrations: "Integrations",
+  events: "Events", core: "Core", other: "Other"
+};
 
 // ============================================================
 // ZOOM TO FIT
@@ -874,18 +919,12 @@ function updateCrossSectionPanel() {
   panel.style.display = "";
   const flows = (DATA.cross_section_flows || []).slice(0, 15);
 
-  const sectionNames = {
-    product: "Product", docs: "Docs", blog: "Blog", learn: "Learn",
-    customers: "Customers", competitors: "Competitors", integrations: "Integrations",
-    events: "Events", core: "Core", other: "Other"
-  };
-
   let html = "";
   flows.forEach(flow => {
     const srcColor = THEME_COLORS["section-" + flow.source] || THEME_COLORS["section-other"];
     const tgtColor = THEME_COLORS["section-" + flow.target] || THEME_COLORS["section-other"];
-    const srcName = sectionNames[flow.source] || flow.source;
-    const tgtName = sectionNames[flow.target] || flow.target;
+    const srcName = SECTION_NAMES[flow.source] || flow.source;
+    const tgtName = SECTION_NAMES[flow.target] || flow.target;
 
     html += `<div class="xsection-row">
       <div class="xsection-flow">
@@ -1169,7 +1208,8 @@ const tooltip = document.getElementById("tooltip");
 function positionTooltipNearNode(event) {
   const x = event.clientX + 12;
   const y = event.clientY - 20;
-  const tw = 480, th = 300;
+  const tw = 480;
+  const th = Math.min(tooltip.offsetHeight || 300, window.innerHeight * 0.7);
   tooltip.style.left = (x + tw > window.innerWidth ? event.clientX - tw - 12 : x) + "px";
   tooltip.style.top = (y + th > window.innerHeight ? Math.max(4, event.clientY - th) : Math.max(4, y)) + "px";
 }
@@ -1209,6 +1249,112 @@ function showTooltip(event, d) {
     d.data.ctas.forEach(cta => {
       html += `<div class="cta-item"><span class="cta-text">${cta.text || "(no text)"}</span><br><span class="cta-target">&rarr; ${cta.href}</span></div>`;
     });
+    html += `</div>`;
+  }
+
+  // ---- CONTEXTUAL: INBOUND LINKS ----
+  if (showInbound) {
+    const inbound = inboundMap[d.data.path] || [];
+    const nonNavInbound = inbound.filter(e => !e.is_nav);
+    html += `<div class="context-section inbound-section">`;
+    html += `<div class="context-section-title">⬅ Inbound Links (${nonNavInbound.length})</div>`;
+    if (nonNavInbound.length > 0) {
+      // Group by source section for a summary
+      const bySrcSection = {};
+      nonNavInbound.forEach(e => {
+        const sec = getSection(e.source);
+        if (!bySrcSection[sec]) bySrcSection[sec] = [];
+        bySrcSection[sec].push(e);
+      });
+      const sectionSummary = Object.entries(bySrcSection)
+        .sort((a, b) => b[1].length - a[1].length)
+        .map(([sec, edges]) => {
+          const color = THEME_COLORS['section-' + sec] || THEME_COLORS['section-other'];
+          return `<span class="xsection-dot-inline" style="background:${color}"></span>${SECTION_NAMES[sec] || sec} (${edges.length})`;
+        }).join(' &nbsp; ');
+      html += `<div class="context-summary">${sectionSummary}</div>`;
+      // Show top individual links
+      const maxLinks = 8;
+      nonNavInbound.slice(0, maxLinks).forEach(e => {
+        const tags = [];
+        if (e.is_cta) tags.push('<span class="link-tag link-tag-cta">CTA</span>');
+        if (e.is_nav) tags.push('<span class="link-tag link-tag-nav">NAV</span>');
+        const truncText = e.text ? (e.text.length > 50 ? e.text.substring(0, 50) + '…' : e.text) : '';
+        html += `<div class="context-item"><span class="link-source">${e.source}</span>${tags.join('')}`;
+        if (truncText) html += `<br><span class="link-text">"${truncText}"</span>`;
+        html += `</div>`;
+      });
+      if (nonNavInbound.length > maxLinks) {
+        html += `<div class="context-summary">...and ${nonNavInbound.length - maxLinks} more inbound links</div>`;
+      }
+    } else {
+      html += `<div class="context-summary">No non-nav inbound links found</div>`;
+    }
+    html += `</div>`;
+  }
+
+  // ---- CONTEXTUAL: CROSS-SECTION LINKS ----
+  if (showCrossSection) {
+    const thisSection = getSection(d.data.path);
+    const thisColor = THEME_COLORS['section-' + thisSection] || THEME_COLORS['section-other'];
+    const outbound = outboundMap[d.data.path] || [];
+    const inbound = inboundMap[d.data.path] || [];
+
+    // Cross-section outbound: links FROM this page TO pages in different sections
+    const xOut = outbound.filter(e => getSection(e.target) !== thisSection);
+    const xIn = inbound.filter(e => getSection(e.source) !== thisSection);
+
+    html += `<div class="context-section xsection-section">`;
+    html += `<div class="context-section-title">↔ Cross-Section Links</div>`;
+    html += `<div class="context-item"><span class="link-source">Section: <span class="xsection-dot-inline" style="background:${thisColor}"></span><strong>${SECTION_NAMES[thisSection] || thisSection}</strong></span></div>`;
+
+    if (xOut.length > 0) {
+      const byTargetSec = {};
+      xOut.forEach(e => {
+        const sec = getSection(e.target);
+        if (!byTargetSec[sec]) byTargetSec[sec] = 0;
+        byTargetSec[sec]++;
+      });
+      html += `<div style="margin-top:4px; font-size:11px; color:${THEME_COLORS['text-secondary']}"><strong>Links out</strong> (${xOut.length}):</div>`;
+      Object.entries(byTargetSec).sort((a,b) => b[1] - a[1]).slice(0, 6).forEach(([sec, count]) => {
+        const color = THEME_COLORS['section-' + sec] || THEME_COLORS['section-other'];
+        html += `<div class="context-item"><span class="xsection-dot-inline" style="background:${color}"></span>${SECTION_NAMES[sec] || sec}: ${count} link${count > 1 ? 's' : ''}</div>`;
+      });
+    }
+
+    if (xIn.length > 0) {
+      const bySrcSec = {};
+      xIn.forEach(e => {
+        const sec = getSection(e.source);
+        if (!bySrcSec[sec]) bySrcSec[sec] = 0;
+        bySrcSec[sec]++;
+      });
+      html += `<div style="margin-top:4px; font-size:11px; color:${THEME_COLORS['text-secondary']}"><strong>Links in</strong> (${xIn.length}):</div>`;
+      Object.entries(bySrcSec).sort((a,b) => b[1] - a[1]).slice(0, 6).forEach(([sec, count]) => {
+        const color = THEME_COLORS['section-' + sec] || THEME_COLORS['section-other'];
+        html += `<div class="context-item"><span class="xsection-dot-inline" style="background:${color}"></span>${SECTION_NAMES[sec] || sec}: ${count} link${count > 1 ? 's' : ''}</div>`;
+      });
+    }
+
+    if (xOut.length === 0 && xIn.length === 0) {
+      html += `<div class="context-summary">No cross-section links for this page</div>`;
+    }
+    html += `</div>`;
+  }
+
+  // ---- CONTEXTUAL: ORPHAN STATUS ----
+  if (showOrphans) {
+    const inbound = inboundMap[d.data.path] || [];
+    const nonNavInbound = inbound.filter(e => !e.is_nav);
+    html += `<div class="context-section orphan-section">`;
+    if (d.data.is_orphan) {
+      html += `<div class="context-section-title">⚠ Orphan Page</div>`;
+      html += `<div class="context-item"><span class="orphan-warning">This page has no non-nav inbound links.</span><br>`;
+      html += `<span class="link-text">It is only reachable through navigation menus or direct URL, not linked from any content page.</span></div>`;
+    } else {
+      html += `<div class="context-section-title">✓ Connected Page</div>`;
+      html += `<div class="context-item"><span class="orphan-ok">${nonNavInbound.length} inbound link${nonNavInbound.length !== 1 ? 's' : ''}</span> from content pages</div>`;
+    }
     html += `</div>`;
   }
 
