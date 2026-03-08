@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RudderStack.com Internal Linking Analysis</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+  (function(){var p=localStorage.getItem('theme-preference')||'dark';var t=p==='system'?(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):p;document.documentElement.setAttribute('data-theme',t)})();
+</script>
+<style>
+:root, [data-theme="dark"] {
+  --c-bg-body: #1a1e27; --c-bg-surface: #252a35; --c-bg-surface-hover: #2d3340;
+  --c-bg-controls: rgba(26,30,39,0.97); --c-bg-tooltip: rgba(30,34,44,0.98);
+  --c-text-primary: #e0e0e0; --c-text-secondary: #ccc; --c-text-muted: #888;
+  --c-text-dim: #666; --c-text-faint: #555; --c-text-white: #fff; --c-text-on-surface: #fff;
+  --c-border-primary: #313845; --c-border-secondary: #3d4451;
+  --c-brand-blue: #1063e2; --c-brand-blue-dark: #0b56c6; --c-brand-blue-light: #76acf7;
+  --c-brand-amber: #f59e0b; --c-brand-green: #22c55e; --c-brand-red: #ef4444;
+  --c-brand-blue-shadow: rgba(16,99,226,0.4);
+  --c-logo-text: #ffffff;
+  --c-shadow-light: rgba(0,0,0,0.4); --c-shadow-medium: rgba(0,0,0,0.5);
+  --c-modal-overlay: rgba(0,0,0,0.6);
+  --c-section-product: #3b82f6; --c-section-docs: #14b8a6; --c-section-blog: #a855f7;
+  --c-section-learn: #22c55e; --c-section-customers: #f59e0b; --c-section-competitors: #ef4444;
+  --c-section-integrations: #6366f1; --c-section-events: #ec4899;
+  --c-section-core: #e2e8f0; --c-section-other: #6b7280;
+  --c-heatmap-0: #252a35; --c-heatmap-1: #1a3a5c; --c-heatmap-2: #1a4f7a; --c-heatmap-3: #1063e2;
+}
+[data-theme="light"] {
+  --c-bg-body: #f5f6f8; --c-bg-surface: #ffffff; --c-bg-surface-hover: #f0f1f3;
+  --c-bg-controls: rgba(245,246,248,0.97); --c-bg-tooltip: rgba(255,255,255,0.98);
+  --c-text-primary: #1a1e27; --c-text-secondary: #555; --c-text-muted: #777;
+  --c-text-dim: #999; --c-text-faint: #aaa; --c-text-white: #fff; --c-text-on-surface: #1a1e27;
+  --c-border-primary: #dde1e8; --c-border-secondary: #c8cdd6;
+  --c-brand-blue: #1063e2; --c-brand-blue-dark: #0b56c6; --c-brand-blue-light: #4a8fe8;
+  --c-brand-amber: #d97706; --c-brand-green: #16a34a; --c-brand-red: #dc2626;
+  --c-brand-blue-shadow: rgba(16,99,226,0.25);
+  --c-logo-text: #1a1e27;
+  --c-shadow-light: rgba(0,0,0,0.08); --c-shadow-medium: rgba(0,0,0,0.12);
+  --c-modal-overlay: rgba(0,0,0,0.3);
+  --c-section-product: #2563eb; --c-section-docs: #0d9488; --c-section-blog: #9333ea;
+  --c-section-learn: #16a34a; --c-section-customers: #d97706; --c-section-competitors: #dc2626;
+  --c-section-integrations: #4f46e5; --c-section-events: #db2777;
+  --c-section-core: #334155; --c-section-other: #9ca3af;
+  --c-heatmap-0: #f0f1f3; --c-heatmap-1: #c4dbf0; --c-heatmap-2: #7db5f0; --c-heatmap-3: #1063e2;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--c-bg-body); color: var(--c-text-primary); min-height: 100vh; }
+
+/* Header */
+#header {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--c-bg-controls); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--c-border-primary); padding: 12px 24px;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+#header .logo-area { display: flex; align-items: center; gap: 10px; }
+#header .logo-area svg { color: var(--c-logo-text); }
+#header .logo-area .page-label { font-size: 14px; font-weight: 600; color: var(--c-brand-blue-light); letter-spacing: -0.3px; }
+#header .nav-links { display: flex; gap: 4px; }
+#header .nav-links a {
+  padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; text-decoration: none;
+  color: var(--c-text-muted); transition: all 0.15s;
+}
+#header .nav-links a:hover { color: var(--c-text-primary); background: var(--c-bg-surface-hover); }
+#header .nav-links a.active { color: var(--c-text-white); background: var(--c-brand-blue); }
+.theme-toggle {
+  display: flex; border: 1px solid var(--c-border-secondary); border-radius: 6px; overflow: hidden; margin-left: auto;
+}
+.theme-toggle button {
+  padding: 5px 8px; border: none; background: var(--c-bg-surface); color: var(--c-text-secondary);
+  font-size: 13px; cursor: pointer; transition: all 0.15s; line-height: 1;
+}
+.theme-toggle button:hover { background: var(--c-bg-surface-hover); }
+.theme-toggle button.active { background: var(--c-brand-blue); color: var(--c-text-white); }
+
+/* Main content */
+#content { padding: 24px; max-width: 1400px; margin: 0 auto; }
+
+/* Stats cards row */
+.stats-row {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;
+  margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--c-bg-surface); border: 1px solid var(--c-border-primary); border-radius: 10px;
+  padding: 16px; text-align: center;
+}
+.stat-card .stat-value { font-size: 28px; font-weight: 700; color: var(--c-brand-blue-light); }
+.stat-card .stat-label { font-size: 11px; color: var(--c-text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+
+/* Panel grid */
+.panel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.panel-grid.full-width { grid-template-columns: 1fr; }
+.panel {
+  background: var(--c-bg-surface); border: 1px solid var(--c-border-primary); border-radius: 10px;
+  padding: 20px; overflow: hidden;
+}
+.panel-title {
+  font-size: 14px; font-weight: 600; color: var(--c-text-primary);
+  margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+}
+.panel-title .subtitle { font-size: 11px; font-weight: 400; color: var(--c-text-muted); }
+
+/* Section stats table */
+.section-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.section-table th {
+  text-align: left; padding: 8px 10px; font-weight: 600; font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.5px; color: var(--c-text-muted);
+  border-bottom: 1px solid var(--c-border-primary);
+}
+.section-table th.num { text-align: right; }
+.section-table td { padding: 7px 10px; border-bottom: 1px solid var(--c-border-primary); }
+.section-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.section-table tr:hover { background: var(--c-bg-surface-hover); }
+.section-dot {
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px;
+  vertical-align: middle;
+}
+
+/* Heatmap */
+.heatmap-container { overflow-x: auto; }
+.heatmap-container svg text { font-family: 'Inter', sans-serif; }
+
+/* Bar chart */
+.bar-chart-container { overflow-x: auto; }
+.bar-chart-container svg text { font-family: 'Inter', sans-serif; }
+
+/* Distribution chart */
+.dist-chart-container svg text { font-family: 'Inter', sans-serif; }
+
+/* Top pages table */
+.pages-table-container { max-height: 500px; overflow-y: auto; }
+.pages-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.pages-table thead { position: sticky; top: 0; background: var(--c-bg-surface); z-index: 1; }
+.pages-table th {
+  text-align: left; padding: 8px 10px; font-weight: 600; font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.5px; color: var(--c-text-muted);
+  border-bottom: 2px solid var(--c-border-primary); cursor: pointer; user-select: none;
+  white-space: nowrap;
+}
+.pages-table th.num { text-align: right; }
+.pages-table th:hover { color: var(--c-text-primary); }
+.pages-table th .sort-arrow { font-size: 10px; margin-left: 3px; opacity: 0.3; }
+.pages-table th.sorted .sort-arrow { opacity: 1; color: var(--c-brand-blue-light); }
+.pages-table td { padding: 6px 10px; border-bottom: 1px solid var(--c-border-primary); }
+.pages-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.pages-table td.path { max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
+.pages-table tr:hover { background: var(--c-bg-surface-hover); }
+.pages-table .section-tag {
+  display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 9px;
+  font-weight: 600; text-transform: uppercase; color: var(--c-text-white);
+}
+.pages-table .orphan-tag {
+  display: inline-block; padding: 1px 5px; border-radius: 3px; font-size: 9px;
+  font-weight: 600; background: var(--c-brand-red); color: var(--c-text-white); margin-left: 4px;
+}
+
+/* Filter tabs */
+.filter-tabs { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
+.filter-tab {
+  padding: 4px 10px; border-radius: 5px; font-size: 11px; font-weight: 500;
+  cursor: pointer; border: 1px solid var(--c-border-secondary); color: var(--c-text-muted);
+  background: transparent; transition: all 0.15s; font-family: 'Inter', sans-serif;
+}
+.filter-tab:hover { color: var(--c-text-primary); border-color: var(--c-brand-blue); }
+.filter-tab.active { background: var(--c-brand-blue); color: var(--c-text-white); border-color: var(--c-brand-blue); }
+.filter-tab .tab-count { font-weight: 400; opacity: 0.7; margin-left: 3px; }
+
+/* Toggle */
+.toggle-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.toggle-label { font-size: 11px; color: var(--c-text-muted); cursor: pointer; display: flex; align-items: center; gap: 5px; }
+
+/* Orphan list */
+.orphan-section { margin-bottom: 16px; }
+.orphan-section-header {
+  font-size: 12px; font-weight: 600; color: var(--c-text-primary); margin-bottom: 6px;
+  display: flex; align-items: center; gap: 6px; cursor: pointer;
+}
+.orphan-section-header .count { font-weight: 400; color: var(--c-text-muted); }
+.orphan-section-header .toggle-icon { font-size: 10px; color: var(--c-text-dim); transition: transform 0.15s; }
+.orphan-section-header.collapsed .toggle-icon { transform: rotate(-90deg); }
+.orphan-paths { padding-left: 18px; }
+.orphan-paths a {
+  display: block; font-size: 11px; color: var(--c-text-muted); text-decoration: none;
+  padding: 2px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.orphan-paths a:hover { color: var(--c-brand-blue-light); }
+.orphan-more { font-size: 11px; color: var(--c-text-dim); padding: 2px 0 2px 18px; font-style: italic; }
+
+/* CSV export button */
+.export-btn {
+  padding: 5px 12px; border: 1px solid var(--c-border-secondary); border-radius: 6px;
+  background: var(--c-bg-surface); color: var(--c-text-secondary); font-size: 11px; cursor: pointer;
+  font-family: 'Inter', sans-serif; transition: all 0.15s;
+}
+.export-btn:hover { border-color: var(--c-brand-blue); color: var(--c-text-primary); }
+
+/* Tooltip */
+.matrix-tooltip {
+  position: fixed; z-index: 200; display: none;
+  background: var(--c-bg-tooltip); border: 1px solid var(--c-border-secondary);
+  border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--c-text-primary);
+  box-shadow: 0 8px 24px var(--c-shadow-medium); pointer-events: none; max-width: 300px;
+}
+.matrix-tooltip .tt-label { font-weight: 600; margin-bottom: 4px; }
+.matrix-tooltip .tt-value { color: var(--c-text-muted); }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div class="logo-area">
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+      <rect width="32" height="32" rx="6" fill="currentColor" fill-opacity="0.1"/>
+      <path d="M8 12 L16 8 L24 12 L16 16Z" fill="currentColor" opacity="0.7"/>
+      <path d="M8 12 L16 16 L16 24 L8 20Z" fill="currentColor" opacity="0.5"/>
+      <path d="M24 12 L16 16 L16 24 L24 20Z" fill="currentColor" opacity="0.3"/>
+    </svg>
+    <span class="page-label">Internal Linking</span>
+  </div>
+  <div class="nav-links">
+    <a href="index.html">Site Map</a>
+    <a href="links.html" class="active">Internal Links</a>
+  </div>
+  <div class="theme-toggle">
+    <button onclick="setTheme('light')" title="Light">&#9788;</button>
+    <button onclick="setTheme('dark')" title="Dark">&#9790;</button>
+    <button onclick="setTheme('system')" title="System">&#9881;</button>
+  </div>
+</div>
+
+<div id="content">
+  <!-- Stats row -->
+  <div class="stats-row" id="stats-row"></div>
+
+  <!-- Section stats + heatmap -->
+  <div class="panel-grid">
+    <div class="panel">
+      <div class="panel-title">Section Overview</div>
+      <div id="section-table-container"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Cross-Section Link Matrix <span class="subtitle" id="matrix-subtitle">(body links only)</span></div>
+      <div class="toggle-row">
+        <label class="toggle-label"><input type="checkbox" id="matrix-include-nav"> Include nav links</label>
+      </div>
+      <div class="heatmap-container" id="heatmap-container"></div>
+    </div>
+  </div>
+
+  <!-- Distribution + orphans -->
+  <div class="panel-grid">
+    <div class="panel">
+      <div class="panel-title">Inbound Link Distribution</div>
+      <div class="dist-chart-container" id="dist-chart"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Orphan Pages <span class="subtitle" id="orphan-subtitle"></span></div>
+      <div id="orphan-container" style="max-height: 400px; overflow-y: auto;"></div>
+    </div>
+  </div>
+
+  <!-- Top pages table -->
+  <div class="panel-grid full-width">
+    <div class="panel">
+      <div class="panel-title" style="justify-content: space-between;">
+        <span>All Pages</span>
+        <button class="export-btn" id="export-pages-btn">Export CSV</button>
+      </div>
+      <div class="filter-tabs" id="section-filter-tabs"></div>
+      <div class="toggle-row">
+        <label class="toggle-label"><input type="checkbox" id="hide-uncrawled"> Hide uncrawled pages</label>
+        <label class="toggle-label" style="margin-left: 12px;"><input type="checkbox" id="orphans-only"> Orphans only</label>
+      </div>
+      <div class="pages-table-container" id="pages-table-container"></div>
+    </div>
+  </div>
+</div>
+
+<div class="matrix-tooltip" id="matrix-tooltip"></div>
+
+<script>
+// Theme
+function setTheme(pref) {
+  localStorage.setItem('theme-preference', pref);
+  const resolved = pref === 'system'
+    ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+    : pref;
+  document.documentElement.setAttribute('data-theme', resolved);
+  document.querySelectorAll('.theme-toggle button').forEach((btn, i) => {
+    btn.classList.toggle('active', ['light','dark','system'][i] === pref);
+  });
+  // Redraw charts with new colors
+  if (window._data) {
+    renderHeatmap();
+    renderDistribution();
+  }
+}
+(function() {
+  const pref = localStorage.getItem('theme-preference') || 'dark';
+  setTheme(pref);
+})();
+
+// Section colors
+const SECTION_COLORS = {
+  product: 'var(--c-section-product)', docs: 'var(--c-section-docs)',
+  blog: 'var(--c-section-blog)', learn: 'var(--c-section-learn)',
+  customers: 'var(--c-section-customers)', competitors: 'var(--c-section-competitors)',
+  integrations: 'var(--c-section-integrations)', events: 'var(--c-section-events)',
+  core: 'var(--c-section-core)', other: 'var(--c-section-other)',
+};
+
+function sectionColor(sec) { return SECTION_COLORS[sec] || 'var(--c-section-other)'; }
+function fmt(n) { return n.toLocaleString(); }
+
+// Load data
+fetch('links_data.json').then(r => r.json()).then(data => {
+  window._data = data;
+  renderAll(data);
+});
+
+function renderAll(data) {
+  renderStats(data);
+  renderSectionTable(data);
+  renderHeatmap();
+  renderDistribution();
+  renderOrphans(data);
+  renderPagesTable(data);
+}
+
+// ============================================================
+// STATS ROW
+// ============================================================
+function renderStats(data) {
+  const s = data.stats;
+  const cards = [
+    { value: fmt(s.total_pages), label: 'Total Pages' },
+    { value: fmt(s.crawled_pages), label: 'Pages Crawled' },
+    { value: fmt(s.total_edges), label: 'Link Edges' },
+    { value: fmt(s.body_edges), label: 'Body Links' },
+    { value: fmt(s.nav_edges), label: 'Nav Links' },
+    { value: fmt(s.orphan_pages), label: 'Orphan Pages' },
+  ];
+  document.getElementById('stats-row').innerHTML = cards.map(c =>
+    `<div class="stat-card"><div class="stat-value">${c.value}</div><div class="stat-label">${c.label}</div></div>`
+  ).join('');
+}
+
+// ============================================================
+// SECTION TABLE
+// ============================================================
+function renderSectionTable(data) {
+  const sections = Object.entries(data.section_stats)
+    .sort((a, b) => b[1].total_pages - a[1].total_pages);
+
+  let html = `<table class="section-table">
+    <thead><tr>
+      <th>Section</th><th class="num">Pages</th><th class="num">Crawled</th>
+      <th class="num">Orphans</th><th class="num">Avg In</th><th class="num">Avg Out</th>
+    </tr></thead><tbody>`;
+
+  for (const [sec, s] of sections) {
+    const orphanPct = s.total_pages > 0 ? Math.round(s.orphans / s.total_pages * 100) : 0;
+    html += `<tr>
+      <td><span class="section-dot" style="background:${sectionColor(sec)}"></span>${sec}</td>
+      <td class="num">${fmt(s.total_pages)}</td>
+      <td class="num">${fmt(s.crawled)}</td>
+      <td class="num">${fmt(s.orphans)} <span style="color:var(--c-text-dim);font-size:10px">(${orphanPct}%)</span></td>
+      <td class="num">${s.avg_inbound}</td>
+      <td class="num">${s.avg_outbound}</td>
+    </tr>`;
+  }
+  html += '</tbody></table>';
+  document.getElementById('section-table-container').innerHTML = html;
+}
+
+// ============================================================
+// CROSS-SECTION HEATMAP
+// ============================================================
+function renderHeatmap() {
+  const data = window._data;
+  const includeNav = document.getElementById('matrix-include-nav').checked;
+  const container = document.getElementById('heatmap-container');
+  container.innerHTML = '';
+
+  const sections = data.sections.slice().sort((a, b) => {
+    const sa = data.section_stats[a], sb = data.section_stats[b];
+    return (sb ? sb.total_pages : 0) - (sa ? sa.total_pages : 0);
+  });
+
+  // Build matrix values
+  const matrixMap = {};
+  for (const flow of data.matrix) {
+    const key = flow.source + '|' + flow.target;
+    matrixMap[key] = includeNav ? flow.total : flow.body;
+  }
+
+  const values = sections.flatMap(src =>
+    sections.map(tgt => matrixMap[src + '|' + tgt] || 0)
+  );
+  const maxVal = Math.max(1, d3.max(values));
+
+  const cellSize = 44;
+  const labelW = 90;
+  const w = labelW + sections.length * cellSize;
+  const h = labelW + sections.length * cellSize;
+
+  const svg = d3.select(container).append('svg')
+    .attr('width', w).attr('height', h);
+
+  // Color scale
+  const cs = getComputedStyle(document.documentElement);
+  const colorScale = d3.scaleSequential()
+    .domain([0, maxVal])
+    .interpolator(d3.interpolateRgb(
+      cs.getPropertyValue('--c-heatmap-0').trim(),
+      cs.getPropertyValue('--c-heatmap-3').trim()
+    ));
+
+  const tooltip = document.getElementById('matrix-tooltip');
+
+  // Column labels
+  svg.selectAll('.col-label')
+    .data(sections).enter()
+    .append('text')
+    .attr('x', (d, i) => labelW + i * cellSize + cellSize / 2)
+    .attr('y', labelW - 6)
+    .attr('text-anchor', 'end')
+    .attr('transform', (d, i) => `rotate(-45, ${labelW + i * cellSize + cellSize / 2}, ${labelW - 6})`)
+    .style('font-size', '10px')
+    .style('fill', d => sectionColor(d))
+    .style('font-weight', '600')
+    .text(d => d);
+
+  // Row labels
+  svg.selectAll('.row-label')
+    .data(sections).enter()
+    .append('text')
+    .attr('x', labelW - 6)
+    .attr('y', (d, i) => labelW + i * cellSize + cellSize / 2 + 3)
+    .attr('text-anchor', 'end')
+    .style('font-size', '10px')
+    .style('fill', d => sectionColor(d))
+    .style('font-weight', '600')
+    .text(d => d);
+
+  // Cells
+  for (let r = 0; r < sections.length; r++) {
+    for (let c = 0; c < sections.length; c++) {
+      const val = matrixMap[sections[r] + '|' + sections[c]] || 0;
+      const g = svg.append('g');
+
+      g.append('rect')
+        .attr('x', labelW + c * cellSize + 1)
+        .attr('y', labelW + r * cellSize + 1)
+        .attr('width', cellSize - 2)
+        .attr('height', cellSize - 2)
+        .attr('rx', 3)
+        .attr('fill', val > 0 ? colorScale(val) : 'var(--c-heatmap-0)')
+        .attr('stroke', 'var(--c-bg-body)')
+        .attr('stroke-width', 1)
+        .style('cursor', 'pointer')
+        .on('mouseover', function(event) {
+          tooltip.style.display = 'block';
+          tooltip.innerHTML = `<div class="tt-label">${sections[r]} &rarr; ${sections[c]}</div>
+            <div class="tt-value">${fmt(val)} links</div>`;
+        })
+        .on('mousemove', function(event) {
+          tooltip.style.left = (event.clientX + 12) + 'px';
+          tooltip.style.top = (event.clientY - 10) + 'px';
+        })
+        .on('mouseout', function() {
+          tooltip.style.display = 'none';
+        });
+
+      if (val > 0) {
+        g.append('text')
+          .attr('x', labelW + c * cellSize + cellSize / 2)
+          .attr('y', labelW + r * cellSize + cellSize / 2 + 4)
+          .attr('text-anchor', 'middle')
+          .style('font-size', val >= 1000 ? '8px' : '9px')
+          .style('fill', val > maxVal * 0.4 ? '#fff' : 'var(--c-text-muted)')
+          .style('font-weight', '600')
+          .style('pointer-events', 'none')
+          .text(val >= 1000 ? (val / 1000).toFixed(1) + 'k' : val);
+      }
+    }
+  }
+
+  // Axis labels
+  svg.append('text')
+    .attr('x', labelW + sections.length * cellSize / 2)
+    .attr('y', h - 2)
+    .attr('text-anchor', 'middle')
+    .style('font-size', '10px').style('fill', 'var(--c-text-dim)')
+    .text('Target Section \u2192');
+
+  svg.append('text')
+    .attr('x', 4).attr('y', labelW + sections.length * cellSize / 2)
+    .attr('text-anchor', 'middle')
+    .attr('transform', `rotate(-90, 4, ${labelW + sections.length * cellSize / 2})`)
+    .style('font-size', '10px').style('fill', 'var(--c-text-dim)')
+    .text('Source Section \u2192');
+}
+
+document.getElementById('matrix-include-nav').addEventListener('change', function() {
+  const sub = document.getElementById('matrix-subtitle');
+  sub.textContent = this.checked ? '(all links)' : '(body links only)';
+  renderHeatmap();
+});
+
+// ============================================================
+// DISTRIBUTION CHART
+// ============================================================
+function renderDistribution() {
+  const data = window._data;
+  const container = document.getElementById('dist-chart');
+  container.innerHTML = '';
+
+  const dist = data.distribution.filter(d => d.count > 0);
+  const margin = { top: 20, right: 20, bottom: 40, left: 60 };
+  const width = 500 - margin.left - margin.right;
+  const height = 300 - margin.top - margin.bottom;
+
+  const svg = d3.select(container).append('svg')
+    .attr('width', width + margin.left + margin.right)
+    .attr('height', height + margin.top + margin.bottom)
+    .append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const x = d3.scaleBand().domain(dist.map(d => d.label)).range([0, width]).padding(0.2);
+  const y = d3.scaleLog().domain([1, d3.max(dist, d => d.count)]).range([height, 0]);
+
+  svg.append('g').attr('transform', `translate(0,${height})`)
+    .call(d3.axisBottom(x))
+    .selectAll('text')
+    .style('font-size', '9px').style('fill', 'var(--c-text-muted)')
+    .attr('transform', 'rotate(-30)').attr('text-anchor', 'end');
+
+  svg.append('g')
+    .call(d3.axisLeft(y).ticks(5, '~s'))
+    .selectAll('text').style('font-size', '9px').style('fill', 'var(--c-text-muted)');
+
+  svg.selectAll('.bar')
+    .data(dist).enter()
+    .append('rect')
+    .attr('x', d => x(d.label))
+    .attr('y', d => d.count > 0 ? y(d.count) : height)
+    .attr('width', x.bandwidth())
+    .attr('height', d => d.count > 0 ? height - y(d.count) : 0)
+    .attr('fill', 'var(--c-brand-blue)')
+    .attr('rx', 2);
+
+  // Value labels
+  svg.selectAll('.bar-label')
+    .data(dist).enter()
+    .append('text')
+    .attr('x', d => x(d.label) + x.bandwidth() / 2)
+    .attr('y', d => (d.count > 0 ? y(d.count) : height) - 4)
+    .attr('text-anchor', 'middle')
+    .style('font-size', '9px').style('fill', 'var(--c-text-muted)')
+    .text(d => fmt(d.count));
+
+  // X axis label
+  svg.append('text')
+    .attr('x', width / 2).attr('y', height + 36)
+    .attr('text-anchor', 'middle')
+    .style('font-size', '10px').style('fill', 'var(--c-text-dim)')
+    .text('Inbound Links');
+
+  svg.append('text')
+    .attr('x', -height / 2).attr('y', -45)
+    .attr('text-anchor', 'middle')
+    .attr('transform', 'rotate(-90)')
+    .style('font-size', '10px').style('fill', 'var(--c-text-dim)')
+    .text('Pages (log scale)');
+}
+
+// ============================================================
+// ORPHAN PAGES
+// ============================================================
+function renderOrphans(data) {
+  const orphans = data.orphan_summary;
+  const totalOrphans = orphans.reduce((s, o) => s + o.count, 0);
+  document.getElementById('orphan-subtitle').textContent = `(${fmt(totalOrphans)} pages with no inbound links)`;
+
+  let html = '';
+  for (const section of orphans) {
+    const isCollapsed = section.count > 10;
+    html += `<div class="orphan-section">
+      <div class="orphan-section-header ${isCollapsed ? 'collapsed' : ''}" onclick="this.classList.toggle('collapsed'); this.nextElementSibling.style.display = this.classList.contains('collapsed') ? 'none' : 'block'; if(this.nextElementSibling.nextElementSibling) this.nextElementSibling.nextElementSibling.style.display = this.classList.contains('collapsed') ? 'none' : 'block';">
+        <span class="toggle-icon">\u25BC</span>
+        <span class="section-dot" style="background:${sectionColor(section.section)}"></span>
+        ${section.section} <span class="count">(${fmt(section.count)})</span>
+      </div>
+      <div class="orphan-paths" style="display:${isCollapsed ? 'none' : 'block'}">
+        ${section.sample.map(p => `<a href="https://www.rudderstack.com${p}" target="_blank" title="${p}">${p}</a>`).join('')}
+      </div>
+      ${section.count > section.sample.length ? `<div class="orphan-more" style="display:${isCollapsed ? 'none' : 'block'}">...and ${fmt(section.count - section.sample.length)} more</div>` : ''}
+    </div>`;
+  }
+  document.getElementById('orphan-container').innerHTML = html;
+}
+
+// ============================================================
+// PAGES TABLE
+// ============================================================
+let currentSort = { col: 'inbound', dir: 'desc' };
+let currentFilter = 'all';
+
+function renderPagesTable(data) {
+  // Build filter tabs
+  const sections = ['all', ...data.sections.sort()];
+  const sectionCounts = { all: data.top_pages.length };
+  for (const p of data.top_pages) {
+    sectionCounts[p.section] = (sectionCounts[p.section] || 0) + 1;
+  }
+
+  document.getElementById('section-filter-tabs').innerHTML = sections.map(sec =>
+    `<button class="filter-tab ${sec === currentFilter ? 'active' : ''}" data-section="${sec}"
+      onclick="currentFilter='${sec}'; document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active')); this.classList.add('active'); updateTable();">
+      ${sec}<span class="tab-count">${fmt(sectionCounts[sec] || 0)}</span>
+    </button>`
+  ).join('');
+
+  updateTable();
+}
+
+function updateTable() {
+  const data = window._data;
+  const hideUncrawled = document.getElementById('hide-uncrawled').checked;
+  const orphansOnly = document.getElementById('orphans-only').checked;
+
+  let pages = data.top_pages.slice();
+  if (currentFilter !== 'all') pages = pages.filter(p => p.section === currentFilter);
+  if (hideUncrawled) pages = pages.filter(p => p.crawled);
+  if (orphansOnly) pages = pages.filter(p => p.is_orphan);
+
+  // Sort
+  const col = currentSort.col;
+  const dir = currentSort.dir === 'asc' ? 1 : -1;
+  pages.sort((a, b) => {
+    if (col === 'path') return dir * a.path.localeCompare(b.path);
+    return dir * ((a[col] || 0) - (b[col] || 0));
+  });
+
+  const columns = [
+    { key: 'path', label: 'Page', cls: '' },
+    { key: 'section', label: 'Section', cls: '' },
+    { key: 'inbound', label: 'Inbound', cls: 'num' },
+    { key: 'inbound_body', label: 'Body In', cls: 'num' },
+    { key: 'inbound_nav', label: 'Nav In', cls: 'num' },
+    { key: 'outbound', label: 'Outbound', cls: 'num' },
+  ];
+
+  let html = `<table class="pages-table"><thead><tr>`;
+  for (const c of columns) {
+    const isSorted = currentSort.col === c.key;
+    const arrow = isSorted ? (currentSort.dir === 'asc' ? '\u25B2' : '\u25BC') : '\u25BC';
+    html += `<th class="${c.cls} ${isSorted ? 'sorted' : ''}"
+      onclick="sortTable('${c.key}')">${c.label}<span class="sort-arrow">${arrow}</span></th>`;
+  }
+  html += '</tr></thead><tbody>';
+
+  for (const p of pages) {
+    html += `<tr>
+      <td class="path" title="${p.path}"><a href="https://www.rudderstack.com${p.path}" target="_blank" style="color:var(--c-text-primary);text-decoration:none;">${p.path}</a>${p.is_orphan ? '<span class="orphan-tag">ORPHAN</span>' : ''}</td>
+      <td><span class="section-tag" style="background:${sectionColor(p.section)}">${p.section}</span></td>
+      <td class="num">${fmt(p.inbound)}</td>
+      <td class="num">${p.inbound_body > 0 ? fmt(p.inbound_body) : '<span style="color:var(--c-text-dim)">0</span>'}</td>
+      <td class="num">${p.inbound_nav > 0 ? fmt(p.inbound_nav) : '<span style="color:var(--c-text-dim)">0</span>'}</td>
+      <td class="num">${p.crawled ? fmt(p.outbound) : '<span style="color:var(--c-text-dim)">\u2014</span>'}</td>
+    </tr>`;
+  }
+  html += '</tbody></table>';
+  document.getElementById('pages-table-container').innerHTML = html;
+}
+
+function sortTable(col) {
+  if (currentSort.col === col) {
+    currentSort.dir = currentSort.dir === 'desc' ? 'asc' : 'desc';
+  } else {
+    currentSort.col = col;
+    currentSort.dir = col === 'path' ? 'asc' : 'desc';
+  }
+  updateTable();
+}
+
+document.getElementById('hide-uncrawled').addEventListener('change', updateTable);
+document.getElementById('orphans-only').addEventListener('change', updateTable);
+
+// CSV export
+document.getElementById('export-pages-btn').addEventListener('click', function() {
+  const data = window._data;
+  let pages = data.top_pages.slice();
+  if (currentFilter !== 'all') pages = pages.filter(p => p.section === currentFilter);
+  if (document.getElementById('hide-uncrawled').checked) pages = pages.filter(p => p.crawled);
+  if (document.getElementById('orphans-only').checked) pages = pages.filter(p => p.is_orphan);
+
+  let csv = 'Path,Section,Crawled,Inbound,Body Inbound,Nav Inbound,Outbound,Is Orphan\n';
+  for (const p of pages) {
+    csv += `"${p.path}",${p.section},${p.crawled},${p.inbound},${p.inbound_body},${p.inbound_nav},${p.outbound},${p.is_orphan}\n`;
+  }
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'internal_links.csv'; a.click();
+  URL.revokeObjectURL(url);
+});
+</script>
+</body>
+</html>
