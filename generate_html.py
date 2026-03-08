@@ -240,16 +240,31 @@ for source_url, data in crawl_results.items():
             })
 
 # ============================================================
-# INBOUND LINK COUNTS
+# SPLIT EDGES: body vs nav (only body edges go in payload)
+# Nav = in <nav> tag OR in header/footer region
+# ============================================================
+body_edges = [e for e in edges if not e.get("is_nav", False) and e.get("location", "body") == "body"]
+nav_edges = [e for e in edges if e.get("is_nav", False) or e.get("location", "body") != "body"]
+print(f"Edge split: {len(body_edges)} body, {len(nav_edges)} nav (total {len(edges)})")
+
+# ============================================================
+# INBOUND/OUTBOUND COUNTS (all edges for stats, body for detail)
 # ============================================================
 inbound_counts = defaultdict(int)
+nav_inbound_counts = defaultdict(int)
+nav_outbound_counts = defaultdict(int)
 for edge in edges:
     inbound_counts[edge["target"]] += 1
+for edge in nav_edges:
+    nav_inbound_counts[edge["target"]] += 1
+    nav_outbound_counts[edge["source"]] += 1
 
 def attach_inbound(node):
-    """Attach inbound link count to each tree node."""
+    """Attach inbound link count and nav summary to each tree node."""
     path = node["path"].rstrip("/") or "/"
     node["inbound_count"] = inbound_counts.get(path, 0)
+    node["nav_inbound"] = nav_inbound_counts.get(path, 0)
+    node["nav_outbound"] = nav_outbound_counts.get(path, 0)
     for child in node.get("children", []):
         attach_inbound(child)
 
@@ -270,11 +285,11 @@ def collect_paths(node):
         collect_paths(child)
 collect_paths(tree)
 
-# Pages that are link targets
-all_targets = set(e["target"] for e in edges)
+# Pages that are body link targets (nav links reach every page, so use body for orphan detection)
+body_targets = set(e["target"] for e in body_edges)
 
-# Orphans = pages in sitemap with zero inbound internal links (exclude root)
-orphan_paths = sorted(all_paths - all_targets - {"/"})
+# Orphans = pages in sitemap with zero body inbound links (exclude root)
+orphan_paths = sorted(all_paths - body_targets - {"/"})
 print(f"Orphan pages (no inbound links from crawled pages): {len(orphan_paths)} of {len(all_paths)}")
 
 # Mark orphans on tree nodes
@@ -338,7 +353,7 @@ for flow in cross_section_flows[:10]:
 # ============================================================
 payload = {
     "tree": tree,
-    "edges": edges,
+    "edges": body_edges,  # Only body edges — nav summary counts are on tree nodes
     "conversion_endpoints": CONVERSION_ENDPOINTS,
     "header_nav": nav_data.get("header_nav", []),
     "footer_nav": nav_data.get("footer_nav", []),
@@ -347,6 +362,8 @@ payload = {
         "total_pages": len(all_urls),
         "pages_crawled": len([d for d in crawl_results.values() if d["status"] == "ok"]),
         "total_links": len(edges),
+        "body_links": len(body_edges),
+        "nav_links": len(nav_edges),
         "total_ctas": sum(len(d.get("ctas", [])) for d in crawl_results.values()),
         "orphan_count": len(orphan_paths),
     }
@@ -356,7 +373,7 @@ with open("output/diagram_data.json", "w") as f:
     json.dump(payload, f)
 
 print(f"\nTree nodes at root level: {len(tree['children'])}")
-print(f"Link edges: {len(edges)}")
+print(f"Link edges: {len(edges)} total ({len(body_edges)} body in payload, {len(nav_edges)} nav as tree counts)")
 print(f"Conversion endpoints: {len(CONVERSION_ENDPOINTS)}")
 for ep in CONVERSION_ENDPOINTS:
     print(f"  {ep['name']}: {ep['source_count']} total ({ep['body_source_count']} body, {ep['source_count'] - ep['body_source_count']} nav)")

@@ -5,6 +5,5 @@ __pycache__/
 
 # Large generated data files
 data/crawl_results.json
-output/diagram_data.json
 output/complete_sitemap_data.json
 output/link_graph.json

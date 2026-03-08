@@ -528,9 +528,10 @@ function updatePathLookup() {
 
 // ============================================================
 // EDGE LOOKUP MAPS (pre-built for O(1) tooltip lookups)
+// Edges in DATA are body-only. Nav counts come from tree nodes.
 // ============================================================
-const inboundMap = {};   // target path → array of edge objects pointing TO this node
-const outboundMap = {};  // source path → array of edge objects going FROM this node
+const inboundMap = {};   // target path → array of body edge objects pointing TO this node
+const outboundMap = {};  // source path → array of body edge objects going FROM this node
 
 function normalizePath(p) {
   // Node paths always end with '/', edge paths usually don't — normalize to trailing slash
@@ -542,9 +543,9 @@ function normalizePath(p) {
   const src = normalizePath(edge.source);
   const tgt = normalizePath(edge.target);
   if (!inboundMap[tgt]) inboundMap[tgt] = [];
-  inboundMap[tgt].push({ source: src, target: tgt, text: edge.text, is_nav: edge.is_nav, is_cta: edge.is_cta, location: edge.location || 'body' });
+  inboundMap[tgt].push({ source: src, target: tgt, text: edge.text, is_cta: edge.is_cta, location: 'body' });
   if (!outboundMap[src]) outboundMap[src] = [];
-  outboundMap[src].push({ source: src, target: tgt, text: edge.text, is_nav: edge.is_nav, is_cta: edge.is_cta, location: edge.location || 'body' });
+  outboundMap[src].push({ source: src, target: tgt, text: edge.text, is_cta: edge.is_cta, location: 'body' });
 });
 
 const SECTION_NAMES = {
@@ -1418,15 +1419,15 @@ function showTooltip(event, d) {
 
   // ---- CONTEXTUAL: INBOUND LINKS ----
   if (showInbound) {
-    const inbound = inboundMap[d.data.path] || [];
-    const bodyInbound = inbound.filter(e => (e.location || 'body') === 'body');
-    const navInbound = inbound.filter(e => (e.location || 'body') !== 'body');
+    const bodyInbound = inboundMap[d.data.path] || [];
+    const navInboundCount = d.data.nav_inbound || 0;
+    const totalInbound = bodyInbound.length + navInboundCount;
 
     html += `<div class="context-section inbound-section">`;
-    html += `<div class="context-section-title">⬅ Inbound Links (${inbound.length} total`;
-    if (navInbound.length > 0) html += `: ${bodyInbound.length} body, ${navInbound.length} nav`;
+    html += `<div class="context-section-title">⬅ Inbound Links (${totalInbound} total`;
+    if (navInboundCount > 0) html += `: ${bodyInbound.length} body, ${navInboundCount} nav`;
     html += `)`;
-    if (inbound.length > 0) html += ` <button class="csv-export-btn csv-export-btn-sm" data-export="inbound" data-path="${d.data.path}">⬇ CSV</button>`;
+    if (bodyInbound.length > 0) html += ` <button class="csv-export-btn csv-export-btn-sm" data-export="inbound" data-path="${d.data.path}">⬇ CSV</button>`;
     html += `</div>`;
 
     // Helper to render a block of inbound links
@@ -1450,8 +1451,6 @@ function showTooltip(event, d) {
       links.slice(0, maxLinks).forEach(e => {
         const tags = [];
         if (e.is_cta) tags.push('<span class="link-tag link-tag-cta">CTA</span>');
-        if (e.location === 'header') tags.push('<span class="link-tag link-tag-hdr">HDR</span>');
-        else if (e.location === 'footer') tags.push('<span class="link-tag link-tag-ftr">FTR</span>');
         const truncText = e.text ? (e.text.length > 50 ? e.text.substring(0, 50) + '…' : e.text) : '';
         html += `<div class="context-item"><span class="link-source">${e.source}</span>${tags.join('')}`;
         if (truncText) html += `<br><span class="link-text">"${truncText}"</span>`;
@@ -1467,14 +1466,12 @@ function showTooltip(event, d) {
       renderInboundBlock(bodyInbound, 8);
     }
 
-    if (navInbound.length > 0) {
-      html += `<div style="font-size:11px; font-weight:600; margin-top:6px; color:${THEME_COLORS['text-muted']};">Nav links (${navInbound.length})</div>`;
-      html += `<div style="opacity:0.6">`;
-      renderInboundBlock(navInbound, 6);
-      html += `</div>`;
+    if (navInboundCount > 0) {
+      html += `<div style="font-size:11px; font-weight:600; margin-top:6px; color:${THEME_COLORS['text-muted']};">Nav links (${navInboundCount})</div>`;
+      html += `<div style="opacity:0.6"><div class="context-summary">Nav/header/footer links not shown in detail</div></div>`;
     }
 
-    if (inbound.length === 0) {
+    if (totalInbound === 0) {
       html += `<div class="context-summary">No inbound links found</div>`;
     }
 
@@ -1493,7 +1490,7 @@ function showTooltip(event, d) {
     const xIn = inbound.filter(e => getSection(e.source) !== thisSection);
 
     html += `<div class="context-section xsection-section">`;
-    html += `<div class="context-section-title">↔ Cross-Section Links`;
+    html += `<div class="context-section-title">↔ Cross-Section Links <span style="font-weight:400; color:${THEME_COLORS['text-muted']}">(body only)</span>`;
     if (xOut.length > 0 || xIn.length > 0) html += ` <button class="csv-export-btn csv-export-btn-sm" data-export="xsection" data-path="${d.data.path}">⬇ CSV</button>`;
     html += `</div>`;
     html += `<div class="context-item"><span class="link-source">Section: <span class="xsection-dot-inline" style="background:${thisColor}"></span><strong>${SECTION_NAMES[thisSection] || thisSection}</strong></span></div>`;
@@ -1534,16 +1531,15 @@ function showTooltip(event, d) {
 
   // ---- CONTEXTUAL: ORPHAN STATUS ----
   if (showOrphans) {
-    const inbound = inboundMap[d.data.path] || [];
-    const nonNavInbound = inbound.filter(e => !e.is_nav);
+    const bodyInbound = inboundMap[d.data.path] || [];
     html += `<div class="context-section orphan-section">`;
     if (d.data.is_orphan) {
       html += `<div class="context-section-title">⚠ Orphan Page</div>`;
-      html += `<div class="context-item"><span class="orphan-warning">This page has no non-nav inbound links.</span><br>`;
+      html += `<div class="context-item"><span class="orphan-warning">This page has no body inbound links.</span><br>`;
       html += `<span class="link-text">It is only reachable through navigation menus or direct URL, not linked from any content page.</span></div>`;
     } else {
       html += `<div class="context-section-title">✓ Connected Page</div>`;
-      html += `<div class="context-item"><span class="orphan-ok">${nonNavInbound.length} inbound link${nonNavInbound.length !== 1 ? 's' : ''}</span> from content pages</div>`;
+      html += `<div class="context-item"><span class="orphan-ok">${bodyInbound.length} body inbound link${bodyInbound.length !== 1 ? 's' : ''}</span> from content pages</div>`;
     }
     html += `</div>`;
   }
@@ -1607,19 +1603,18 @@ tooltip.addEventListener("click", (e) => {
     if (exportType === 'inbound') {
       const inbound = (inboundMap[path] || []);
       const rows = inbound.map(e => [
-        e.source, e.text || '', e.is_cta ? 'yes' : 'no', e.is_nav ? 'yes' : 'no',
-        e.location || 'body',
+        e.source, e.text || '', e.is_cta ? 'yes' : 'no',
         SECTION_NAMES[getSection(e.source)] || getSection(e.source)
       ]);
-      downloadCSV(nodeName + '_inbound_links.csv', ['source_page', 'anchor_text', 'is_cta', 'is_nav', 'location', 'source_section'], rows);
+      downloadCSV(nodeName + '_inbound_body_links.csv', ['source_page', 'anchor_text', 'is_cta', 'source_section'], rows);
     } else if (exportType === 'xsection') {
       const thisSection = getSection(path);
       const outbound = (outboundMap[path] || []).filter(e => getSection(e.target) !== thisSection);
       const inbound = (inboundMap[path] || []).filter(e => getSection(e.source) !== thisSection);
       const rows = [];
-      outbound.forEach(e => rows.push(['outbound', e.target, e.text || '', SECTION_NAMES[getSection(e.target)] || getSection(e.target), e.is_cta ? 'yes' : 'no', e.location || 'body']));
-      inbound.forEach(e => rows.push(['inbound', e.source, e.text || '', SECTION_NAMES[getSection(e.source)] || getSection(e.source), e.is_cta ? 'yes' : 'no', e.location || 'body']));
-      downloadCSV(nodeName + '_cross_section_links.csv', ['direction', 'page', 'anchor_text', 'section', 'is_cta', 'location'], rows);
+      outbound.forEach(e => rows.push(['outbound', e.target, e.text || '', SECTION_NAMES[getSection(e.target)] || getSection(e.target), e.is_cta ? 'yes' : 'no']));
+      inbound.forEach(e => rows.push(['inbound', e.source, e.text || '', SECTION_NAMES[getSection(e.source)] || getSection(e.source), e.is_cta ? 'yes' : 'no']));
+      downloadCSV(nodeName + '_cross_section_links.csv', ['direction', 'page', 'anchor_text', 'section', 'is_cta'], rows);
     }
     return;
   }
