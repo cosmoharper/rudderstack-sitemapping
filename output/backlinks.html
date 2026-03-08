@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RudderStack.com Backlink Analysis</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+  (function(){var p=localStorage.getItem('theme-preference')||'dark';var t=p==='system'?(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):p;document.documentElement.setAttribute('data-theme',t)})();
+</script>
+<style>
+:root, [data-theme="dark"] {
+  --c-bg-body: #1a1e27; --c-bg-surface: #252a35; --c-bg-surface-hover: #2d3340;
+  --c-bg-controls: rgba(26,30,39,0.97); --c-bg-tooltip: rgba(30,34,44,0.98);
+  --c-text-primary: #e0e0e0; --c-text-secondary: #ccc; --c-text-muted: #888;
+  --c-text-dim: #666; --c-text-faint: #555; --c-text-white: #fff; --c-text-on-surface: #fff;
+  --c-border-primary: #313845; --c-border-secondary: #3d4451;
+  --c-brand-blue: #1063e2; --c-brand-blue-dark: #0b56c6; --c-brand-blue-light: #76acf7;
+  --c-brand-amber: #f59e0b; --c-brand-green: #22c55e; --c-brand-red: #ef4444;
+  --c-brand-blue-shadow: rgba(16,99,226,0.4);
+  --c-logo-text: #ffffff;
+  --c-shadow-light: rgba(0,0,0,0.4); --c-shadow-medium: rgba(0,0,0,0.5);
+  --c-section-product: #3b82f6; --c-section-docs: #14b8a6; --c-section-blog: #a855f7;
+  --c-section-learn: #22c55e; --c-section-customers: #f59e0b; --c-section-competitors: #ef4444;
+  --c-section-integrations: #6366f1; --c-section-events: #ec4899;
+  --c-section-core: #e2e8f0; --c-section-other: #6b7280;
+  --c-heatmap-0: #252a35; --c-heatmap-3: #1063e2;
+}
+[data-theme="light"] {
+  --c-bg-body: #f5f6f8; --c-bg-surface: #ffffff; --c-bg-surface-hover: #f0f1f3;
+  --c-bg-controls: rgba(245,246,248,0.97); --c-bg-tooltip: rgba(255,255,255,0.98);
+  --c-text-primary: #1a1e27; --c-text-secondary: #555; --c-text-muted: #777;
+  --c-text-dim: #999; --c-text-faint: #aaa; --c-text-white: #fff; --c-text-on-surface: #1a1e27;
+  --c-border-primary: #dde1e8; --c-border-secondary: #c8cdd6;
+  --c-brand-blue: #1063e2; --c-brand-blue-dark: #0b56c6; --c-brand-blue-light: #4a8fe8;
+  --c-brand-amber: #d97706; --c-brand-green: #16a34a; --c-brand-red: #dc2626;
+  --c-brand-blue-shadow: rgba(16,99,226,0.25);
+  --c-logo-text: #1a1e27;
+  --c-shadow-light: rgba(0,0,0,0.08); --c-shadow-medium: rgba(0,0,0,0.12);
+  --c-section-product: #2563eb; --c-section-docs: #0d9488; --c-section-blog: #9333ea;
+  --c-section-learn: #16a34a; --c-section-customers: #d97706; --c-section-competitors: #dc2626;
+  --c-section-integrations: #4f46e5; --c-section-events: #db2777;
+  --c-section-core: #334155; --c-section-other: #9ca3af;
+  --c-heatmap-0: #f0f1f3; --c-heatmap-3: #1063e2;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--c-bg-body); color: var(--c-text-primary); min-height: 100vh; }
+
+#header {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--c-bg-controls); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--c-border-primary); padding: 12px 24px;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+#header .logo-area { display: flex; align-items: center; gap: 10px; }
+#header .logo-area svg { color: var(--c-logo-text); }
+#header .logo-area .page-label { font-size: 14px; font-weight: 600; color: var(--c-brand-blue-light); letter-spacing: -0.3px; }
+#header .nav-links { display: flex; gap: 4px; }
+#header .nav-links a {
+  padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; text-decoration: none;
+  color: var(--c-text-muted); transition: all 0.15s;
+}
+#header .nav-links a:hover { color: var(--c-text-primary); background: var(--c-bg-surface-hover); }
+#header .nav-links a.active { color: var(--c-text-white); background: var(--c-brand-blue); }
+.theme-toggle {
+  display: flex; border: 1px solid var(--c-border-secondary); border-radius: 6px; overflow: hidden; margin-left: auto;
+}
+.theme-toggle button {
+  padding: 5px 8px; border: none; background: var(--c-bg-surface); color: var(--c-text-secondary);
+  font-size: 13px; cursor: pointer; transition: all 0.15s; line-height: 1;
+}
+.theme-toggle button:hover { background: var(--c-bg-surface-hover); }
+.theme-toggle button.active { background: var(--c-brand-blue); color: var(--c-text-white); }
+
+#content { padding: 24px; max-width: 1400px; margin: 0 auto; }
+
+.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.stat-card { background: var(--c-bg-surface); border: 1px solid var(--c-border-primary); border-radius: 10px; padding: 16px; text-align: center; }
+.stat-card .stat-value { font-size: 28px; font-weight: 700; color: var(--c-brand-blue-light); }
+.stat-card .stat-label { font-size: 11px; color: var(--c-text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+
+.panel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.panel-grid.full-width { grid-template-columns: 1fr; }
+.panel-grid.three-col { grid-template-columns: 1fr 1fr 1fr; }
+.panel { background: var(--c-bg-surface); border: 1px solid var(--c-border-primary); border-radius: 10px; padding: 20px; overflow: hidden; }
+.panel-title { font-size: 14px; font-weight: 600; color: var(--c-text-primary); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.panel-title .subtitle { font-size: 11px; font-weight: 400; color: var(--c-text-muted); }
+
+/* Tables */
+.data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.data-table thead { position: sticky; top: 0; background: var(--c-bg-surface); z-index: 1; }
+.data-table th {
+  text-align: left; padding: 8px 10px; font-weight: 600; font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.5px; color: var(--c-text-muted);
+  border-bottom: 2px solid var(--c-border-primary); cursor: pointer; user-select: none; white-space: nowrap;
+}
+.data-table th.num { text-align: right; }
+.data-table th:hover { color: var(--c-text-primary); }
+.data-table th .sort-arrow { font-size: 10px; margin-left: 3px; opacity: 0.3; }
+.data-table th.sorted .sort-arrow { opacity: 1; color: var(--c-brand-blue-light); }
+.data-table td { padding: 6px 10px; border-bottom: 1px solid var(--c-border-primary); }
+.data-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.data-table td.path { max-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
+.data-table td.domain { max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.data-table td.anchor-cell { max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
+.data-table tr:hover { background: var(--c-bg-surface-hover); }
+
+.scroll-container { max-height: 500px; overflow-y: auto; }
+
+.section-tag { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 9px; font-weight: 600; text-transform: uppercase; color: var(--c-text-white); }
+.dofollow-tag { display: inline-block; padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: 600; }
+.dofollow-tag.df { background: var(--c-brand-green); color: var(--c-text-white); }
+.dofollow-tag.nf { background: var(--c-text-dim); color: var(--c-bg-body); }
+.lost-tag { display: inline-block; padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: 600; background: var(--c-brand-red); color: var(--c-text-white); }
+.type-tag { display: inline-block; padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: 500; background: var(--c-border-secondary); color: var(--c-text-secondary); }
+
+.dr-bar { display: inline-block; height: 6px; border-radius: 3px; margin-right: 6px; vertical-align: middle; }
+
+/* Filters */
+.filter-tabs { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
+.filter-tab {
+  padding: 4px 10px; border-radius: 5px; font-size: 11px; font-weight: 500;
+  cursor: pointer; border: 1px solid var(--c-border-secondary); color: var(--c-text-muted);
+  background: transparent; transition: all 0.15s; font-family: 'Inter', sans-serif;
+}
+.filter-tab:hover { color: var(--c-text-primary); border-color: var(--c-brand-blue); }
+.filter-tab.active { background: var(--c-brand-blue); color: var(--c-text-white); border-color: var(--c-brand-blue); }
+.filter-tab .tab-count { font-weight: 400; opacity: 0.7; margin-left: 3px; }
+
+.toggle-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.toggle-label { font-size: 11px; color: var(--c-text-muted); cursor: pointer; display: flex; align-items: center; gap: 5px; }
+
+.export-btn {
+  padding: 5px 12px; border: 1px solid var(--c-border-secondary); border-radius: 6px;
+  background: var(--c-bg-surface); color: var(--c-text-secondary); font-size: 11px; cursor: pointer;
+  font-family: 'Inter', sans-serif; transition: all 0.15s;
+}
+.export-btn:hover { border-color: var(--c-brand-blue); color: var(--c-text-primary); }
+
+/* Charts */
+.chart-container svg text { font-family: 'Inter', sans-serif; }
+
+/* Section dot */
+.section-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div class="logo-area">
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+      <rect width="32" height="32" rx="6" fill="currentColor" fill-opacity="0.1"/>
+      <path d="M8 12 L16 8 L24 12 L16 16Z" fill="currentColor" opacity="0.7"/>
+      <path d="M8 12 L16 16 L16 24 L8 20Z" fill="currentColor" opacity="0.5"/>
+      <path d="M24 12 L16 16 L16 24 L24 20Z" fill="currentColor" opacity="0.3"/>
+    </svg>
+    <span class="page-label">Backlinks</span>
+  </div>
+  <div class="nav-links">
+    <a href="index.html">Site Map</a>
+    <a href="links.html">Internal Links</a>
+    <a href="backlinks.html" class="active">Backlinks</a>
+  </div>
+  <div class="theme-toggle">
+    <button onclick="setTheme('light')" title="Light">&#9788;</button>
+    <button onclick="setTheme('dark')" title="Dark">&#9790;</button>
+    <button onclick="setTheme('system')" title="System">&#9881;</button>
+  </div>
+</div>
+
+<div id="content">
+  <div class="stats-row" id="stats-row"></div>
+
+  <!-- DR distribution + Backlinks by section -->
+  <div class="panel-grid">
+    <div class="panel">
+      <div class="panel-title">Domain Rating Distribution</div>
+      <div class="chart-container" id="dr-chart"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Backlinks by Target Section</div>
+      <div id="section-table-container"></div>
+    </div>
+  </div>
+
+  <!-- Timeline + Top anchors -->
+  <div class="panel-grid">
+    <div class="panel">
+      <div class="panel-title">Backlink Discovery Timeline</div>
+      <div class="chart-container" id="timeline-chart"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Top Anchor Texts <span class="subtitle">(by frequency)</span></div>
+      <div class="scroll-container" id="anchors-container" style="max-height: 340px;"></div>
+    </div>
+  </div>
+
+  <!-- Top target pages -->
+  <div class="panel-grid full-width">
+    <div class="panel">
+      <div class="panel-title">
+        <span>Top Target Pages</span>
+        <button class="export-btn" id="export-targets-btn">Export CSV</button>
+      </div>
+      <div class="scroll-container" id="targets-container"></div>
+    </div>
+  </div>
+
+  <!-- Top referring domains -->
+  <div class="panel-grid full-width">
+    <div class="panel">
+      <div class="panel-title">
+        <span>Top Referring Domains</span>
+        <button class="export-btn" id="export-domains-btn">Export CSV</button>
+      </div>
+      <div class="scroll-container" id="domains-container"></div>
+    </div>
+  </div>
+
+  <!-- All backlinks table -->
+  <div class="panel-grid full-width">
+    <div class="panel">
+      <div class="panel-title">
+        <span>All Backlinks</span>
+        <button class="export-btn" id="export-all-btn">Export CSV</button>
+      </div>
+      <div class="filter-tabs" id="bl-section-filter"></div>
+      <div class="toggle-row">
+        <label class="toggle-label"><input type="checkbox" id="dofollow-only"> Dofollow only</label>
+        <label class="toggle-label"><input type="checkbox" id="hide-lost"> Hide lost</label>
+      </div>
+      <div class="scroll-container" id="all-bl-container" style="max-height: 600px;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SECTION_COLORS = {
+  product: 'var(--c-section-product)', docs: 'var(--c-section-docs)',
+  blog: 'var(--c-section-blog)', learn: 'var(--c-section-learn)',
+  customers: 'var(--c-section-customers)', competitors: 'var(--c-section-competitors)',
+  integrations: 'var(--c-section-integrations)', events: 'var(--c-section-events)',
+  core: 'var(--c-section-core)', other: 'var(--c-section-other)',
+};
+function sectionColor(s) { return SECTION_COLORS[s] || 'var(--c-section-other)'; }
+function fmt(n) { return typeof n === 'number' ? n.toLocaleString() : n; }
+function drColor(dr) {
+  if (dr >= 70) return 'var(--c-brand-green)';
+  if (dr >= 40) return 'var(--c-brand-blue-light)';
+  if (dr >= 20) return 'var(--c-brand-amber)';
+  return 'var(--c-text-dim)';
+}
+
+function setTheme(pref) {
+  localStorage.setItem('theme-preference', pref);
+  const resolved = pref === 'system'
+    ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : pref;
+  document.documentElement.setAttribute('data-theme', resolved);
+  document.querySelectorAll('.theme-toggle button').forEach((btn, i) => {
+    btn.classList.toggle('active', ['light','dark','system'][i] === pref);
+  });
+  if (window._data) { renderDRChart(); renderTimeline(); }
+}
+(function() { setTheme(localStorage.getItem('theme-preference') || 'dark'); })();
+
+fetch('backlinks_data.json').then(r => r.json()).then(data => {
+  window._data = data;
+  renderAll(data);
+});
+
+function renderAll(data) {
+  renderStats(data);
+  renderDRChart();
+  renderSectionTable(data);
+  renderTimeline();
+  renderAnchors(data);
+  renderTargets(data);
+  renderDomains(data);
+  renderAllBacklinks(data);
+}
+
+// ============================================================
+// STATS
+// ============================================================
+function renderStats(data) {
+  const s = data.stats;
+  const cards = [
+    { value: fmt(s.total_backlinks), label: 'Total Backlinks' },
+    { value: fmt(s.unique_domains), label: 'Referring Domains' },
+    { value: fmt(s.unique_targets), label: 'Target Pages' },
+    { value: fmt(s.dofollow), label: 'Dofollow' },
+    { value: fmt(s.nofollow), label: 'Nofollow' },
+    { value: fmt(s.live), label: 'Live' },
+    { value: fmt(s.lost), label: 'Lost' },
+    { value: s.avg_dr, label: 'Avg DR' },
+  ];
+  document.getElementById('stats-row').innerHTML = cards.map(c =>
+    `<div class="stat-card"><div class="stat-value">${c.value}</div><div class="stat-label">${c.label}</div></div>`
+  ).join('');
+}
+
+// ============================================================
+// DR CHART
+// ============================================================
+function renderDRChart() {
+  const data = window._data;
+  const container = document.getElementById('dr-chart');
+  container.innerHTML = '';
+  const dist = data.dr_distribution.filter(d => d.count > 0);
+  const margin = { top: 20, right: 20, bottom: 40, left: 50 };
+  const width = 500 - margin.left - margin.right;
+  const height = 280 - margin.top - margin.bottom;
+
+  const svg = d3.select(container).append('svg')
+    .attr('width', width + margin.left + margin.right)
+    .attr('height', height + margin.top + margin.bottom)
+    .append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const x = d3.scaleBand().domain(dist.map(d => d.label)).range([0, width]).padding(0.2);
+  const y = d3.scaleLinear().domain([0, d3.max(dist, d => d.count)]).nice().range([height, 0]);
+
+  svg.append('g').attr('transform', `translate(0,${height})`)
+    .call(d3.axisBottom(x)).selectAll('text').style('font-size', '9px').style('fill', 'var(--c-text-muted)');
+  svg.append('g').call(d3.axisLeft(y).ticks(5))
+    .selectAll('text').style('font-size', '9px').style('fill', 'var(--c-text-muted)');
+
+  svg.selectAll('.bar').data(dist).enter().append('rect')
+    .attr('x', d => x(d.label)).attr('y', d => y(d.count))
+    .attr('width', x.bandwidth()).attr('height', d => height - y(d.count))
+    .attr('fill', d => drColor(d.min)).attr('rx', 2);
+
+  svg.selectAll('.bar-label').data(dist).enter().append('text')
+    .attr('x', d => x(d.label) + x.bandwidth() / 2).attr('y', d => y(d.count) - 4)
+    .attr('text-anchor', 'middle').style('font-size', '9px').style('fill', 'var(--c-text-muted)')
+    .text(d => d.count);
+
+  svg.append('text').attr('x', width / 2).attr('y', height + 36)
+    .attr('text-anchor', 'middle').style('font-size', '10px').style('fill', 'var(--c-text-dim)').text('Domain Rating');
+}
+
+// ============================================================
+// SECTION TABLE
+// ============================================================
+function renderSectionTable(data) {
+  const sections = data.section_summary;
+  let html = `<table class="data-table"><thead><tr>
+    <th>Section</th><th class="num">Backlinks</th><th class="num">Domains</th>
+    <th class="num">Targets</th><th class="num">Dofollow</th></tr></thead><tbody>`;
+  for (const s of sections) {
+    html += `<tr>
+      <td><span class="section-dot" style="background:${sectionColor(s.section)}"></span>${s.section}</td>
+      <td class="num">${fmt(s.backlinks)}</td><td class="num">${fmt(s.domains)}</td>
+      <td class="num">${fmt(s.targets)}</td><td class="num">${fmt(s.dofollow)}</td></tr>`;
+  }
+  html += '</tbody></table>';
+  document.getElementById('section-table-container').innerHTML = html;
+}
+
+// ============================================================
+// TIMELINE
+// ============================================================
+function renderTimeline() {
+  const data = window._data;
+  const container = document.getElementById('timeline-chart');
+  container.innerHTML = '';
+  const tl = data.timeline;
+  if (!tl.length) return;
+
+  const margin = { top: 20, right: 20, bottom: 40, left: 50 };
+  const width = 500 - margin.left - margin.right;
+  const height = 280 - margin.top - margin.bottom;
+
+  const svg = d3.select(container).append('svg')
+    .attr('width', width + margin.left + margin.right)
+    .attr('height', height + margin.top + margin.bottom)
+    .append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const x = d3.scaleBand().domain(tl.map(d => d.month)).range([0, width]).padding(0.1);
+  const y = d3.scaleLinear().domain([0, d3.max(tl, d => d.count)]).nice().range([height, 0]);
+
+  // Show every 3rd label
+  const tickVals = tl.map(d => d.month).filter((_, i) => i % 3 === 0);
+  svg.append('g').attr('transform', `translate(0,${height})`)
+    .call(d3.axisBottom(x).tickValues(tickVals))
+    .selectAll('text').style('font-size', '8px').style('fill', 'var(--c-text-muted)')
+    .attr('transform', 'rotate(-30)').attr('text-anchor', 'end');
+  svg.append('g').call(d3.axisLeft(y).ticks(5))
+    .selectAll('text').style('font-size', '9px').style('fill', 'var(--c-text-muted)');
+
+  svg.selectAll('.bar').data(tl).enter().append('rect')
+    .attr('x', d => x(d.month)).attr('y', d => y(d.count))
+    .attr('width', x.bandwidth()).attr('height', d => height - y(d.count))
+    .attr('fill', 'var(--c-brand-blue)').attr('rx', 1);
+
+  svg.append('text').attr('x', width / 2).attr('y', height + 36)
+    .attr('text-anchor', 'middle').style('font-size', '10px').style('fill', 'var(--c-text-dim)').text('First Seen Month');
+}
+
+// ============================================================
+// ANCHORS
+// ============================================================
+function renderAnchors(data) {
+  const anchors = data.top_anchors.slice(0, 50);
+  let html = `<table class="data-table"><thead><tr>
+    <th>Anchor Text</th><th class="num">Count</th><th class="num">Domains</th><th class="num">Targets</th>
+  </tr></thead><tbody>`;
+  for (const a of anchors) {
+    const text = a.text.length > 80 ? a.text.slice(0, 77) + '...' : a.text;
+    html += `<tr><td class="anchor-cell" title="${a.text.replace(/"/g, '&quot;')}">${text}</td>
+      <td class="num">${fmt(a.count)}</td><td class="num">${fmt(a.domains)}</td><td class="num">${fmt(a.targets)}</td></tr>`;
+  }
+  html += '</tbody></table>';
+  document.getElementById('anchors-container').innerHTML = html;
+}
+
+// ============================================================
+// TOP TARGETS
+// ============================================================
+function renderTargets(data) {
+  const targets = data.top_targets;
+  let html = `<table class="data-table"><thead><tr>
+    <th>Target Page</th><th>Section</th><th class="num">Backlinks</th><th class="num">Domains</th>
+    <th class="num">Dofollow</th><th class="num">Avg DR</th><th>Top Anchors</th>
+  </tr></thead><tbody>`;
+  for (const t of targets.slice(0, 100)) {
+    const anchors = t.top_anchors.map(a => `<span style="color:var(--c-text-muted)">${a.text.slice(0,40)}</span> <span style="color:var(--c-text-dim)">(${a.count})</span>`).join(', ');
+    html += `<tr>
+      <td class="path" title="${t.path}"><a href="https://www.rudderstack.com${t.path}" target="_blank" style="color:var(--c-text-primary);text-decoration:none;">${t.path}</a></td>
+      <td><span class="section-tag" style="background:${sectionColor(t.section)}">${t.section}</span></td>
+      <td class="num">${fmt(t.backlinks)}</td><td class="num">${fmt(t.domains)}</td>
+      <td class="num">${fmt(t.dofollow)}</td>
+      <td class="num"><span class="dr-bar" style="width:${t.avg_dr/2}px;background:${drColor(t.avg_dr)}"></span>${t.avg_dr}</td>
+      <td class="anchor-cell">${anchors}</td></tr>`;
+  }
+  html += '</tbody></table>';
+  document.getElementById('targets-container').innerHTML = html;
+}
+
+// ============================================================
+// TOP DOMAINS
+// ============================================================
+function renderDomains(data) {
+  const domains = data.top_domains;
+  let html = `<table class="data-table"><thead><tr>
+    <th>Referring Domain</th><th class="num">DR</th><th class="num">Backlinks</th>
+    <th class="num">Targets</th><th class="num">Dofollow</th><th class="num">Traffic</th>
+  </tr></thead><tbody>`;
+  for (const d of domains.slice(0, 100)) {
+    html += `<tr>
+      <td class="domain"><a href="https://${d.domain}" target="_blank" style="color:var(--c-text-primary);text-decoration:none;">${d.domain}</a></td>
+      <td class="num"><span class="dr-bar" style="width:${d.dr/2}px;background:${drColor(d.dr)}"></span>${d.dr}</td>
+      <td class="num">${fmt(d.backlinks)}</td><td class="num">${fmt(d.targets)}</td>
+      <td class="num">${fmt(d.dofollow)}</td>
+      <td class="num">${d.traffic > 0 ? fmt(d.traffic) : '<span style="color:var(--c-text-dim)">0</span>'}</td></tr>`;
+  }
+  html += '</tbody></table>';
+  document.getElementById('domains-container').innerHTML = html;
+}
+
+// ============================================================
+// ALL BACKLINKS TABLE
+// ============================================================
+let blFilter = 'all';
+
+function renderAllBacklinks(data) {
+  // Section filter tabs
+  const sections = ['all'];
+  const secCounts = { all: data.all_backlinks.length };
+  for (const bl of data.all_backlinks) {
+    if (!sections.includes(bl.target_section)) sections.push(bl.target_section);
+    secCounts[bl.target_section] = (secCounts[bl.target_section] || 0) + 1;
+  }
+  document.getElementById('bl-section-filter').innerHTML = sections.map(s =>
+    `<button class="filter-tab ${s === blFilter ? 'active' : ''}" onclick="blFilter='${s}';document.querySelectorAll('#bl-section-filter .filter-tab').forEach(t=>t.classList.remove('active'));this.classList.add('active');updateBLTable();">${s}<span class="tab-count">${fmt(secCounts[s] || 0)}</span></button>`
+  ).join('');
+  updateBLTable();
+}
+
+function updateBLTable() {
+  const data = window._data;
+  const dfOnly = document.getElementById('dofollow-only').checked;
+  const hideLost = document.getElementById('hide-lost').checked;
+
+  let bls = data.all_backlinks;
+  if (blFilter !== 'all') bls = bls.filter(b => b.target_section === blFilter);
+  if (dfOnly) bls = bls.filter(b => !b.nofollow);
+  if (hideLost) bls = bls.filter(b => !b.lost);
+
+  let html = `<table class="data-table"><thead><tr>
+    <th>Referring Domain</th><th class="num">DR</th><th>Target</th><th>Anchor</th>
+    <th>Type</th><th>Status</th><th>First Seen</th>
+  </tr></thead><tbody>`;
+  for (const b of bls.slice(0, 500)) {
+    const status = b.lost
+      ? `<span class="lost-tag">LOST</span>`
+      : (b.nofollow ? `<span class="dofollow-tag nf">NF</span>` : `<span class="dofollow-tag df">DF</span>`);
+    html += `<tr>
+      <td class="domain" title="${b.ref_url}"><a href="${b.ref_url}" target="_blank" style="color:var(--c-text-primary);text-decoration:none;">${b.ref_domain}</a></td>
+      <td class="num"><span class="dr-bar" style="width:${b.dr/2}px;background:${drColor(b.dr)}"></span>${b.dr}</td>
+      <td class="path" title="${b.target_path}"><span class="section-tag" style="background:${sectionColor(b.target_section)};margin-right:4px;">${b.target_section}</span>${b.target_path}</td>
+      <td class="anchor-cell" title="${b.anchor.replace(/"/g, '&quot;')}">${b.anchor || '<span style="color:var(--c-text-dim)">(none)</span>'}</td>
+      <td><span class="type-tag">${b.link_type}</span></td>
+      <td>${status}</td>
+      <td style="font-size:11px;color:var(--c-text-muted);white-space:nowrap">${b.first_seen}</td></tr>`;
+  }
+  if (bls.length > 500) html += `<tr><td colspan="7" style="text-align:center;color:var(--c-text-dim);padding:12px;">Showing 500 of ${fmt(bls.length)} — use Export CSV for full data</td></tr>`;
+  html += '</tbody></table>';
+  document.getElementById('all-bl-container').innerHTML = html;
+}
+
+document.getElementById('dofollow-only').addEventListener('change', updateBLTable);
+document.getElementById('hide-lost').addEventListener('change', updateBLTable);
+
+// CSV EXPORTS
+function downloadCSV(filename, csv) {
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById('export-targets-btn').addEventListener('click', function() {
+  const data = window._data;
+  let csv = 'Target Path,Section,Backlinks,Domains,Dofollow,Avg DR,Total Traffic\n';
+  for (const t of data.top_targets) {
+    csv += `"${t.path}",${t.section},${t.backlinks},${t.domains},${t.dofollow},${t.avg_dr},${t.total_traffic}\n`;
+  }
+  downloadCSV('backlinks_targets.csv', csv);
+});
+
+document.getElementById('export-domains-btn').addEventListener('click', function() {
+  const data = window._data;
+  let csv = 'Domain,DR,Backlinks,Targets,Dofollow,Traffic\n';
+  for (const d of data.top_domains) {
+    csv += `"${d.domain}",${d.dr},${d.backlinks},${d.targets},${d.dofollow},${d.traffic}\n`;
+  }
+  downloadCSV('backlinks_domains.csv', csv);
+});
+
+document.getElementById('export-all-btn').addEventListener('click', function() {
+  const data = window._data;
+  let bls = data.all_backlinks;
+  if (blFilter !== 'all') bls = bls.filter(b => b.target_section === blFilter);
+  if (document.getElementById('dofollow-only').checked) bls = bls.filter(b => !b.nofollow);
+  if (document.getElementById('hide-lost').checked) bls = bls.filter(b => !b.lost);
+
+  let csv = 'Referring Domain,Referring URL,Referring Title,DR,UR,Target Path,Target Section,Anchor,Type,Nofollow,Page Traffic,First Seen,Last Seen,Lost\n';
+  for (const b of bls) {
+    csv += `"${b.ref_domain}","${b.ref_url}","${b.ref_title.replace(/"/g, '""')}",${b.dr},${b.ur},"${b.target_path}",${b.target_section},"${b.anchor.replace(/"/g, '""')}",${b.link_type},${b.nofollow},${b.page_traffic},"${b.first_seen}","${b.last_seen}","${b.lost}"\n`;
+  }
+  downloadCSV('backlinks_all.csv', csv);
+});
+</script>
+</body>
+</html>
