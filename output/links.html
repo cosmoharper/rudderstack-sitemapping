@@ -485,14 +485,15 @@ function renderHeatmap() {
   }
 
   // Column labels (rendered after cells so they appear on top)
+  // Using text-anchor:start + rotate(-45) so text extends upward-right from anchor
   const colLabelG = svg.append('g').attr('class', 'col-labels');
   colLabelG.selectAll('.col-label')
     .data(sections).enter()
     .append('text')
     .attr('x', (d, i) => labelW + i * cellSize + cellSize / 2)
-    .attr('y', gridTop - 6)
-    .attr('text-anchor', 'end')
-    .attr('transform', (d, i) => `rotate(-45, ${labelW + i * cellSize + cellSize / 2}, ${gridTop - 6})`)
+    .attr('y', gridTop - 8)
+    .attr('text-anchor', 'start')
+    .attr('transform', (d, i) => `rotate(-45, ${labelW + i * cellSize + cellSize / 2}, ${gridTop - 8})`)
     .style('font-size', '10px')
     .style('fill', d => sectionColor(d))
     .style('font-weight', '600')
