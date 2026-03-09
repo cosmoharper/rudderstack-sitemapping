@@ -1,0 +1,719 @@
+{
+  "nodes": [
+    {
+      "id": "blog",
+      "label": "Blog",
+      "current_pages": 389,
+      "future_pages": 389,
+      "planned_pages": 0,
+      "crawled_pages": 387,
+      "orphan_pages": 179,
+      "orphan_rate": 0.46,
+      "backlinks": 385,
+      "is_new": false
+    },
+    {
+      "id": "competitors",
+      "label": "Competitors",
+      "current_pages": 41,
+      "future_pages": 46,
+      "planned_pages": 5,
+      "crawled_pages": 41,
+      "orphan_pages": 23,
+      "orphan_rate": 0.561,
+      "backlinks": 11,
+      "is_new": false
+    },
+    {
+      "id": "core",
+      "label": "Core Pages",
+      "current_pages": 12,
+      "future_pages": 12,
+      "planned_pages": 0,
+      "crawled_pages": 12,
+      "orphan_pages": 2,
+      "orphan_rate": 0.167,
+      "backlinks": 559,
+      "is_new": false
+    },
+    {
+      "id": "customers",
+      "label": "Customers",
+      "current_pages": 36,
+      "future_pages": 42,
+      "planned_pages": 6,
+      "crawled_pages": 36,
+      "orphan_pages": 8,
+      "orphan_rate": 0.222,
+      "backlinks": 8,
+      "is_new": false
+    },
+    {
+      "id": "docs",
+      "label": "Documentation",
+      "current_pages": 943,
+      "future_pages": 943,
+      "planned_pages": 0,
+      "crawled_pages": 943,
+      "orphan_pages": 1,
+      "orphan_rate": 0.001,
+      "backlinks": 374,
+      "is_new": false
+    },
+    {
+      "id": "events",
+      "label": "Events & Webinars",
+      "current_pages": 98,
+      "future_pages": 98,
+      "planned_pages": 0,
+      "crawled_pages": 97,
+      "orphan_pages": 77,
+      "orphan_rate": 0.786,
+      "backlinks": 6,
+      "is_new": false
+    },
+    {
+      "id": "integrations",
+      "label": "Integrations",
+      "current_pages": 19185,
+      "future_pages": 19185,
+      "planned_pages": 0,
+      "crawled_pages": 499,
+      "orphan_pages": 18270,
+      "orphan_rate": 0.952,
+      "backlinks": 36,
+      "is_new": false
+    },
+    {
+      "id": "learn",
+      "label": "Learn",
+      "current_pages": 402,
+      "future_pages": 417,
+      "planned_pages": 15,
+      "crawled_pages": 402,
+      "orphan_pages": 10,
+      "orphan_rate": 0.025,
+      "backlinks": 177,
+      "is_new": false
+    },
+    {
+      "id": "other",
+      "label": "Other",
+      "current_pages": 59,
+      "future_pages": 59,
+      "planned_pages": 0,
+      "crawled_pages": 58,
+      "orphan_pages": 36,
+      "orphan_rate": 0.61,
+      "backlinks": 907,
+      "is_new": false
+    },
+    {
+      "id": "product",
+      "label": "Product",
+      "current_pages": 12,
+      "future_pages": 12,
+      "planned_pages": 0,
+      "crawled_pages": 12,
+      "orphan_pages": 2,
+      "orphan_rate": 0.167,
+      "backlinks": 37,
+      "is_new": false
+    },
+    {
+      "id": "topics",
+      "label": "Topics",
+      "current_pages": 0,
+      "future_pages": 10,
+      "planned_pages": 10,
+      "crawled_pages": 0,
+      "orphan_pages": 0,
+      "orphan_rate": 0,
+      "backlinks": 0,
+      "is_new": true
+    }
+  ],
+  "edges": [
+    {
+      "source": "blog",
+      "target": "competitors",
+      "current_count": 13,
+      "future_count": 13,
+      "is_new": false
+    },
+    {
+      "source": "blog",
+      "target": "core",
+      "current_count": 438,
+      "future_count": 438,
+      "is_new": false
+    },
+    {
+      "source": "blog",
+      "target": "customers",
+      "current_count": 58,
+      "future_count": 58,
+      "is_new": false
+    },
+    {
+      "source": "blog",
+      "target": "docs",
+      "current_count": 308,
+      "future_count": 308,
+      "is_new": false
+    },
+    {
+      "source": "blog",
+      "target": "events",
+      "current_count": 13,
+      "future_count": 13,
+      "is_new": false
+    },
+    {
+      "source": "blog",
+      "target": "integrations",
+      "current_count": 175,
+      "future_count": 175,
+      "is_new": false
+    },
+    {
+      "source": "blog",
+      "target": "learn",
+      "current_count": 696,
+      "future_count": 696,
+      "is_new": false
+    },
+    {
+      "source": "blog",
+      "target": "other",
+      "current_count": 472,
+      "future_count": 472,
+      "is_new": false
+    },
+    {
+      "source": "blog",
+      "target": "product",
+      "current_count": 200,
+      "future_count": 1161,
+      "is_new": false
+    },
+    {
+      "source": "blog",
+      "target": "topics",
+      "current_count": 0,
+      "future_count": 387,
+      "is_new": true
+    },
+    {
+      "source": "competitors",
+      "target": "core",
+      "current_count": 32,
+      "future_count": 32,
+      "is_new": false
+    },
+    {
+      "source": "competitors",
+      "target": "learn",
+      "current_count": 23,
+      "future_count": 23,
+      "is_new": false
+    },
+    {
+      "source": "competitors",
+      "target": "other",
+      "current_count": 45,
+      "future_count": 45,
+      "is_new": false
+    },
+    {
+      "source": "competitors",
+      "target": "product",
+      "current_count": 44,
+      "future_count": 44,
+      "is_new": false
+    },
+    {
+      "source": "competitors",
+      "target": "topics",
+      "current_count": 0,
+      "future_count": 92,
+      "is_new": true
+    },
+    {
+      "source": "core",
+      "target": "blog",
+      "current_count": 25,
+      "future_count": 25,
+      "is_new": false
+    },
+    {
+      "source": "core",
+      "target": "competitors",
+      "current_count": 4,
+      "future_count": 4,
+      "is_new": false
+    },
+    {
+      "source": "core",
+      "target": "customers",
+      "current_count": 7,
+      "future_count": 7,
+      "is_new": false
+    },
+    {
+      "source": "core",
+      "target": "docs",
+      "current_count": 1,
+      "future_count": 1,
+      "is_new": false
+    },
+    {
+      "source": "core",
+      "target": "other",
+      "current_count": 12,
+      "future_count": 12,
+      "is_new": false
+    },
+    {
+      "source": "core",
+      "target": "product",
+      "current_count": 5,
+      "future_count": 5,
+      "is_new": false
+    },
+    {
+      "source": "customers",
+      "target": "blog",
+      "current_count": 46,
+      "future_count": 46,
+      "is_new": false
+    },
+    {
+      "source": "customers",
+      "target": "core",
+      "current_count": 35,
+      "future_count": 35,
+      "is_new": false
+    },
+    {
+      "source": "customers",
+      "target": "docs",
+      "current_count": 7,
+      "future_count": 7,
+      "is_new": false
+    },
+    {
+      "source": "customers",
+      "target": "integrations",
+      "current_count": 24,
+      "future_count": 84,
+      "is_new": false
+    },
+    {
+      "source": "customers",
+      "target": "learn",
+      "current_count": 49,
+      "future_count": 49,
+      "is_new": false
+    },
+    {
+      "source": "customers",
+      "target": "other",
+      "current_count": 3,
+      "future_count": 3,
+      "is_new": false
+    },
+    {
+      "source": "customers",
+      "target": "product",
+      "current_count": 12,
+      "future_count": 12,
+      "is_new": false
+    },
+    {
+      "source": "docs",
+      "target": "blog",
+      "current_count": 5,
+      "future_count": 5,
+      "is_new": false
+    },
+    {
+      "source": "docs",
+      "target": "core",
+      "current_count": 18,
+      "future_count": 18,
+      "is_new": false
+    },
+    {
+      "source": "docs",
+      "target": "learn",
+      "current_count": 3,
+      "future_count": 3,
+      "is_new": false
+    },
+    {
+      "source": "docs",
+      "target": "other",
+      "current_count": 1,
+      "future_count": 1,
+      "is_new": false
+    },
+    {
+      "source": "events",
+      "target": "learn",
+      "current_count": 5,
+      "future_count": 5,
+      "is_new": false
+    },
+    {
+      "source": "events",
+      "target": "other",
+      "current_count": 8,
+      "future_count": 8,
+      "is_new": false
+    },
+    {
+      "source": "events",
+      "target": "product",
+      "current_count": 2,
+      "future_count": 2,
+      "is_new": false
+    },
+    {
+      "source": "integrations",
+      "target": "core",
+      "current_count": 10,
+      "future_count": 10,
+      "is_new": false
+    },
+    {
+      "source": "integrations",
+      "target": "docs",
+      "current_count": 4,
+      "future_count": 4,
+      "is_new": false
+    },
+    {
+      "source": "integrations",
+      "target": "integrations",
+      "current_count": 0,
+      "future_count": 1497,
+      "is_new": true
+    },
+    {
+      "source": "integrations",
+      "target": "topics",
+      "current_count": 0,
+      "future_count": 499,
+      "is_new": true
+    },
+    {
+      "source": "learn",
+      "target": "blog",
+      "current_count": 106,
+      "future_count": 106,
+      "is_new": false
+    },
+    {
+      "source": "learn",
+      "target": "core",
+      "current_count": 3,
+      "future_count": 3,
+      "is_new": false
+    },
+    {
+      "source": "learn",
+      "target": "customers",
+      "current_count": 4,
+      "future_count": 4,
+      "is_new": false
+    },
+    {
+      "source": "learn",
+      "target": "docs",
+      "current_count": 48,
+      "future_count": 48,
+      "is_new": false
+    },
+    {
+      "source": "learn",
+      "target": "events",
+      "current_count": 1,
+      "future_count": 1,
+      "is_new": false
+    },
+    {
+      "source": "learn",
+      "target": "integrations",
+      "current_count": 287,
+      "future_count": 287,
+      "is_new": false
+    },
+    {
+      "source": "learn",
+      "target": "other",
+      "current_count": 38,
+      "future_count": 38,
+      "is_new": false
+    },
+    {
+      "source": "learn",
+      "target": "product",
+      "current_count": 11,
+      "future_count": 834,
+      "is_new": false
+    },
+    {
+      "source": "other",
+      "target": "blog",
+      "current_count": 26,
+      "future_count": 26,
+      "is_new": false
+    },
+    {
+      "source": "other",
+      "target": "competitors",
+      "current_count": 22,
+      "future_count": 22,
+      "is_new": false
+    },
+    {
+      "source": "other",
+      "target": "core",
+      "current_count": 27,
+      "future_count": 27,
+      "is_new": false
+    },
+    {
+      "source": "other",
+      "target": "customers",
+      "current_count": 30,
+      "future_count": 30,
+      "is_new": false
+    },
+    {
+      "source": "other",
+      "target": "docs",
+      "current_count": 7,
+      "future_count": 7,
+      "is_new": false
+    },
+    {
+      "source": "other",
+      "target": "events",
+      "current_count": 16,
+      "future_count": 16,
+      "is_new": false
+    },
+    {
+      "source": "other",
+      "target": "integrations",
+      "current_count": 243,
+      "future_count": 243,
+      "is_new": false
+    },
+    {
+      "source": "other",
+      "target": "learn",
+      "current_count": 392,
+      "future_count": 392,
+      "is_new": false
+    },
+    {
+      "source": "other",
+      "target": "product",
+      "current_count": 17,
+      "future_count": 17,
+      "is_new": false
+    },
+    {
+      "source": "product",
+      "target": "blog",
+      "current_count": 8,
+      "future_count": 8,
+      "is_new": false
+    },
+    {
+      "source": "product",
+      "target": "competitors",
+      "current_count": 4,
+      "future_count": 4,
+      "is_new": false
+    },
+    {
+      "source": "product",
+      "target": "core",
+      "current_count": 11,
+      "future_count": 11,
+      "is_new": false
+    },
+    {
+      "source": "product",
+      "target": "customers",
+      "current_count": 12,
+      "future_count": 12,
+      "is_new": false
+    },
+    {
+      "source": "product",
+      "target": "docs",
+      "current_count": 25,
+      "future_count": 25,
+      "is_new": false
+    },
+    {
+      "source": "product",
+      "target": "events",
+      "current_count": 1,
+      "future_count": 1,
+      "is_new": false
+    },
+    {
+      "source": "product",
+      "target": "other",
+      "current_count": 4,
+      "future_count": 4,
+      "is_new": false
+    },
+    {
+      "source": "topics",
+      "target": "learn",
+      "current_count": 0,
+      "future_count": 12,
+      "is_new": true
+    },
+    {
+      "source": "topics",
+      "target": "product",
+      "current_count": 0,
+      "future_count": 18,
+      "is_new": true
+    }
+  ],
+  "linking_rules": [
+    {
+      "id": "blog_to_product",
+      "source": "blog",
+      "target": "product",
+      "min_per_page": 3,
+      "phase": 2,
+      "current_links": 200,
+      "projected_links": 1161,
+      "gap": 961
+    },
+    {
+      "id": "learn_to_product",
+      "source": "learn",
+      "target": "product",
+      "min_per_page": 2,
+      "phase": 3,
+      "current_links": 11,
+      "projected_links": 834,
+      "gap": 823
+    },
+    {
+      "id": "blog_to_hub",
+      "source": "blog",
+      "target": "topics",
+      "min_per_page": 1,
+      "phase": 2,
+      "current_links": 0,
+      "projected_links": 387,
+      "gap": 387
+    },
+    {
+      "id": "integration_to_hub",
+      "source": "integrations",
+      "target": "topics",
+      "min_per_page": 1,
+      "phase": 3,
+      "current_links": 0,
+      "projected_links": 499,
+      "gap": 499
+    },
+    {
+      "id": "integration_cross",
+      "source": "integrations",
+      "target": "integrations",
+      "min_per_page": 3,
+      "phase": 3,
+      "current_links": 0,
+      "projected_links": 1497,
+      "gap": 1497
+    },
+    {
+      "id": "comparison_to_hub",
+      "source": "competitors",
+      "target": "topics",
+      "min_per_page": 2,
+      "phase": 2,
+      "current_links": 0,
+      "projected_links": 92,
+      "gap": 92
+    },
+    {
+      "id": "casestudy_to_int",
+      "source": "customers",
+      "target": "integrations",
+      "min_per_page": 2,
+      "phase": 2,
+      "current_links": 24,
+      "projected_links": 84,
+      "gap": 60
+    }
+  ],
+  "topic_hubs": [
+    {
+      "id": "warehouse-native-cdp",
+      "name": "Warehouse-Native CDP",
+      "path": "/topics/warehouse-native-cdp/",
+      "phase": 2,
+      "child_count": 4
+    },
+    {
+      "id": "event-streaming",
+      "name": "Event Streaming",
+      "path": "/topics/event-streaming/",
+      "phase": 3,
+      "child_count": 0
+    },
+    {
+      "id": "reverse-etl",
+      "name": "Reverse ETL",
+      "path": "/topics/reverse-etl/",
+      "phase": 3,
+      "child_count": 0
+    },
+    {
+      "id": "identity-resolution",
+      "name": "Identity Resolution",
+      "path": "/topics/identity-resolution/",
+      "phase": 3,
+      "child_count": 0
+    },
+    {
+      "id": "data-governance",
+      "name": "Data Governance",
+      "path": "/topics/data-governance/",
+      "phase": 2,
+      "child_count": 0
+    },
+    {
+      "id": "ai-ml",
+      "name": "AI & ML Data",
+      "path": "/topics/ai-ml/",
+      "phase": 3,
+      "child_count": 0
+    }
+  ],
+  "stats": {
+    "total_sections": 11,
+    "new_sections": 1,
+    "total_current_pages": 21177,
+    "total_future_pages": 21213,
+    "total_planned_pages": 36,
+    "total_current_flows": 4146,
+    "total_future_flows": 8495,
+    "flow_increase": 4349
+  }
+}

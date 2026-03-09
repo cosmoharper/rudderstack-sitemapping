@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RudderStack.com Future State Sitemap</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+  (function(){var p=localStorage.getItem('theme-preference')||'dark';var t=p==='system'?(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):p;document.documentElement.setAttribute('data-theme',t)})();
+</script>
+<style>
+:root, [data-theme="dark"] {
+  --c-bg-body: #1a1e27; --c-bg-surface: #252a35;
+  --c-bg-controls: rgba(26,30,39,0.97); --c-bg-tooltip: rgba(30,34,44,0.98);
+  --c-text-primary: #e0e0e0; --c-text-secondary: #ccc; --c-text-muted: #888;
+  --c-text-dim: #666; --c-text-faint: #555; --c-text-white: #fff; --c-text-on-surface: #fff;
+  --c-border-primary: #313845; --c-border-secondary: #3d4451;
+  --c-brand-blue: #1063e2; --c-brand-blue-dark: #0b56c6; --c-brand-blue-light: #76acf7;
+  --c-brand-amber: #f59e0b; --c-brand-green: #22c55e;
+  --c-brand-blue-shadow: rgba(16,99,226,0.4);
+  --c-node-label: #ccc; --c-node-count: #888; --c-node-expand: #fff;
+  --c-node-stroke-collapsed: #aaa; --c-node-link-icon: #76acf7;
+  --c-logo-text: #ffffff;
+  --c-shadow-light: rgba(0,0,0,0.4); --c-shadow-medium: rgba(0,0,0,0.5); --c-shadow-heavy: rgba(0,0,0,0.6);
+  --c-modal-overlay: rgba(0,0,0,0.6);
+  --c-link-tree: #3d4451; --c-link-internal: #1063e2; --c-link-cta: #f59e0b; --c-link-nav: #76acf7;
+  --c-section-product: #3b82f6; --c-section-docs: #14b8a6; --c-section-blog: #a855f7;
+  --c-section-learn: #22c55e; --c-section-customers: #f59e0b; --c-section-competitors: #ef4444;
+  --c-section-integrations: #6366f1; --c-section-events: #ec4899;
+  --c-section-topics: #06b6d4;
+  --c-section-core: #e2e8f0; --c-section-other: #6b7280;
+  --c-planned: #10b981; --c-planned-glow: rgba(16,185,129,0.3);
+}
+[data-theme="light"] {
+  --c-bg-body: #f5f6f8; --c-bg-surface: #ffffff;
+  --c-bg-controls: rgba(245,246,248,0.97); --c-bg-tooltip: rgba(255,255,255,0.98);
+  --c-text-primary: #1a1e27; --c-text-secondary: #555; --c-text-muted: #777;
+  --c-text-dim: #999; --c-text-faint: #aaa; --c-text-white: #fff; --c-text-on-surface: #1a1e27;
+  --c-border-primary: #dde1e8; --c-border-secondary: #c8cdd6;
+  --c-brand-blue: #1063e2; --c-brand-blue-dark: #0b56c6; --c-brand-blue-light: #4a8fe8;
+  --c-brand-amber: #d97706; --c-brand-green: #16a34a;
+  --c-brand-blue-shadow: rgba(16,99,226,0.25);
+  --c-node-label: #444; --c-node-count: #888; --c-node-expand: #fff;
+  --c-node-stroke-collapsed: #999; --c-node-link-icon: #4a8fe8;
+  --c-logo-text: #1a1e27;
+  --c-shadow-light: rgba(0,0,0,0.08); --c-shadow-medium: rgba(0,0,0,0.12); --c-shadow-heavy: rgba(0,0,0,0.18);
+  --c-modal-overlay: rgba(0,0,0,0.3);
+  --c-link-tree: #c8cdd6; --c-link-internal: #1063e2; --c-link-cta: #d97706; --c-link-nav: #4a8fe8;
+  --c-section-product: #2563eb; --c-section-docs: #0d9488; --c-section-blog: #9333ea;
+  --c-section-learn: #16a34a; --c-section-customers: #d97706; --c-section-competitors: #dc2626;
+  --c-section-integrations: #4f46e5; --c-section-events: #db2777;
+  --c-section-topics: #0891b2;
+  --c-section-core: #334155; --c-section-other: #9ca3af;
+  --c-planned: #059669; --c-planned-glow: rgba(5,150,105,0.25);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--c-bg-body); color: var(--c-text-primary); overflow: hidden; }
+
+#controls {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: var(--c-bg-controls); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--c-border-primary); padding: 12px 20px;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+#controls .logo-area { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+#controls .logo-area svg { color: var(--c-logo-text); }
+#controls .logo-area .site-map-label { font-size: 14px; font-weight: 600; color: var(--c-planned); letter-spacing: -0.3px; }
+#controls .nav-links { display: flex; gap: 4px; }
+#controls .nav-links a { padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; text-decoration: none; color: var(--c-text-muted); transition: all 0.15s; }
+#controls .nav-links a:hover { color: var(--c-text-primary); background: var(--c-bg-surface); }
+#controls .nav-links a.active { color: var(--c-text-white); background: var(--c-brand-blue); }
+#controls .stats { font-size: 12px; color: var(--c-text-muted); white-space: nowrap; }
+
+#search-box {
+  padding: 6px 12px; border: 1px solid var(--c-border-secondary); border-radius: 6px;
+  background: var(--c-bg-surface); color: var(--c-text-primary); font-size: 13px; width: 220px;
+  font-family: 'Inter', sans-serif;
+}
+#search-box:focus { outline: none; border-color: var(--c-brand-blue); }
+
+.toggle-btn {
+  padding: 5px 12px; border: 1px solid var(--c-border-secondary); border-radius: 6px;
+  background: var(--c-bg-surface); color: var(--c-text-secondary); font-size: 12px; cursor: pointer;
+  transition: all 0.2s; white-space: nowrap; font-family: 'Inter', sans-serif;
+  position: relative;
+}
+.toggle-btn:hover { border-color: var(--c-brand-blue); color: var(--c-text-on-surface); }
+.toggle-btn.active { background: var(--c-brand-blue); border-color: var(--c-brand-blue); color: var(--c-text-white); }
+.toggle-btn.active-green { background: var(--c-planned); border-color: var(--c-planned); color: var(--c-text-white); }
+.toggle-btn .btn-tip {
+  display: none; position: absolute; top: calc(100% + 8px); left: 50%;
+  transform: translateX(-50%); z-index: 250;
+  background: var(--c-bg-body); border: 1px solid var(--c-border-secondary); border-radius: 6px;
+  padding: 8px 12px; font-size: 11px; line-height: 1.5; color: var(--c-text-secondary);
+  white-space: normal; width: 220px; text-align: left;
+  box-shadow: 0 6px 20px var(--c-shadow-light); pointer-events: none; font-weight: 400;
+}
+.toggle-btn .btn-tip::before {
+  content: ''; position: absolute; top: -5px; left: 50%; transform: translateX(-50%);
+  border-left: 5px solid transparent; border-right: 5px solid transparent;
+  border-bottom: 5px solid var(--c-border-secondary);
+}
+.toggle-btn:hover .btn-tip { display: block; }
+.toggle-btn .btn-tip.tip-left { left: 0; transform: none; }
+.toggle-btn .btn-tip.tip-left::before { left: 20px; transform: none; }
+.toggle-btn .btn-tip.tip-right { left: auto; right: 0; transform: none; }
+.toggle-btn .btn-tip.tip-right::before { left: auto; right: 20px; transform: none; }
+
+.phase-btns { display: flex; gap: 4px; align-items: center; }
+.phase-btns .phase-label { font-size: 11px; color: var(--c-text-muted); font-weight: 600; margin-right: 2px; }
+.phase-btn {
+  padding: 3px 10px; border: 1px solid var(--c-border-secondary); border-radius: 12px;
+  background: var(--c-bg-surface); color: var(--c-text-muted); font-size: 11px; cursor: pointer;
+  transition: all 0.2s; font-family: 'Inter', sans-serif; font-weight: 600;
+}
+.phase-btn:hover { border-color: var(--c-planned); color: var(--c-planned); }
+.phase-btn.active { background: var(--c-planned); border-color: var(--c-planned); color: var(--c-text-white); }
+
+/* Theme toggle */
+.theme-toggle {
+  display: flex; border: 1px solid var(--c-border-secondary); border-radius: 6px; overflow: hidden; margin-left: auto;
+}
+.theme-toggle button {
+  padding: 5px 8px; border: none; background: var(--c-bg-surface); color: var(--c-text-secondary);
+  font-size: 12px; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s;
+  display: flex; align-items: center; gap: 0; white-space: nowrap; line-height: 1;
+}
+.theme-toggle button:not(:last-child) { border-right: 1px solid var(--c-border-secondary); }
+.theme-toggle button:hover { color: var(--c-text-on-surface); }
+.theme-toggle button.active { background: var(--c-brand-blue); color: var(--c-text-white); }
+.theme-toggle button svg { width: 14px; height: 14px; fill: currentColor; }
+
+#legend {
+  position: fixed; bottom: 20px; left: 20px; z-index: 100;
+  background: var(--c-bg-controls); backdrop-filter: blur(10px);
+  border: 1px solid var(--c-border-primary); border-radius: 8px; padding: 14px 18px;
+  font-size: 12px;
+}
+#legend h3 { font-size: 13px; margin-bottom: 8px; color: var(--c-brand-blue); }
+.legend-section-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.legend-item { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+.legend-line { display: inline-block; width: 30px; }
+.legend-line-tree { border-top: 2px solid var(--c-link-tree); }
+.legend-planned-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; border: 2px dashed var(--c-planned); flex-shrink: 0; }
+.legend-planned-filled { width: 10px; height: 10px; border-radius: 50%; display: inline-block; background: var(--c-planned); flex-shrink: 0; }
+.legend-orphan-ring { width: 10px; height: 10px; border-radius: 50%; display: inline-block; border: 2px dashed var(--c-section-competitors); flex-shrink: 0; }
+
+#tooltip {
+  position: fixed; z-index: 200; pointer-events: auto; display: none;
+  background: var(--c-bg-tooltip); backdrop-filter: blur(10px);
+  border: 1px solid var(--c-border-secondary); border-radius: 8px; padding: 14px 18px;
+  max-width: 480px; max-height: 70vh; overflow-y: auto; font-size: 12px; line-height: 1.5;
+  box-shadow: 0 8px 30px var(--c-shadow-medium);
+}
+#tooltip h4 { color: var(--c-brand-blue); font-size: 14px; margin-bottom: 6px; word-break: break-all; }
+#tooltip .url { font-size: 11px; margin-bottom: 8px; word-break: break-all; }
+#tooltip .url a { color: var(--c-brand-blue-light); text-decoration: underline; cursor: pointer; transition: color 0.15s; }
+#tooltip .url a:hover { color: var(--c-brand-blue); }
+#tooltip .planned-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; margin-left: 6px; }
+#tooltip .planned-badge.new { background: var(--c-planned); color: #fff; }
+#tooltip .planned-badge.existing { background: var(--c-brand-blue); color: #fff; }
+#tooltip .phase-tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; background: var(--c-bg-surface); color: var(--c-text-secondary); border: 1px solid var(--c-border-secondary); margin-left: 4px; }
+#tooltip .planned-type { color: var(--c-planned); font-weight: 600; font-size: 11px; margin-top: 4px; }
+#tooltip .context-section { margin-top: 8px; }
+#tooltip .context-section-title { font-weight: 600; font-size: 11px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+#tooltip .orphan-warning { color: var(--c-section-competitors); font-weight: 600; }
+#tooltip .orphan-ok { color: var(--c-brand-green); }
+#tooltip .context-item { background: var(--c-bg-surface); padding: 3px 8px; margin: 2px 0; border-radius: 0 4px 4px 0; font-size: 11px; line-height: 1.4; }
+#tooltip .inbound-section .context-item { border-left: 3px solid var(--c-brand-amber); }
+#tooltip .xsection-dot-inline { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 3px; vertical-align: middle; }
+#tooltip .context-summary { color: var(--c-text-muted); font-size: 10px; margin-top: 4px; }
+
+/* Cross-section / future flows panel */
+#xsection-panel {
+  position: fixed; bottom: 20px; right: 20px; z-index: 100;
+  background: var(--c-bg-controls); backdrop-filter: blur(10px);
+  border: 1px solid var(--c-border-primary); border-radius: 8px; padding: 14px 18px;
+  font-size: 11px; max-height: 450px; overflow-y: auto; min-width: 280px;
+}
+#xsection-panel h3 { font-size: 13px; margin-bottom: 8px; color: var(--c-planned); }
+.xsection-row { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; gap: 12px; }
+.xsection-flow { display: flex; align-items: center; gap: 4px; }
+.xsection-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.xsection-arrow { color: var(--c-text-dim); font-size: 10px; }
+.xsection-count { font-weight: 600; font-variant-numeric: tabular-nums; }
+.xsection-count .current { color: var(--c-text-muted); }
+.xsection-count .projected { color: var(--c-planned); }
+.xsection-count .new-badge { font-size: 9px; color: var(--c-planned); font-weight: 700; margin-left: 2px; }
+
+.node { cursor: pointer; }
+.node circle { transition: all 0.3s ease; }
+.node:hover circle { filter: brightness(1.3); }
+.node text { font-size: 11px; fill: var(--c-node-label); pointer-events: none; font-family: 'Inter', sans-serif; }
+.node text.count-label { font-size: 9px; fill: var(--c-node-count); }
+.node text.expand-icon { font-size: 10px; fill: var(--c-node-expand); font-weight: bold; pointer-events: none; }
+.node text.link-icon { font-size: 11px; fill: var(--c-node-link-icon); pointer-events: all; cursor: pointer; opacity: 0; transition: opacity 0.15s; }
+.node:hover text.link-icon { opacity: 1; }
+
+.link { fill: none; stroke-opacity: 0.25; }
+.link.tree-link { stroke: var(--c-link-tree); stroke-width: 1.2; }
+
+/* Inbound badges */
+.inbound-badge { pointer-events: none; }
+
+/* Smooth theme transition */
+body, #controls, #legend, #tooltip, .toggle-btn, .theme-toggle button, #search-box {
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+</style>
+</head>
+<body>
+
+<div id="controls">
+  <div class="logo-area">
+    <svg width="180" height="26" viewBox="0 0 180 26" xmlns="http://www.w3.org/2000/svg"><path d="M1,1 L24,1 A23,23 0 0,1 1,24 Z" fill="#1A63EE"/><text x="30" y="21" font-family="Inter, system-ui, sans-serif" font-weight="400" font-size="21" fill="#1A63EE" letter-spacing="-0.3">rudderstack</text></svg>
+    <span class="site-map-label">Future Sitemap</span>
+  </div>
+  <div class="nav-links">
+    <a href="index.html">Site Map</a>
+    <a href="future_sitemap.html" class="active">Future Sitemap</a>
+    <a href="ia_diagram.html">IA Diagram</a>
+    <a href="links.html">Internal Links</a>
+    <a href="backlinks.html">Backlinks</a>
+    <a href="roadmap.html">IA Roadmap</a>
+  </div>
+  <input id="search-box" type="text" placeholder="Search pages...">
+  <button class="toggle-btn active" id="btn-tree">Tree Links</button>
+  <button class="toggle-btn" id="btn-new-only">Show New Only<span class="btn-tip tip-right">Show only the planned/new pages, dimming all existing pages. Useful to see exactly what will be added.</span></button>
+  <button class="toggle-btn" id="btn-inbound">Inbound Links</button>
+  <button class="toggle-btn" id="btn-orphans">Orphans</button>
+  <button class="toggle-btn" id="btn-xsection">Future Flows<span class="btn-tip tip-left">Show projected cross-section link flows comparing current vs future state.</span></button>
+  <div class="phase-btns">
+    <span class="phase-label">Phase:</span>
+    <button class="phase-btn active" data-phase="all">All</button>
+    <button class="phase-btn" data-phase="2">P2</button>
+    <button class="phase-btn" data-phase="3">P3</button>
+    <button class="phase-btn" data-phase="4">P4</button>
+  </div>
+  <button class="toggle-btn" id="btn-expand-all">Expand All (L2)</button>
+  <button class="toggle-btn" id="btn-collapse">Collapse All</button>
+  <button class="toggle-btn" id="btn-fit">Zoom to Fit</button>
+  <span class="stats" id="stats-text"></span>
+  <div class="theme-toggle">
+    <button id="theme-light" title="Light"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="3.5" fill="none" stroke="currentColor" stroke-width="1.5"/><g stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="10" y1="2" x2="10" y2="4"/><line x1="10" y1="16" x2="10" y2="18"/><line x1="2" y1="10" x2="4" y2="10"/><line x1="16" y1="10" x2="18" y2="10"/><line x1="4.3" y1="4.3" x2="5.7" y2="5.7"/><line x1="14.3" y1="14.3" x2="15.7" y2="15.7"/><line x1="4.3" y1="15.7" x2="5.7" y2="14.3"/><line x1="14.3" y1="5.7" x2="15.7" y2="4.3"/></g></svg></button>
+    <button id="theme-dark" title="Dark"><svg viewBox="0 0 20 20"><path d="M15.1 12.5A6.5 6.5 0 0 1 7.5 4.9 7 7 0 1 0 15.1 12.5z"/></svg></button>
+    <button id="theme-system" title="System"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2.5" y="3" width="15" height="10" rx="1.5"/><line x1="7" y1="16" x2="13" y2="16"/><line x1="10" y1="13" x2="10" y2="16"/></svg></button>
+  </div>
+</div>
+
+<div id="legend">
+  <h3>Legend</h3>
+  <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-product)"></span> Product</div>
+  <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-docs)"></span> Documentation</div>
+  <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-blog)"></span> Blog</div>
+  <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-learn)"></span> Learning Center</div>
+  <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-customers)"></span> Customer Stories</div>
+  <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-competitors)"></span> Competitors</div>
+  <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-integrations)"></span> Integrations</div>
+  <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-events)"></span> Events &amp; Webinars</div>
+  <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-topics)"></span> Topics (New)</div>
+  <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-core)"></span> Core Pages</div>
+  <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-other)"></span> Other</div>
+  <div style="height:4px"></div>
+  <div class="legend-item"><span class="legend-line legend-line-tree">&nbsp;</span> Tree structure</div>
+  <div class="legend-item"><span class="legend-planned-filled"></span> Planned page (new)</div>
+  <div class="legend-item"><span class="legend-planned-dot"></span> Planned (dashed ring)</div>
+  <div class="legend-item" id="legend-orphan" style="display:none"><span class="legend-orphan-ring"></span> Orphan page (0 inbound)</div>
+</div>
+
+<div id="tooltip"></div>
+
+<div id="xsection-panel" style="display:none">
+  <h3>Future Cross-Section Flows</h3>
+  <div id="xsection-content"></div>
+</div>
+
+<svg id="diagram"></svg>
+
+<script>
+// ============================================================
+// THEME ENGINE
+// ============================================================
+const THEME_COLORS = {};
+const TV = [
+  'bg-body','bg-surface','bg-controls','bg-tooltip',
+  'text-primary','text-secondary','text-muted','text-dim','text-faint','text-white','text-on-surface',
+  'border-primary','border-secondary',
+  'brand-blue','brand-blue-dark','brand-blue-light','brand-amber','brand-green','brand-blue-shadow',
+  'node-label','node-count','node-expand','node-stroke-collapsed','node-link-icon',
+  'logo-text','shadow-light','shadow-medium','shadow-heavy','modal-overlay',
+  'link-tree','link-internal','link-cta','link-nav',
+  'section-product','section-docs','section-blog','section-learn',
+  'section-customers','section-competitors','section-integrations',
+  'section-events','section-topics','section-core','section-other',
+  'planned','planned-glow'
+];
+function readCSSColors() {
+  const s = getComputedStyle(document.documentElement);
+  TV.forEach(v => { THEME_COLORS[v] = s.getPropertyValue('--c-' + v).trim(); });
+}
+function getEffective(p) { return p === 'system' ? (matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light') : p; }
+function applyTheme(pref) {
+  document.documentElement.setAttribute('data-theme', getEffective(pref));
+  localStorage.setItem('theme-preference', pref);
+  readCSSColors();
+  document.querySelectorAll('.theme-toggle button').forEach(b => b.classList.remove('active'));
+  const ab = document.getElementById('theme-' + pref);
+  if (ab) ab.classList.add('active');
+  if (typeof updateThemeColors === 'function') updateThemeColors();
+}
+const _savedPref = localStorage.getItem('theme-preference') || 'dark';
+applyTheme(_savedPref);
+document.getElementById('theme-light').addEventListener('click', () => applyTheme('light'));
+document.getElementById('theme-dark').addEventListener('click', () => applyTheme('dark'));
+document.getElementById('theme-system').addEventListener('click', () => applyTheme('system'));
+matchMedia('(prefers-color-scheme:dark)').addEventListener('change', () => {
+  if (localStorage.getItem('theme-preference') === 'system') applyTheme('system');
+});
+
+// Load data and render
+fetch('future_sitemap_data.json?v=' + Date.now()).then(r => r.json()).then(DATA => {
+
+const stats = DATA.stats;
+const plannedPages = new Set((DATA.planned_pages || []).map(p => p.path));
+const plannedPageMap = {};
+(DATA.planned_pages || []).forEach(p => { plannedPageMap[p.path] = p; });
+
+document.getElementById('stats-text').textContent =
+  `${stats.future_total_pages?.toLocaleString() || '?'} total pages | ${stats.pages_added || 0} new planned | ${stats.topic_hubs || 0} topic hubs`;
+
+// ============================================================
+// TREE LAYOUT
+// ============================================================
+const width = window.innerWidth;
+const height = window.innerHeight;
+const margin = { top: 80, right: 40, bottom: 40, left: 200 };
+
+const svg = d3.select("#diagram")
+  .attr("width", width)
+  .attr("height", height);
+
+const g = svg.append("g").attr("class", "main-group");
+
+const zoom = d3.zoom()
+  .scaleExtent([0.05, 4])
+  .on("zoom", (event) => { g.attr("transform", event.transform); });
+svg.call(zoom);
+svg.call(zoom.transform, d3.zoomIdentity.translate(margin.left, height / 2).scale(0.6));
+
+const root = d3.hierarchy(DATA.tree);
+
+root.descendants().forEach(d => {
+  d._allChildren = d.children;
+  if (d.depth >= 1) { d._collapsed = true; d.children = null; }
+});
+
+const treeLayout = d3.tree().nodeSize([22, 220]);
+const pathToNode = {};
+
+function updatePathLookup() {
+  root.descendants().forEach(d => { pathToNode[d.data.path] = d; });
+}
+
+// ============================================================
+// EDGE LOOKUP MAPS
+// ============================================================
+const inboundMap = {};
+const outboundMap = {};
+
+function normalizePath(p) {
+  if (!p) return '/';
+  return p.endsWith('/') ? p : p + '/';
+}
+
+(DATA.edges || []).forEach(edge => {
+  const src = normalizePath(edge.source);
+  const tgt = normalizePath(edge.target);
+  if (!inboundMap[tgt]) inboundMap[tgt] = [];
+  inboundMap[tgt].push({ source: src, target: tgt, text: edge.text, is_cta: edge.is_cta, location: 'body' });
+  if (!outboundMap[src]) outboundMap[src] = [];
+  outboundMap[src].push({ source: src, target: tgt, text: edge.text, is_cta: edge.is_cta, location: 'body' });
+});
+
+const SECTION_NAMES = {
+  product: "Product", docs: "Docs", blog: "Blog", learn: "Learn",
+  customers: "Customers", competitors: "Competitors", integrations: "Integrations",
+  events: "Events", topics: "Topics", core: "Core", other: "Other"
+};
+
+const SECTION_RULES = [
+  { key: 'product',      match: p => p.startsWith('/product/') },
+  { key: 'docs',         match: p => p.startsWith('/docs/') },
+  { key: 'blog',         match: p => p.startsWith('/blog/') },
+  { key: 'learn',        match: p => p.startsWith('/learn/') || p.startsWith('/guides/') || p.startsWith('/knowledge-base/') },
+  { key: 'customers',    match: p => p.startsWith('/customers/') },
+  { key: 'competitors',  match: p => p.startsWith('/competitors/') },
+  { key: 'integrations', match: p => p.startsWith('/integration/') },
+  { key: 'events',       match: p => p.startsWith('/webinars/') || p.startsWith('/events/') },
+  { key: 'topics',       match: p => p.startsWith('/topics/') },
+  { key: 'core',         match: p => ['/','/pricing/','/about/','/contact/','/request-demo/','/enterprise-quote/','/interactive-demo/','/careers/','/security/','/partners/','/partnerships/','/resource-center/'].includes(p) },
+];
+
+function getSection(path) {
+  for (const rule of SECTION_RULES) { if (rule.match(path)) return rule.key; }
+  return 'other';
+}
+
+// ============================================================
+// TOGGLE STATES
+// ============================================================
+let showTree = true;
+let showInbound = false, showOrphans = false, showCrossSection = false;
+let showNewOnly = false;
+let activePhaseFilter = 'all'; // 'all', '2', '3', '4'
+
+// ============================================================
+// NODE FILL LOGIC
+// ============================================================
+function isPlanned(d) {
+  return d.data.is_planned === true;
+}
+
+function getNodeFill(d) {
+  if (isPlanned(d)) return THEME_COLORS['planned'];
+  const section = getSection(d.data.path || '/');
+  return THEME_COLORS['section-' + section] || THEME_COLORS['section-other'];
+}
+
+function matchesPhaseFilter(d) {
+  if (activePhaseFilter === 'all') return true;
+  if (!isPlanned(d)) return true; // existing pages always show
+  return String(d.data.phase) === activePhaseFilter;
+}
+
+// ============================================================
+// ZOOM TO FIT
+// ============================================================
+function zoomToFit(animated) {
+  const nodes = root.descendants();
+  if (nodes.length === 0) return;
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  nodes.forEach(d => { minX = Math.min(minX, d.x); maxX = Math.max(maxX, d.x); minY = Math.min(minY, d.y); maxY = Math.max(maxY, d.y); });
+  const padding = 100;
+  const treeWidth = maxY - minY + padding * 2;
+  const treeHeight = maxX - minX + padding * 2;
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const scaleX = w / treeWidth;
+  const scaleY = (h - 80) / treeHeight;
+  const scale = Math.min(scaleX, scaleY, 1.5);
+  const centerX = (minY + maxY) / 2;
+  const centerY = (minX + maxX) / 2;
+  const t = d3.zoomIdentity.translate(w / 2, h / 2).scale(scale).translate(-centerX, -centerY);
+  if (animated) { svg.transition().duration(750).call(zoom.transform, t); }
+  else { svg.call(zoom.transform, t); }
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+const linkGroup = g.append("g").attr("class", "links");
+const nodeGroup = g.append("g").attr("class", "nodes");
+
+let clickTimer = null;
+
+function update(source) {
+  treeLayout(root);
+  updatePathLookup();
+
+  const nodes = root.descendants();
+  const links = root.links();
+  const duration = 400;
+
+  // ---- TREE LINKS ----
+  const treeLink = linkGroup.selectAll(".tree-link").data(links, d => d.target.data.path);
+  treeLink.exit().transition().duration(duration).attr("opacity", 0).remove();
+  const treeLinkEnter = treeLink.enter().append("path").attr("class", "link tree-link").attr("opacity", 0);
+  treeLink.merge(treeLinkEnter).transition().duration(duration)
+    .attr("opacity", showTree ? 1 : 0)
+    .attr("d", d3.linkHorizontal().x(d => d.y).y(d => d.x));
+
+  // ---- NODES ----
+  const node = nodeGroup.selectAll(".node").data(nodes, d => d.data.path);
+  node.exit().transition().duration(duration).attr("opacity", 0).remove();
+
+  const nodeEnter = node.enter().append("g")
+    .attr("class", "node")
+    .attr("transform", d => `translate(${source ? source.y : d.y},${source ? source.x : d.x})`)
+    .attr("opacity", 0);
+
+  nodeEnter.append("circle");
+  nodeEnter.append("text").attr("class", "expand-icon").attr("text-anchor", "middle").attr("dy", "0.35em");
+  nodeEnter.append("text").attr("dy", "0.35em").attr("class", "label");
+  nodeEnter.append("text").attr("class", "count-label").attr("dy", "0.35em");
+  nodeEnter.append("text").attr("class", "link-icon").attr("dy", "0.35em").text("\u2197");
+
+  const nodeUpdate = node.merge(nodeEnter);
+
+  nodeUpdate.transition().duration(duration)
+    .attr("transform", d => `translate(${d.y},${d.x})`)
+    .attr("opacity", 1);
+
+  // Click handler
+  nodeUpdate.on("click", (event, d) => {
+    if (event.target.classList && event.target.classList.contains("link-icon")) return;
+    if (clickTimer) {
+      clearTimeout(clickTimer); clickTimer = null;
+      window.open("https://www.rudderstack.com" + d.data.path, "_blank");
+    } else {
+      clickTimer = setTimeout(() => {
+        clickTimer = null;
+        if (d._allChildren) {
+          if (d._collapsed) { d.children = d._allChildren; d._collapsed = false; }
+          else { d.children = null; d._collapsed = true; }
+          update(d);
+        }
+      }, 250);
+    }
+  });
+
+  nodeUpdate.select(".link-icon").on("click", (event, d) => {
+    event.stopPropagation();
+    window.open("https://www.rudderstack.com" + d.data.path, "_blank");
+  });
+
+  // Circle rendering
+  nodeUpdate.select("circle")
+    .attr("r", d => {
+      if (d.depth === 0) return 8;
+      const total = d.data.total_urls || 1;
+      return Math.max(4, Math.min(12, Math.sqrt(total) * 1.2));
+    })
+    .attr("fill", d => getNodeFill(d))
+    .attr("stroke", d => {
+      if (isPlanned(d)) return THEME_COLORS['planned'];
+      return d._collapsed && d._allChildren ? THEME_COLORS['node-stroke-collapsed'] : "none";
+    })
+    .attr("stroke-width", d => isPlanned(d) ? 2.5 : (d._collapsed && d._allChildren ? 2 : 0))
+    .attr("stroke-dasharray", d => isPlanned(d) ? "4,2" : "none");
+
+  // Expand icon
+  nodeUpdate.select(".expand-icon").text(d => {
+    if (!d._allChildren || d._allChildren.length === 0) return "";
+    return d._collapsed ? "+" : "";
+  });
+
+  // Labels
+  nodeUpdate.select(".label")
+    .attr("x", d => (d._collapsed && d._allChildren) || !d.children ? 14 : -14)
+    .attr("text-anchor", d => (d._collapsed && d._allChildren) || !d.children ? "start" : "end")
+    .text(d => {
+      let name = d.data.planned_title || d.data.name;
+      if (name.length > 40) name = name.substring(0, 37) + "...";
+      return name;
+    })
+    .attr("fill", d => isPlanned(d) ? THEME_COLORS['planned'] : THEME_COLORS['node-label'])
+    .attr("font-weight", d => isPlanned(d) ? "600" : "400");
+
+  nodeUpdate.select(".count-label")
+    .attr("x", d => {
+      const mainX = (d._collapsed && d._allChildren) || !d.children ? 14 : -14;
+      const labelLen = Math.min(40, (d.data.planned_title || d.data.name).length) * 6.5;
+      return (d._collapsed && d._allChildren) || !d.children ? mainX + labelLen + 4 : mainX - labelLen - 4;
+    })
+    .attr("text-anchor", d => (d._collapsed && d._allChildren) || !d.children ? "start" : "end")
+    .text(d => {
+      if (d.data.total_urls > 1) return `(${d.data.total_urls.toLocaleString()})`;
+      return "";
+    });
+
+  nodeUpdate.select(".link-icon")
+    .attr("x", d => {
+      const mainX = (d._collapsed && d._allChildren) || !d.children ? 14 : -14;
+      const labelLen = Math.min(40, (d.data.planned_title || d.data.name).length) * 6.5;
+      const countLen = d.data.total_urls > 1 ? String(d.data.total_urls.toLocaleString()).length * 6 + 14 : 0;
+      return (d._collapsed && d._allChildren) || !d.children ? mainX + labelLen + countLen + 8 : mainX - labelLen - countLen - 8;
+    });
+
+  // Tooltip
+  nodeUpdate
+    .on("mouseover", (event, d) => showTooltip(event, d))
+    .on("mouseout", hideTooltip);
+
+  // ---- SHOW NEW ONLY / PHASE FILTER ----
+  applyVisualFilters(nodeUpdate);
+
+  // ---- INBOUND BADGES ----
+  nodeUpdate.selectAll(".inbound-badge").remove();
+  if (showInbound) {
+    nodeUpdate.filter(d => (d.data.inbound_count || 0) > 0)
+      .append("text")
+      .attr("class", "inbound-badge")
+      .attr("x", 0)
+      .attr("y", d => {
+        const r = d.depth === 0 ? 8 : Math.max(4, Math.min(12, Math.sqrt(d.data.total_urls || 1) * 1.2));
+        return -(r + 6);
+      })
+      .attr("text-anchor", "middle")
+      .attr("font-size", "8px").attr("font-weight", "700")
+      .attr("fill", THEME_COLORS['brand-amber'])
+      .text(d => d.data.inbound_count);
+  }
+
+  // ---- AUTO-FIT ----
+  const visibleCount = root.descendants().length;
+  if (visibleCount <= 200) {
+    setTimeout(() => zoomToFit(true), duration + 100);
+  }
+}
+
+function applyVisualFilters(nodeUpdate) {
+  if (!nodeUpdate) nodeUpdate = nodeGroup.selectAll(".node");
+
+  if (showNewOnly) {
+    nodeUpdate.each(function(d) {
+      const planned = isPlanned(d);
+      const phaseMatch = matchesPhaseFilter(d);
+      const show = planned && phaseMatch;
+      d3.select(this).select("circle").transition().duration(300).attr("opacity", show ? 1 : 0.08);
+      d3.select(this).selectAll("text.label, text.count-label, text.link-icon").transition().duration(300).attr("opacity", show ? 1 : 0.08);
+    });
+  } else if (activePhaseFilter !== 'all') {
+    nodeUpdate.each(function(d) {
+      const planned = isPlanned(d);
+      const dimmed = planned && !matchesPhaseFilter(d);
+      d3.select(this).select("circle").transition().duration(300).attr("opacity", dimmed ? 0.15 : 1);
+      d3.select(this).selectAll("text.label, text.count-label, text.link-icon").transition().duration(300).attr("opacity", dimmed ? 0.15 : 1);
+    });
+  } else if (showOrphans) {
+    nodeUpdate.select("circle")
+      .attr("stroke", d => {
+        if (isPlanned(d)) return THEME_COLORS['planned'];
+        if (d.data.is_orphan) return THEME_COLORS['section-competitors'];
+        return d._collapsed && d._allChildren ? THEME_COLORS['node-stroke-collapsed'] : "none";
+      })
+      .attr("stroke-width", d => {
+        if (isPlanned(d)) return 2.5;
+        if (d.data.is_orphan) return 2.5;
+        return d._collapsed && d._allChildren ? 2 : 0;
+      })
+      .attr("stroke-dasharray", d => (isPlanned(d) || d.data.is_orphan) ? "3,2" : "none")
+      .attr("opacity", d => (!isPlanned(d) && !d.data.is_orphan) ? 0.2 : 1);
+    nodeUpdate.select(".label").attr("opacity", d => (!isPlanned(d) && !d.data.is_orphan) ? 0.2 : 1);
+    nodeUpdate.select(".count-label").attr("opacity", d => (!isPlanned(d) && !d.data.is_orphan) ? 0.2 : 1);
+  } else {
+    nodeUpdate.select("circle")
+      .attr("opacity", 1)
+      .attr("fill", d => getNodeFill(d))
+      .attr("stroke", d => {
+        if (isPlanned(d)) return THEME_COLORS['planned'];
+        return d._collapsed && d._allChildren ? THEME_COLORS['node-stroke-collapsed'] : "none";
+      })
+      .attr("stroke-width", d => isPlanned(d) ? 2.5 : (d._collapsed && d._allChildren ? 2 : 0))
+      .attr("stroke-dasharray", d => isPlanned(d) ? "4,2" : "none");
+    nodeUpdate.selectAll("text.label, text.count-label, text.link-icon").attr("opacity", 1);
+  }
+}
+
+// ============================================================
+// CROSS-SECTION / FUTURE FLOWS PANEL
+// ============================================================
+function updateCrossSectionPanel() {
+  const panel = document.getElementById("xsection-panel");
+  const content = document.getElementById("xsection-content");
+
+  if (!showCrossSection) { panel.style.display = "none"; return; }
+  panel.style.display = "";
+
+  const flows = (DATA.future_flows || []).slice(0, 20);
+
+  let html = "";
+  flows.forEach(flow => {
+    const srcColor = THEME_COLORS["section-" + flow.source] || THEME_COLORS["section-other"];
+    const tgtColor = THEME_COLORS["section-" + flow.target] || THEME_COLORS["section-other"];
+    const srcName = SECTION_NAMES[flow.source] || flow.source;
+    const tgtName = SECTION_NAMES[flow.target] || flow.target;
+    const cur = flow.current_count || 0;
+    const fut = flow.future_count || 0;
+    const isNew = flow.is_new;
+    const grew = fut > cur;
+
+    html += `<div class="xsection-row">
+      <div class="xsection-flow">
+        <span class="xsection-dot" style="background:${srcColor}"></span>
+        <span>${srcName}</span>
+        <span class="xsection-arrow">\u2192</span>
+        <span class="xsection-dot" style="background:${tgtColor}"></span>
+        <span>${tgtName}</span>
+      </div>
+      <span class="xsection-count">
+        <span class="current">${cur}</span>
+        ${grew ? ` <span style="color:var(--c-text-dim)">\u2192</span> <span class="projected">${fut}</span>` : ''}
+        ${isNew ? '<span class="new-badge">NEW</span>' : ''}
+      </span>
+    </div>`;
+  });
+
+  if (!flows.length) {
+    html = '<div style="color:var(--c-text-muted)">No flow data available.</div>';
+  }
+
+  content.innerHTML = html;
+}
+
+// ============================================================
+// TOOLTIP
+// ============================================================
+const tooltip = document.getElementById("tooltip");
+
+function positionTooltipNearNode(event) {
+  const x = event.clientX + 12;
+  const y = event.clientY - 20;
+  const tw = 480;
+  const th = Math.min(tooltip.offsetHeight || 300, window.innerHeight * 0.7);
+  tooltip.style.left = (x + tw > window.innerWidth ? event.clientX - tw - 12 : x) + "px";
+  tooltip.style.top = (y + th > window.innerHeight ? Math.max(4, event.clientY - th) : Math.max(4, y)) + "px";
+}
+
+function showTooltip(event, d) {
+  cancelHideTooltip();
+  const planned = isPlanned(d);
+
+  let html = `<h4>${d.data.planned_title || d.data.name}`;
+  if (planned) {
+    html += `<span class="planned-badge new">NEW</span>`;
+    if (d.data.phase) html += `<span class="phase-tag">Phase ${d.data.phase}</span>`;
+  }
+  html += `</h4>`;
+
+  const fullUrl = "https://www.rudderstack.com" + d.data.path;
+  html += `<div class="url"><a href="${fullUrl}" target="_blank" rel="noopener">${d.data.path}</a></div>`;
+
+  if (planned) {
+    const TYPE_LABELS = {
+      topic_hub: 'Topic Hub', warehouse_pillar: 'Warehouse Pillar',
+      comparison: 'Comparison Page', case_study: 'Case Study',
+      qa_aeo: 'Q&A / AEO Page', education: 'Education Page'
+    };
+    if (d.data.planned_type) {
+      html += `<div class="planned-type">${TYPE_LABELS[d.data.planned_type] || d.data.planned_type}</div>`;
+    }
+    html += `<div style="margin-top:4px; color:${THEME_COLORS['text-muted']}">This page does not exist yet. It is planned for Phase ${d.data.phase || '?'}.</div>`;
+  } else {
+    html += `<div><strong>Pages:</strong> ${d.data.total_urls.toLocaleString()} total, ${d.data.url_count} direct</div>`;
+    if (d._collapsed && d._allChildren) {
+      html += `<div style="color:${THEME_COLORS['text-muted']}; margin-top:4px;">Click to expand ${d._allChildren.length} children</div>`;
+    }
+  }
+
+  // Section info
+  const section = getSection(d.data.path);
+  const secColor = THEME_COLORS['section-' + section] || THEME_COLORS['section-other'];
+  html += `<div style="margin-top:6px;"><span class="xsection-dot-inline" style="background:${secColor}"></span><strong>${SECTION_NAMES[section] || section}</strong> section</div>`;
+
+  // Inbound links context
+  if (showInbound && !planned) {
+    const bodyInbound = inboundMap[d.data.path] || [];
+    const navInboundCount = d.data.nav_inbound || 0;
+    const totalInbound = bodyInbound.length + navInboundCount;
+
+    html += `<div class="context-section inbound-section">`;
+    html += `<div class="context-section-title">\u2B05 Inbound Links (${totalInbound} total)</div>`;
+
+    if (bodyInbound.length > 0) {
+      const bySrcSection = {};
+      bodyInbound.forEach(e => { const sec = getSection(e.source); if (!bySrcSection[sec]) bySrcSection[sec] = []; bySrcSection[sec].push(e); });
+      const sectionSummary = Object.entries(bySrcSection)
+        .sort((a, b) => b[1].length - a[1].length)
+        .map(([sec, edges]) => {
+          const color = THEME_COLORS['section-' + sec] || THEME_COLORS['section-other'];
+          return `<span class="xsection-dot-inline" style="background:${color}"></span>${SECTION_NAMES[sec] || sec} (${edges.length})`;
+        }).join(' &nbsp; ');
+      html += `<div class="context-summary">${sectionSummary}</div>`;
+      bodyInbound.slice(0, 5).forEach(e => {
+        html += `<div class="context-item"><span style="color:var(--c-text-secondary)">${e.source}</span></div>`;
+      });
+      if (bodyInbound.length > 5) html += `<div class="context-summary">...and ${bodyInbound.length - 5} more</div>`;
+    } else {
+      html += `<div class="context-summary">No body inbound links</div>`;
+    }
+    html += `</div>`;
+  }
+
+  // Orphan context
+  if (showOrphans && !planned) {
+    html += `<div class="context-section">`;
+    if (d.data.is_orphan) {
+      html += `<div class="context-section-title"><span class="orphan-warning">\u26A0 Orphan Page</span></div>`;
+      html += `<div class="context-item">No body inbound links. Only reachable through nav menus or direct URL.</div>`;
+    } else {
+      const bodyInbound = inboundMap[d.data.path] || [];
+      html += `<div class="context-section-title"><span class="orphan-ok">\u2713 Connected Page</span></div>`;
+      html += `<div class="context-item">${bodyInbound.length} body inbound links</div>`;
+    }
+    html += `</div>`;
+  }
+
+  html += `<div style="color:${THEME_COLORS['text-faint']}; font-size:10px; margin-top:8px;">Click to expand/collapse | Double-click to open</div>`;
+  tooltip.innerHTML = html;
+  tooltip.style.display = "block";
+  positionTooltipNearNode(event);
+}
+
+let _tooltipHideTimer = null;
+function hideTooltip() {
+  _tooltipHideTimer = setTimeout(() => { tooltip.style.display = "none"; }, 300);
+}
+function cancelHideTooltip() { if (_tooltipHideTimer) { clearTimeout(_tooltipHideTimer); _tooltipHideTimer = null; } }
+
+tooltip.addEventListener("mouseenter", cancelHideTooltip);
+tooltip.addEventListener("mouseleave", () => { tooltip.style.display = "none"; });
+
+tooltip.addEventListener("click", (e) => {
+  const link = e.target.closest("a[href]");
+  if (link) { e.preventDefault(); e.stopPropagation(); window.open(link.href, "_blank"); }
+});
+
+// ============================================================
+// CONTROLS
+// ============================================================
+document.getElementById("btn-tree").addEventListener("click", () => {
+  showTree = !showTree;
+  document.getElementById("btn-tree").classList.toggle("active");
+  linkGroup.selectAll(".tree-link").transition().duration(300).attr("opacity", showTree ? 1 : 0);
+});
+
+document.getElementById("btn-new-only").addEventListener("click", () => {
+  showNewOnly = !showNewOnly;
+  const btn = document.getElementById("btn-new-only");
+  btn.classList.toggle("active");
+  btn.classList.toggle("active-green", showNewOnly);
+  if (showNewOnly) btn.classList.remove("active");
+  applyVisualFilters();
+});
+
+document.getElementById("btn-inbound").addEventListener("click", () => {
+  showInbound = !showInbound;
+  document.getElementById("btn-inbound").classList.toggle("active");
+  update(root);
+});
+
+document.getElementById("btn-orphans").addEventListener("click", () => {
+  showOrphans = !showOrphans;
+  document.getElementById("btn-orphans").classList.toggle("active");
+  document.getElementById("legend-orphan").style.display = showOrphans ? "" : "none";
+  update(root);
+});
+
+document.getElementById("btn-xsection").addEventListener("click", () => {
+  showCrossSection = !showCrossSection;
+  document.getElementById("btn-xsection").classList.toggle("active");
+  updateCrossSectionPanel();
+});
+
+// Phase filter buttons
+document.querySelectorAll(".phase-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    activePhaseFilter = btn.dataset.phase;
+    document.querySelectorAll(".phase-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    applyVisualFilters();
+  });
+});
+
+// Expand all to level 2
+document.getElementById("btn-expand-all").addEventListener("click", () => {
+  root.descendants().forEach(d => { if (d.depth < 2 && d._allChildren) { d.children = d._allChildren; d._collapsed = false; } });
+  update(root);
+});
+
+// Collapse all
+document.getElementById("btn-collapse").addEventListener("click", () => {
+  root.descendants().forEach(d => { if (d.depth >= 1 && d._allChildren) { d.children = null; d._collapsed = true; } });
+  update(root);
+});
+
+// Zoom to Fit
+document.getElementById("btn-fit").addEventListener("click", () => zoomToFit(true));
+
+// ============================================================
+// SEARCH
+// ============================================================
+const searchBox = document.getElementById("search-box");
+let preSearchState = null;
+let searchDebounce = null;
+
+function getAllDescendants(node) {
+  const result = [];
+  function walk(n) { result.push(n); (n._allChildren || n.children || []).forEach(walk); }
+  walk(node);
+  return result;
+}
+
+function saveCollapseState() {
+  const state = new Map();
+  getAllDescendants(root).forEach(d => { if (d._allChildren) state.set(d.data.path, d._collapsed); });
+  return state;
+}
+
+function restoreCollapseState(state) {
+  getAllDescendants(root).forEach(d => {
+    if (d._allChildren && state.has(d.data.path)) {
+      const wasCollapsed = state.get(d.data.path);
+      if (wasCollapsed) { d.children = null; d._collapsed = true; }
+      else { d.children = d._allChildren; d._collapsed = false; }
+    }
+  });
+}
+
+searchBox.addEventListener("input", () => {
+  clearTimeout(searchDebounce);
+  const query = searchBox.value.toLowerCase().trim();
+
+  if (!query) {
+    if (preSearchState) { restoreCollapseState(preSearchState); preSearchState = null; update(root); }
+    nodeGroup.selectAll(".node circle").attr("opacity", 1);
+    nodeGroup.selectAll(".node text").attr("opacity", 1);
+    return;
+  }
+
+  searchDebounce = setTimeout(() => {
+    if (!preSearchState) preSearchState = saveCollapseState();
+    const allNodes = getAllDescendants(root);
+    const matches = allNodes.filter(d =>
+      d.data.name.toLowerCase().includes(query) ||
+      d.data.path.toLowerCase().includes(query) ||
+      (d.data.planned_title && d.data.planned_title.toLowerCase().includes(query))
+    );
+
+    if (matches.length === 0) {
+      nodeGroup.selectAll(".node").each(function() {
+        d3.select(this).select("circle").attr("opacity", 0.15);
+        d3.select(this).selectAll("text").attr("opacity", 0.15);
+      });
+      return;
+    }
+
+    let expanded = false;
+    matches.forEach(m => {
+      let n = m;
+      while (n.parent) {
+        if (n.parent._collapsed && n.parent._allChildren) { n.parent.children = n.parent._allChildren; n.parent._collapsed = false; expanded = true; }
+        n = n.parent;
+      }
+    });
+
+    if (expanded) update(root);
+
+    const delay = expanded ? 450 : 0;
+    setTimeout(() => {
+      const matchPaths = new Set(matches.map(m => m.data.path));
+      nodeGroup.selectAll(".node").each(function(d) {
+        const isMatch = matchPaths.has(d.data.path);
+        d3.select(this).select("circle").attr("opacity", isMatch ? 1 : 0.15);
+        d3.select(this).selectAll("text").attr("opacity", isMatch ? 1 : 0.15);
+      });
+
+      if (expanded && matches.length > 0) {
+        const first = matches.find(m => m.y !== undefined);
+        if (first) {
+          const w = window.innerWidth, h = window.innerHeight - 80;
+          const scale = 0.7;
+          const t = d3.zoomIdentity.translate(w / 2, h / 2).scale(scale).translate(-first.y, -first.x);
+          svg.transition().duration(750).call(zoom.transform, t);
+        }
+      }
+    }, delay);
+  }, 300);
+});
+
+// ============================================================
+// INITIAL RENDER
+// ============================================================
+root.descendants().forEach(d => {
+  if (d.depth < 1 && d._allChildren) { d.children = d._allChildren; d._collapsed = false; }
+});
+
+update(root);
+
+window.addEventListener("resize", () => {
+  svg.attr("width", window.innerWidth).attr("height", window.innerHeight);
+});
+
+// ============================================================
+// THEME: Re-apply D3 colors when theme changes
+// ============================================================
+window.updateThemeColors = function() {
+  readCSSColors();
+  nodeGroup.selectAll(".node circle")
+    .attr("fill", d => getNodeFill(d))
+    .attr("stroke", d => {
+      if (isPlanned(d)) return THEME_COLORS['planned'];
+      if (showOrphans && d.data.is_orphan) return THEME_COLORS['section-competitors'];
+      return d._collapsed && d._allChildren ? THEME_COLORS['node-stroke-collapsed'] : "none";
+    });
+  nodeGroup.selectAll(".node .label")
+    .attr("fill", d => isPlanned(d) ? THEME_COLORS['planned'] : THEME_COLORS['node-label']);
+  nodeGroup.selectAll(".inbound-badge").attr("fill", THEME_COLORS['brand-amber']);
+  if (showCrossSection) updateCrossSectionPanel();
+};
+
+}); // end fetch
+</script>
+</body>
+</html>

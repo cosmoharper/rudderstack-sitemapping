@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RudderStack.com IA Diagram</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+  (function(){var p=localStorage.getItem('theme-preference')||'dark';var t=p==='system'?(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):p;document.documentElement.setAttribute('data-theme',t)})();
+</script>
+<style>
+:root, [data-theme="dark"] {
+  --c-bg-body: #1a1e27; --c-bg-surface: #252a35;
+  --c-bg-controls: rgba(26,30,39,0.97); --c-bg-tooltip: rgba(30,34,44,0.98);
+  --c-text-primary: #e0e0e0; --c-text-secondary: #ccc; --c-text-muted: #888;
+  --c-text-dim: #666; --c-text-faint: #555; --c-text-white: #fff; --c-text-on-surface: #fff;
+  --c-border-primary: #313845; --c-border-secondary: #3d4451;
+  --c-brand-blue: #1063e2; --c-brand-blue-dark: #0b56c6; --c-brand-blue-light: #76acf7;
+  --c-brand-amber: #f59e0b; --c-brand-green: #22c55e;
+  --c-brand-blue-shadow: rgba(16,99,226,0.4);
+  --c-shadow-light: rgba(0,0,0,0.4); --c-shadow-medium: rgba(0,0,0,0.5);
+  --c-section-product: #3b82f6; --c-section-docs: #14b8a6; --c-section-blog: #a855f7;
+  --c-section-learn: #22c55e; --c-section-customers: #f59e0b; --c-section-competitors: #ef4444;
+  --c-section-integrations: #6366f1; --c-section-events: #ec4899;
+  --c-section-topics: #06b6d4;
+  --c-section-core: #e2e8f0; --c-section-other: #6b7280;
+  --c-planned: #10b981; --c-planned-glow: rgba(16,185,129,0.3);
+  --c-node-label: #ccc; --c-logo-text: #fff;
+}
+[data-theme="light"] {
+  --c-bg-body: #f5f6f8; --c-bg-surface: #ffffff;
+  --c-bg-controls: rgba(245,246,248,0.97); --c-bg-tooltip: rgba(255,255,255,0.98);
+  --c-text-primary: #1a1e27; --c-text-secondary: #555; --c-text-muted: #777;
+  --c-text-dim: #999; --c-text-faint: #aaa; --c-text-white: #fff; --c-text-on-surface: #1a1e27;
+  --c-border-primary: #dde1e8; --c-border-secondary: #c8cdd6;
+  --c-brand-blue: #1063e2; --c-brand-blue-dark: #0b56c6; --c-brand-blue-light: #4a8fe8;
+  --c-brand-amber: #d97706; --c-brand-green: #16a34a;
+  --c-brand-blue-shadow: rgba(16,99,226,0.25);
+  --c-shadow-light: rgba(0,0,0,0.08); --c-shadow-medium: rgba(0,0,0,0.12);
+  --c-section-product: #2563eb; --c-section-docs: #0d9488; --c-section-blog: #9333ea;
+  --c-section-learn: #16a34a; --c-section-customers: #d97706; --c-section-competitors: #dc2626;
+  --c-section-integrations: #4f46e5; --c-section-events: #db2777;
+  --c-section-topics: #0891b2;
+  --c-section-core: #334155; --c-section-other: #9ca3af;
+  --c-planned: #059669; --c-planned-glow: rgba(5,150,105,0.25);
+  --c-node-label: #333; --c-logo-text: #1a1e27;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--c-bg-body); color: var(--c-text-primary); overflow: hidden; }
+
+#controls {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: var(--c-bg-controls); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--c-border-primary); padding: 12px 20px;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+#controls .logo-area { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+#controls .logo-area svg { color: var(--c-logo-text); }
+#controls .logo-area .site-map-label { font-size: 14px; font-weight: 600; color: var(--c-brand-blue-light); letter-spacing: -0.3px; }
+#controls .nav-links { display: flex; gap: 4px; }
+#controls .nav-links a { padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; text-decoration: none; color: var(--c-text-muted); transition: all 0.15s; }
+#controls .nav-links a:hover { color: var(--c-text-primary); background: var(--c-bg-surface); }
+#controls .nav-links a.active { color: var(--c-text-white); background: var(--c-brand-blue); }
+#controls .stats { font-size: 12px; color: var(--c-text-muted); white-space: nowrap; }
+
+.toggle-btn {
+  padding: 5px 12px; border: 1px solid var(--c-border-secondary); border-radius: 6px;
+  background: var(--c-bg-surface); color: var(--c-text-secondary); font-size: 12px; cursor: pointer;
+  transition: all 0.2s; white-space: nowrap; font-family: 'Inter', sans-serif; position: relative;
+}
+.toggle-btn:hover { border-color: var(--c-brand-blue); color: var(--c-text-on-surface); }
+.toggle-btn.active { background: var(--c-brand-blue); border-color: var(--c-brand-blue); color: var(--c-text-white); }
+.toggle-btn.active-green { background: var(--c-planned); border-color: var(--c-planned); color: var(--c-text-white); }
+.toggle-btn .btn-tip {
+  display: none; position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); z-index: 250;
+  background: var(--c-bg-body); border: 1px solid var(--c-border-secondary); border-radius: 6px;
+  padding: 8px 12px; font-size: 11px; line-height: 1.5; color: var(--c-text-secondary);
+  white-space: normal; width: 220px; text-align: left; box-shadow: 0 6px 20px var(--c-shadow-light);
+  pointer-events: none; font-weight: 400;
+}
+.toggle-btn .btn-tip::before {
+  content: ''; position: absolute; top: -5px; left: 50%; transform: translateX(-50%);
+  border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 5px solid var(--c-border-secondary);
+}
+.toggle-btn:hover .btn-tip { display: block; }
+.toggle-btn .btn-tip.tip-left { left: 0; transform: none; }
+.toggle-btn .btn-tip.tip-left::before { left: 20px; transform: none; }
+
+.theme-toggle {
+  display: flex; border: 1px solid var(--c-border-secondary); border-radius: 6px; overflow: hidden; margin-left: auto;
+}
+.theme-toggle button {
+  padding: 5px 8px; border: none; background: var(--c-bg-surface); color: var(--c-text-secondary);
+  font-size: 12px; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s;
+  display: flex; align-items: center; gap: 0; white-space: nowrap; line-height: 1;
+}
+.theme-toggle button:not(:last-child) { border-right: 1px solid var(--c-border-secondary); }
+.theme-toggle button:hover { color: var(--c-text-on-surface); }
+.theme-toggle button.active { background: var(--c-brand-blue); color: var(--c-text-white); }
+.theme-toggle button svg { width: 14px; height: 14px; fill: currentColor; }
+
+#tooltip {
+  position: fixed; z-index: 200; pointer-events: none; display: none;
+  background: var(--c-bg-tooltip); backdrop-filter: blur(10px);
+  border: 1px solid var(--c-border-secondary); border-radius: 8px; padding: 14px 18px;
+  max-width: 420px; font-size: 12px; line-height: 1.5; box-shadow: 0 8px 30px var(--c-shadow-medium);
+}
+#tooltip h4 { font-size: 14px; margin-bottom: 6px; }
+#tooltip .stat-row { display: flex; justify-content: space-between; gap: 16px; padding: 2px 0; }
+#tooltip .stat-label { color: var(--c-text-muted); }
+#tooltip .stat-val { font-weight: 600; font-variant-numeric: tabular-nums; }
+#tooltip .planned-badge { display: inline-block; padding: 1px 6px; border-radius: 8px; font-size: 10px; font-weight: 700; background: var(--c-planned); color: #fff; margin-left: 6px; }
+#tooltip .orphan-bar { height: 4px; border-radius: 2px; background: var(--c-border-secondary); margin-top: 4px; overflow: hidden; }
+#tooltip .orphan-bar-fill { height: 100%; border-radius: 2px; }
+#tooltip .section-divider { height: 1px; background: var(--c-border-primary); margin: 8px 0; }
+#tooltip .edge-info { margin-top: 6px; }
+#tooltip .edge-info .flow-label { font-weight: 600; }
+
+/* Detail panel */
+#detail-panel {
+  position: fixed; bottom: 20px; right: 20px; z-index: 100;
+  background: var(--c-bg-controls); backdrop-filter: blur(10px);
+  border: 1px solid var(--c-border-primary); border-radius: 8px; padding: 18px 22px;
+  font-size: 12px; max-height: 60vh; overflow-y: auto; width: 320px; display: none;
+}
+#detail-panel h3 { font-size: 15px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+#detail-panel .section-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+#detail-panel .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+#detail-panel .metric { background: var(--c-bg-body); border-radius: 6px; padding: 8px 10px; }
+#detail-panel .metric-val { font-size: 18px; font-weight: 700; }
+#detail-panel .metric-label { font-size: 10px; color: var(--c-text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+#detail-panel .flow-section { margin-top: 8px; }
+#detail-panel .flow-section h4 { font-size: 12px; font-weight: 600; color: var(--c-text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+#detail-panel .flow-row { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; gap: 8px; }
+#detail-panel .flow-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+#detail-panel .flow-name { flex: 1; }
+#detail-panel .flow-count { font-weight: 600; font-variant-numeric: tabular-nums; }
+#detail-panel .flow-count .current { color: var(--c-text-muted); }
+#detail-panel .flow-count .future { color: var(--c-planned); }
+#detail-panel .flow-count .arrow { color: var(--c-text-dim); margin: 0 2px; }
+#detail-panel .close-btn { position: absolute; top: 12px; right: 12px; background: none; border: none; color: var(--c-text-muted); font-size: 18px; cursor: pointer; padding: 2px 6px; border-radius: 4px; }
+#detail-panel .close-btn:hover { color: var(--c-text-on-surface); background: var(--c-border-primary); }
+
+/* Legend */
+#legend {
+  position: fixed; bottom: 20px; left: 20px; z-index: 100;
+  background: var(--c-bg-controls); backdrop-filter: blur(10px);
+  border: 1px solid var(--c-border-primary); border-radius: 8px; padding: 14px 18px;
+  font-size: 12px;
+}
+#legend h3 { font-size: 13px; margin-bottom: 8px; color: var(--c-brand-blue); }
+.legend-item { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+.legend-section-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.legend-line { display: inline-block; width: 20px; height: 3px; border-radius: 2px; background: var(--c-text-dim); }
+.legend-line-future { background: var(--c-planned); }
+
+/* Smooth transitions */
+body, #controls, #legend, #tooltip, #detail-panel, .toggle-btn, .theme-toggle button {
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+</style>
+</head>
+<body>
+
+<div id="controls">
+  <div class="logo-area">
+    <svg width="180" height="26" viewBox="0 0 180 26" xmlns="http://www.w3.org/2000/svg"><path d="M1,1 L24,1 A23,23 0 0,1 1,24 Z" fill="#1A63EE"/><text x="30" y="21" font-family="Inter, system-ui, sans-serif" font-weight="400" font-size="21" fill="#1A63EE" letter-spacing="-0.3">rudderstack</text></svg>
+    <span class="site-map-label">IA Diagram</span>
+  </div>
+  <div class="nav-links">
+    <a href="index.html">Site Map</a>
+    <a href="future_sitemap.html">Future Sitemap</a>
+    <a href="ia_diagram.html" class="active">IA Diagram</a>
+    <a href="links.html">Internal Links</a>
+    <a href="backlinks.html">Backlinks</a>
+    <a href="roadmap.html">IA Roadmap</a>
+  </div>
+  <button class="toggle-btn active" id="btn-current">Current State<span class="btn-tip tip-right">Show the current information architecture with existing cross-section link flows.</span></button>
+  <button class="toggle-btn" id="btn-future">Future State<span class="btn-tip">Show the projected future architecture with planned pages and linking rules applied.</span></button>
+  <button class="toggle-btn" id="btn-labels">Edge Labels<span class="btn-tip tip-left">Show link count labels on edges between sections.</span></button>
+  <span class="stats" id="stats-text"></span>
+  <div class="theme-toggle">
+    <button id="theme-light" title="Light"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="3.5" fill="none" stroke="currentColor" stroke-width="1.5"/><g stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="10" y1="2" x2="10" y2="4"/><line x1="10" y1="16" x2="10" y2="18"/><line x1="2" y1="10" x2="4" y2="10"/><line x1="16" y1="10" x2="18" y2="10"/><line x1="4.3" y1="4.3" x2="5.7" y2="5.7"/><line x1="14.3" y1="14.3" x2="15.7" y2="15.7"/><line x1="4.3" y1="15.7" x2="5.7" y2="14.3"/><line x1="14.3" y1="5.7" x2="15.7" y2="4.3"/></g></svg></button>
+    <button id="theme-dark" title="Dark"><svg viewBox="0 0 20 20"><path d="M15.1 12.5A6.5 6.5 0 0 1 7.5 4.9 7 7 0 1 0 15.1 12.5z"/></svg></button>
+    <button id="theme-system" title="System"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2.5" y="3" width="15" height="10" rx="1.5"/><line x1="7" y1="16" x2="13" y2="16"/><line x1="10" y1="13" x2="10" y2="16"/></svg></button>
+  </div>
+</div>
+
+<div id="legend">
+  <h3>Legend</h3>
+  <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-product)"></span> Product</div>
+  <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-docs)"></span> Documentation</div>
+  <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-blog)"></span> Blog</div>
+  <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-learn)"></span> Learning Center</div>
+  <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-customers)"></span> Customer Stories</div>
+  <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-competitors)"></span> Competitors</div>
+  <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-integrations)"></span> Integrations</div>
+  <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-events)"></span> Events &amp; Webinars</div>
+  <div class="legend-item" id="legend-topics" style="display:none"><span class="legend-section-dot" style="background:var(--c-section-topics)"></span> Topics (New)</div>
+  <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-core)"></span> Core Pages</div>
+  <div class="legend-item"><span class="legend-section-dot" style="background:var(--c-section-other)"></span> Other</div>
+  <div style="height:4px"></div>
+  <div class="legend-item"><span class="legend-line"></span> Current links</div>
+  <div class="legend-item" id="legend-future-line" style="display:none"><span class="legend-line legend-line-future"></span> New/increased links</div>
+  <div style="color:var(--c-text-dim); font-size:10px; margin-top:6px;">Node size = page count<br>Edge thickness = link count<br>Click a node for details</div>
+</div>
+
+<div id="tooltip"></div>
+
+<div id="detail-panel">
+  <button class="close-btn" id="detail-close">&times;</button>
+  <div id="detail-content"></div>
+</div>
+
+<svg id="diagram"></svg>
+
+<script>
+// ============================================================
+// THEME ENGINE
+// ============================================================
+const THEME_COLORS = {};
+const TV = [
+  'bg-body','bg-surface','bg-controls','bg-tooltip',
+  'text-primary','text-secondary','text-muted','text-dim','text-faint','text-white','text-on-surface',
+  'border-primary','border-secondary',
+  'brand-blue','brand-blue-dark','brand-blue-light','brand-amber','brand-green','brand-blue-shadow',
+  'shadow-light','shadow-medium',
+  'section-product','section-docs','section-blog','section-learn',
+  'section-customers','section-competitors','section-integrations',
+  'section-events','section-topics','section-core','section-other',
+  'planned','planned-glow','node-label','logo-text'
+];
+function readCSSColors() {
+  const s = getComputedStyle(document.documentElement);
+  TV.forEach(v => { THEME_COLORS[v] = s.getPropertyValue('--c-' + v).trim(); });
+}
+function getEffective(p) { return p === 'system' ? (matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light') : p; }
+function applyTheme(pref) {
+  document.documentElement.setAttribute('data-theme', getEffective(pref));
+  localStorage.setItem('theme-preference', pref);
+  readCSSColors();
+  document.querySelectorAll('.theme-toggle button').forEach(b => b.classList.remove('active'));
+  const ab = document.getElementById('theme-' + pref);
+  if (ab) ab.classList.add('active');
+  if (typeof updateThemeColors === 'function') updateThemeColors();
+}
+const _savedPref = localStorage.getItem('theme-preference') || 'dark';
+applyTheme(_savedPref);
+document.getElementById('theme-light').addEventListener('click', () => applyTheme('light'));
+document.getElementById('theme-dark').addEventListener('click', () => applyTheme('dark'));
+document.getElementById('theme-system').addEventListener('click', () => applyTheme('system'));
+matchMedia('(prefers-color-scheme:dark)').addEventListener('change', () => {
+  if (localStorage.getItem('theme-preference') === 'system') applyTheme('system');
+});
+
+// ============================================================
+// LOAD DATA & RENDER
+// ============================================================
+fetch('ia_data.json?v=' + Date.now()).then(r => r.json()).then(DATA => {
+
+const stats = DATA.stats;
+let showFuture = false;
+let showEdgeLabels = false;
+let selectedNode = null;
+
+function updateStats() {
+  if (showFuture) {
+    document.getElementById('stats-text').textContent =
+      `${stats.total_future_pages.toLocaleString()} pages | ${stats.total_sections} sections | ${stats.total_future_flows.toLocaleString()} cross-links (+${stats.flow_increase.toLocaleString()})`;
+  } else {
+    document.getElementById('stats-text').textContent =
+      `${stats.total_current_pages.toLocaleString()} pages | ${stats.total_sections - stats.new_sections} sections | ${stats.total_current_flows.toLocaleString()} cross-links`;
+  }
+}
+updateStats();
+
+// Color map
+function sectionColor(id) {
+  return THEME_COLORS['section-' + id] || THEME_COLORS['section-other'];
+}
+
+// ============================================================
+// SVG SETUP
+// ============================================================
+const width = window.innerWidth;
+const height = window.innerHeight;
+
+const svg = d3.select("#diagram")
+  .attr("width", width)
+  .attr("height", height);
+
+const g = svg.append("g");
+
+const zoom = d3.zoom()
+  .scaleExtent([0.3, 4])
+  .on("zoom", (event) => { g.attr("transform", event.transform); });
+svg.call(zoom);
+svg.call(zoom.transform, d3.zoomIdentity.translate(width / 2, height / 2));
+
+// ============================================================
+// PREPARE DATA
+// ============================================================
+// Filter nodes for current vs future state
+function getVisibleNodes() {
+  if (showFuture) return DATA.nodes;
+  return DATA.nodes.filter(n => !n.is_new);
+}
+
+function getNodeRadius(n) {
+  const pages = showFuture ? n.future_pages : n.current_pages;
+  return Math.max(20, Math.min(70, Math.sqrt(pages) * 2.5));
+}
+
+function getEdgeWidth(e) {
+  const count = showFuture ? e.future_count : e.current_count;
+  if (count === 0) return 0;
+  return Math.max(1, Math.min(12, Math.sqrt(count) * 0.3));
+}
+
+function getEdgeOpacity(e) {
+  const count = showFuture ? e.future_count : e.current_count;
+  if (count === 0) return 0;
+  return Math.max(0.15, Math.min(0.6, count / 1000));
+}
+
+function getVisibleEdges() {
+  const visibleIds = new Set(getVisibleNodes().map(n => n.id));
+  return DATA.edges.filter(e => {
+    const count = showFuture ? e.future_count : e.current_count;
+    return count > 0 && visibleIds.has(e.source_id || e.source) && visibleIds.has(e.target_id || e.target);
+  });
+}
+
+// ============================================================
+// FORCE SIMULATION
+// ============================================================
+let simulation;
+let nodeData, edgeData;
+let nodeElements, edgeElements, labelElements, edgeLabelElements;
+
+// Edge rendering layers
+const edgeGroup = g.append("g").attr("class", "edges");
+const edgeLabelGroup = g.append("g").attr("class", "edge-labels");
+const nodeGroup = g.append("g").attr("class", "nodes");
+const labelGroup = g.append("g").attr("class", "labels");
+
+function buildGraph() {
+  const visibleNodes = getVisibleNodes();
+  nodeData = visibleNodes.map(n => ({
+    ...n,
+    id: n.id,
+    x: n._x || 0,
+    y: n._y || 0,
+  }));
+
+  const nodeMap = {};
+  nodeData.forEach(n => { nodeMap[n.id] = n; });
+
+  const visibleEdges = getVisibleEdges();
+  // Merge duplicate source/target pairs (sum both directions)
+  const edgeMerged = {};
+  visibleEdges.forEach(e => {
+    const srcId = typeof e.source === 'object' ? e.source.id : e.source;
+    const tgtId = typeof e.target === 'object' ? e.target.id : e.target;
+    if (!nodeMap[srcId] || !nodeMap[tgtId]) return;
+    const key = [srcId, tgtId].sort().join('|');
+    if (!edgeMerged[key]) {
+      edgeMerged[key] = {
+        source: srcId,
+        target: tgtId,
+        current_count: 0,
+        future_count: 0,
+        is_new: false,
+      };
+    }
+    edgeMerged[key].current_count += e.current_count;
+    edgeMerged[key].future_count += e.future_count;
+    if (e.is_new) edgeMerged[key].is_new = true;
+  });
+  edgeData = Object.values(edgeMerged).filter(e => {
+    const count = showFuture ? e.future_count : e.current_count;
+    return count > 0;
+  });
+
+  return { nodeMap };
+}
+
+function render() {
+  const { nodeMap } = buildGraph();
+
+  // ---- EDGES ----
+  edgeGroup.selectAll("line").remove();
+  edgeElements = edgeGroup.selectAll("line")
+    .data(edgeData)
+    .join("line")
+    .attr("stroke", e => {
+      if (showFuture && e.is_new) return THEME_COLORS['planned'];
+      if (showFuture && e.future_count > e.current_count) return THEME_COLORS['planned'];
+      return THEME_COLORS['text-dim'];
+    })
+    .attr("stroke-width", e => getEdgeWidth(e))
+    .attr("stroke-opacity", e => getEdgeOpacity(e))
+    .attr("stroke-linecap", "round");
+
+  // ---- EDGE LABELS ----
+  edgeLabelGroup.selectAll("text").remove();
+  if (showEdgeLabels) {
+    edgeLabelElements = edgeLabelGroup.selectAll("text")
+      .data(edgeData)
+      .join("text")
+      .attr("text-anchor", "middle")
+      .attr("font-size", "9px")
+      .attr("font-family", "Inter, sans-serif")
+      .attr("font-weight", "600")
+      .attr("fill", e => {
+        if (showFuture && (e.is_new || e.future_count > e.current_count)) return THEME_COLORS['planned'];
+        return THEME_COLORS['text-muted'];
+      })
+      .text(e => {
+        const count = showFuture ? e.future_count : e.current_count;
+        return count;
+      });
+  }
+
+  // ---- NODES ----
+  nodeGroup.selectAll("g").remove();
+  const nodeGs = nodeGroup.selectAll("g")
+    .data(nodeData, d => d.id)
+    .join("g")
+    .attr("cursor", "pointer")
+    .call(d3.drag()
+      .on("start", dragStarted)
+      .on("drag", dragged)
+      .on("end", dragEnded));
+
+  nodeGs.append("circle")
+    .attr("r", d => getNodeRadius(d))
+    .attr("fill", d => sectionColor(d.id))
+    .attr("fill-opacity", 0.2)
+    .attr("stroke", d => sectionColor(d.id))
+    .attr("stroke-width", d => d.is_new && showFuture ? 3 : 2)
+    .attr("stroke-dasharray", d => d.is_new && showFuture ? "6,3" : "none");
+
+  // Page count inside circle
+  nodeGs.append("text")
+    .attr("text-anchor", "middle")
+    .attr("dy", "0.35em")
+    .attr("font-size", d => getNodeRadius(d) > 35 ? "14px" : "11px")
+    .attr("font-weight", "700")
+    .attr("fill", d => sectionColor(d.id))
+    .attr("font-family", "Inter, sans-serif")
+    .text(d => {
+      const pages = showFuture ? d.future_pages : d.current_pages;
+      return pages.toLocaleString();
+    });
+
+  nodeElements = nodeGs;
+
+  // ---- LABELS ----
+  labelGroup.selectAll("text").remove();
+  labelElements = labelGroup.selectAll("text")
+    .data(nodeData, d => d.id)
+    .join("text")
+    .attr("text-anchor", "middle")
+    .attr("font-size", "12px")
+    .attr("font-weight", "600")
+    .attr("fill", THEME_COLORS['node-label'])
+    .attr("font-family", "Inter, sans-serif")
+    .attr("dy", d => getNodeRadius(d) + 16)
+    .text(d => d.label);
+
+  // ---- EVENTS ----
+  nodeGs
+    .on("mouseover", (event, d) => showNodeTooltip(event, d))
+    .on("mouseout", () => { tooltip.style.display = "none"; })
+    .on("click", (event, d) => showDetailPanel(d));
+
+  edgeElements
+    .on("mouseover", (event, d) => showEdgeTooltip(event, d))
+    .on("mouseout", () => { tooltip.style.display = "none"; });
+
+  // ---- SIMULATION ----
+  if (simulation) simulation.stop();
+
+  simulation = d3.forceSimulation(nodeData)
+    .force("link", d3.forceLink(edgeData).id(d => d.id).distance(200).strength(0.3))
+    .force("charge", d3.forceManyBody().strength(-800))
+    .force("center", d3.forceCenter(0, 0))
+    .force("collision", d3.forceCollide().radius(d => getNodeRadius(d) + 30))
+    .on("tick", ticked);
+
+  simulation.alpha(1).restart();
+}
+
+function ticked() {
+  edgeElements
+    .attr("x1", d => d.source.x)
+    .attr("y1", d => d.source.y)
+    .attr("x2", d => d.target.x)
+    .attr("y2", d => d.target.y);
+
+  if (showEdgeLabels && edgeLabelElements) {
+    edgeLabelElements
+      .attr("x", d => (d.source.x + d.target.x) / 2)
+      .attr("y", d => (d.source.y + d.target.y) / 2 - 6);
+  }
+
+  nodeElements.attr("transform", d => `translate(${d.x},${d.y})`);
+  labelElements
+    .attr("x", d => d.x)
+    .attr("y", d => d.y);
+}
+
+function dragStarted(event, d) {
+  if (!event.active) simulation.alphaTarget(0.3).restart();
+  d.fx = d.x; d.fy = d.y;
+}
+function dragged(event, d) { d.fx = event.x; d.fy = event.y; }
+function dragEnded(event, d) {
+  if (!event.active) simulation.alphaTarget(0);
+  d._x = d.x; d._y = d.y;
+  d.fx = null; d.fy = null;
+}
+
+// ============================================================
+// TOOLTIP
+// ============================================================
+const tooltip = document.getElementById("tooltip");
+
+function showNodeTooltip(event, d) {
+  const curPages = d.current_pages;
+  const futPages = d.future_pages;
+  const orphanRate = d.orphan_rate;
+  const color = sectionColor(d.id);
+
+  let html = `<h4 style="color:${color}">${d.label}`;
+  if (d.is_new) html += `<span class="planned-badge">NEW</span>`;
+  html += `</h4>`;
+
+  html += `<div class="stat-row"><span class="stat-label">Current pages</span><span class="stat-val">${curPages.toLocaleString()}</span></div>`;
+  if (d.planned_pages > 0) {
+    html += `<div class="stat-row"><span class="stat-label">Planned pages</span><span class="stat-val" style="color:${THEME_COLORS['planned']}">+${d.planned_pages}</span></div>`;
+    html += `<div class="stat-row"><span class="stat-label">Future total</span><span class="stat-val">${futPages.toLocaleString()}</span></div>`;
+  }
+  html += `<div class="stat-row"><span class="stat-label">Crawled</span><span class="stat-val">${d.crawled_pages.toLocaleString()}</span></div>`;
+  html += `<div class="stat-row"><span class="stat-label">Orphan rate</span><span class="stat-val" style="color:${orphanRate > 0.5 ? THEME_COLORS['section-competitors'] : orphanRate > 0.3 ? THEME_COLORS['brand-amber'] : THEME_COLORS['brand-green']}">${(orphanRate * 100).toFixed(0)}%</span></div>`;
+  html += `<div class="orphan-bar"><div class="orphan-bar-fill" style="width:${orphanRate * 100}%; background:${orphanRate > 0.5 ? THEME_COLORS['section-competitors'] : orphanRate > 0.3 ? THEME_COLORS['brand-amber'] : THEME_COLORS['brand-green']}"></div></div>`;
+  if (d.backlinks > 0) {
+    html += `<div class="stat-row"><span class="stat-label">External backlinks</span><span class="stat-val">${d.backlinks.toLocaleString()}</span></div>`;
+  }
+  html += `<div style="color:${THEME_COLORS['text-faint']}; font-size:10px; margin-top:6px;">Click for details</div>`;
+
+  tooltip.innerHTML = html;
+  tooltip.style.display = "block";
+  tooltip.style.left = (event.clientX + 12) + "px";
+  tooltip.style.top = (event.clientY - 12) + "px";
+}
+
+function showEdgeTooltip(event, d) {
+  const srcColor = sectionColor(typeof d.source === 'object' ? d.source.id : d.source);
+  const tgtColor = sectionColor(typeof d.target === 'object' ? d.target.id : d.target);
+  const srcLabel = typeof d.source === 'object' ? d.source.label : d.source;
+  const tgtLabel = typeof d.target === 'object' ? d.target.label : d.target;
+
+  let html = `<div class="edge-info">`;
+  html += `<div class="flow-label"><span style="color:${srcColor}">${srcLabel}</span> \u2194 <span style="color:${tgtColor}">${tgtLabel}</span></div>`;
+  html += `<div class="section-divider"></div>`;
+  html += `<div class="stat-row"><span class="stat-label">Current links</span><span class="stat-val">${d.current_count.toLocaleString()}</span></div>`;
+  html += `<div class="stat-row"><span class="stat-label">Future links</span><span class="stat-val" style="color:${d.future_count > d.current_count ? THEME_COLORS['planned'] : THEME_COLORS['text-secondary']}">${d.future_count.toLocaleString()}</span></div>`;
+  if (d.future_count > d.current_count) {
+    html += `<div class="stat-row"><span class="stat-label">Increase</span><span class="stat-val" style="color:${THEME_COLORS['planned']}">+${(d.future_count - d.current_count).toLocaleString()}</span></div>`;
+  }
+  html += `</div>`;
+
+  tooltip.innerHTML = html;
+  tooltip.style.display = "block";
+  tooltip.style.left = (event.clientX + 12) + "px";
+  tooltip.style.top = (event.clientY - 12) + "px";
+}
+
+// ============================================================
+// DETAIL PANEL
+// ============================================================
+function showDetailPanel(d) {
+  selectedNode = d;
+  const panel = document.getElementById("detail-panel");
+  const content = document.getElementById("detail-content");
+  const color = sectionColor(d.id);
+  const curPages = d.current_pages;
+  const futPages = d.future_pages;
+
+  let html = `<h3><span class="section-dot" style="background:${color}"></span>${d.label}`;
+  if (d.is_new) html += `<span style="font-size:10px; font-weight:700; color:${THEME_COLORS['planned']}; margin-left:6px;">NEW SECTION</span>`;
+  html += `</h3>`;
+
+  html += `<div class="metric-grid">`;
+  html += `<div class="metric"><div class="metric-val">${curPages.toLocaleString()}</div><div class="metric-label">Current Pages</div></div>`;
+  html += `<div class="metric"><div class="metric-val" style="color:${futPages > curPages ? THEME_COLORS['planned'] : ''}">${futPages.toLocaleString()}</div><div class="metric-label">Future Pages</div></div>`;
+  html += `<div class="metric"><div class="metric-val">${d.crawled_pages.toLocaleString()}</div><div class="metric-label">Crawled</div></div>`;
+  html += `<div class="metric"><div class="metric-val" style="color:${d.orphan_rate > 0.5 ? THEME_COLORS['section-competitors'] : d.orphan_rate > 0.3 ? THEME_COLORS['brand-amber'] : THEME_COLORS['brand-green']}">${(d.orphan_rate * 100).toFixed(0)}%</div><div class="metric-label">Orphan Rate</div></div>`;
+  html += `</div>`;
+
+  if (d.planned_pages > 0) {
+    html += `<div style="padding:6px 10px; background:${THEME_COLORS['planned-glow']}; border-radius:6px; border-left:3px solid ${THEME_COLORS['planned']}; margin-bottom:12px; font-size:11px;">`;
+    html += `<strong style="color:${THEME_COLORS['planned']}">+${d.planned_pages} planned pages</strong> in future state`;
+    html += `</div>`;
+  }
+
+  // Flows from/to this section
+  const outflows = DATA.edges.filter(e => e.source === d.id && e.source !== e.target);
+  const inflows = DATA.edges.filter(e => e.target === d.id && e.source !== e.target);
+
+  if (outflows.length > 0) {
+    const sortedOut = [...outflows].sort((a, b) => (showFuture ? b.future_count : b.current_count) - (showFuture ? a.future_count : a.current_count));
+    html += `<div class="flow-section"><h4>Links Out</h4>`;
+    sortedOut.filter(e => (showFuture ? e.future_count : e.current_count) > 0).forEach(e => {
+      const tgtNode = DATA.nodes.find(n => n.id === e.target);
+      const tgtColor = sectionColor(e.target);
+      const cur = e.current_count;
+      const fut = e.future_count;
+      html += `<div class="flow-row"><span class="flow-dot" style="background:${tgtColor}"></span><span class="flow-name">${tgtNode ? tgtNode.label : e.target}</span>`;
+      html += `<span class="flow-count"><span class="current">${cur}</span>`;
+      if (fut > cur) html += `<span class="arrow">\u2192</span><span class="future">${fut}</span>`;
+      html += `</span></div>`;
+    });
+    html += `</div>`;
+  }
+
+  if (inflows.length > 0) {
+    const sortedIn = [...inflows].sort((a, b) => (showFuture ? b.future_count : b.current_count) - (showFuture ? a.future_count : a.current_count));
+    html += `<div class="flow-section"><h4>Links In</h4>`;
+    sortedIn.filter(e => (showFuture ? e.future_count : e.current_count) > 0).forEach(e => {
+      const srcNode = DATA.nodes.find(n => n.id === e.source);
+      const srcColor = sectionColor(e.source);
+      const cur = e.current_count;
+      const fut = e.future_count;
+      html += `<div class="flow-row"><span class="flow-dot" style="background:${srcColor}"></span><span class="flow-name">${srcNode ? srcNode.label : e.source}</span>`;
+      html += `<span class="flow-count"><span class="current">${cur}</span>`;
+      if (fut > cur) html += `<span class="arrow">\u2192</span><span class="future">${fut}</span>`;
+      html += `</span></div>`;
+    });
+    html += `</div>`;
+  }
+
+  // Backlinks
+  if (d.backlinks > 0) {
+    html += `<div class="flow-section"><h4>External Backlinks</h4>`;
+    html += `<div style="font-size:13px; font-weight:700; color:${THEME_COLORS['brand-blue-light']}">${d.backlinks.toLocaleString()}</div>`;
+    html += `</div>`;
+  }
+
+  content.innerHTML = html;
+  panel.style.display = "block";
+
+  // Highlight connected edges
+  highlightNode(d);
+}
+
+function highlightNode(d) {
+  const connectedIds = new Set();
+  connectedIds.add(d.id);
+  edgeData.forEach(e => {
+    const srcId = typeof e.source === 'object' ? e.source.id : e.source;
+    const tgtId = typeof e.target === 'object' ? e.target.id : e.target;
+    if (srcId === d.id) connectedIds.add(tgtId);
+    if (tgtId === d.id) connectedIds.add(srcId);
+  });
+
+  nodeElements.select("circle")
+    .transition().duration(300)
+    .attr("fill-opacity", n => connectedIds.has(n.id) ? 0.3 : 0.05)
+    .attr("stroke-opacity", n => connectedIds.has(n.id) ? 1 : 0.2);
+  nodeElements.select("text")
+    .transition().duration(300)
+    .attr("opacity", n => connectedIds.has(n.id) ? 1 : 0.2);
+  labelElements
+    .transition().duration(300)
+    .attr("opacity", n => connectedIds.has(n.id) ? 1 : 0.2);
+
+  edgeElements
+    .transition().duration(300)
+    .attr("stroke-opacity", e => {
+      const srcId = typeof e.source === 'object' ? e.source.id : e.source;
+      const tgtId = typeof e.target === 'object' ? e.target.id : e.target;
+      return (srcId === d.id || tgtId === d.id) ? 0.7 : 0.03;
+    })
+    .attr("stroke-width", e => {
+      const srcId = typeof e.source === 'object' ? e.source.id : e.source;
+      const tgtId = typeof e.target === 'object' ? e.target.id : e.target;
+      return (srcId === d.id || tgtId === d.id) ? getEdgeWidth(e) * 1.5 : getEdgeWidth(e) * 0.5;
+    });
+}
+
+function clearHighlight() {
+  nodeElements.select("circle")
+    .transition().duration(300)
+    .attr("fill-opacity", 0.2)
+    .attr("stroke-opacity", 1);
+  nodeElements.select("text")
+    .transition().duration(300)
+    .attr("opacity", 1);
+  labelElements
+    .transition().duration(300)
+    .attr("opacity", 1);
+  edgeElements
+    .transition().duration(300)
+    .attr("stroke-opacity", e => getEdgeOpacity(e))
+    .attr("stroke-width", e => getEdgeWidth(e));
+}
+
+document.getElementById("detail-close").addEventListener("click", () => {
+  document.getElementById("detail-panel").style.display = "none";
+  selectedNode = null;
+  clearHighlight();
+});
+
+// Click background to deselect
+svg.on("click", (event) => {
+  if (event.target === svg.node()) {
+    document.getElementById("detail-panel").style.display = "none";
+    selectedNode = null;
+    clearHighlight();
+  }
+});
+
+// ============================================================
+// CONTROLS
+// ============================================================
+document.getElementById("btn-current").addEventListener("click", () => {
+  if (!showFuture) return;
+  showFuture = false;
+  document.getElementById("btn-current").classList.add("active");
+  document.getElementById("btn-future").classList.remove("active");
+  document.getElementById("btn-future").classList.remove("active-green");
+  document.getElementById("legend-topics").style.display = "none";
+  document.getElementById("legend-future-line").style.display = "none";
+  updateStats();
+  render();
+});
+
+document.getElementById("btn-future").addEventListener("click", () => {
+  if (showFuture) return;
+  showFuture = true;
+  document.getElementById("btn-future").classList.add("active-green");
+  document.getElementById("btn-current").classList.remove("active");
+  document.getElementById("legend-topics").style.display = "";
+  document.getElementById("legend-future-line").style.display = "";
+  updateStats();
+  render();
+});
+
+document.getElementById("btn-labels").addEventListener("click", () => {
+  showEdgeLabels = !showEdgeLabels;
+  document.getElementById("btn-labels").classList.toggle("active");
+  render();
+});
+
+// ============================================================
+// THEME RE-APPLY
+// ============================================================
+window.updateThemeColors = function() {
+  readCSSColors();
+  render();
+};
+
+// ============================================================
+// INITIAL RENDER
+// ============================================================
+render();
+
+window.addEventListener("resize", () => {
+  svg.attr("width", window.innerWidth).attr("height", window.innerHeight);
+});
+
+}); // end fetch
+</script>
+</body>
+</html>
