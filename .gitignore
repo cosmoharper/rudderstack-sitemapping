@@ -7,3 +7,4 @@ __pycache__/
 data/crawl_results.json
 output/complete_sitemap_data.json
 output/link_graph.json
+.vercel

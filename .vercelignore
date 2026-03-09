@@ -1,0 +1,16 @@
+# Large source data files (not needed for deployment)
+data/
+*.pyc
+__pycache__/
+*.py
+*.md
+.claude/
+.git/
+
+# Legacy output files not used by the app
+output/complete_sitemap_data.json
+output/link_graph.json
+output/ctas.csv
+output/internal_links.csv
+output/pages.csv
+output/sitemap_diagram.md
