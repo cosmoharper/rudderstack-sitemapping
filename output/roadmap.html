@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RudderStack.com IA Roadmap</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+  (function(){var p=localStorage.getItem('theme-preference')||'dark';var t=p==='system'?(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):p;document.documentElement.setAttribute('data-theme',t)})();
+</script>
+<style>
+:root, [data-theme="dark"] {
+  --c-bg-body: #1a1e27; --c-bg-surface: #252a35; --c-bg-surface-hover: #2d3340;
+  --c-bg-controls: rgba(26,30,39,0.97); --c-bg-tooltip: rgba(30,34,44,0.98);
+  --c-text-primary: #e0e0e0; --c-text-secondary: #ccc; --c-text-muted: #888;
+  --c-text-dim: #666; --c-text-faint: #555; --c-text-white: #fff; --c-text-on-surface: #fff;
+  --c-border-primary: #313845; --c-border-secondary: #3d4451;
+  --c-brand-blue: #1063e2; --c-brand-blue-dark: #0b56c6; --c-brand-blue-light: #76acf7;
+  --c-brand-amber: #f59e0b; --c-brand-green: #22c55e; --c-brand-red: #ef4444;
+  --c-brand-blue-shadow: rgba(16,99,226,0.4);
+  --c-logo-text: #ffffff;
+  --c-shadow-light: rgba(0,0,0,0.4); --c-shadow-medium: rgba(0,0,0,0.5);
+  --c-section-product: #3b82f6; --c-section-docs: #14b8a6; --c-section-blog: #a855f7;
+  --c-section-learn: #22c55e; --c-section-customers: #f59e0b; --c-section-competitors: #ef4444;
+  --c-section-integrations: #6366f1; --c-section-events: #ec4899;
+  --c-section-core: #e2e8f0; --c-section-other: #6b7280;
+  --c-heatmap-0: #252a35; --c-heatmap-3: #1063e2;
+}
+[data-theme="light"] {
+  --c-bg-body: #f5f6f8; --c-bg-surface: #ffffff; --c-bg-surface-hover: #f0f1f3;
+  --c-bg-controls: rgba(245,246,248,0.97); --c-bg-tooltip: rgba(255,255,255,0.98);
+  --c-text-primary: #1a1e27; --c-text-secondary: #555; --c-text-muted: #777;
+  --c-text-dim: #999; --c-text-faint: #aaa; --c-text-white: #fff; --c-text-on-surface: #1a1e27;
+  --c-border-primary: #dde1e8; --c-border-secondary: #c8cdd6;
+  --c-brand-blue: #1063e2; --c-brand-blue-dark: #0b56c6; --c-brand-blue-light: #4a8fe8;
+  --c-brand-amber: #d97706; --c-brand-green: #16a34a; --c-brand-red: #dc2626;
+  --c-brand-blue-shadow: rgba(16,99,226,0.25);
+  --c-logo-text: #1a1e27;
+  --c-shadow-light: rgba(0,0,0,0.08); --c-shadow-medium: rgba(0,0,0,0.12);
+  --c-section-product: #2563eb; --c-section-docs: #0d9488; --c-section-blog: #9333ea;
+  --c-section-learn: #16a34a; --c-section-customers: #d97706; --c-section-competitors: #dc2626;
+  --c-section-integrations: #4f46e5; --c-section-events: #db2777;
+  --c-section-core: #334155; --c-section-other: #9ca3af;
+  --c-heatmap-0: #f0f1f3; --c-heatmap-3: #1063e2;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--c-bg-body); color: var(--c-text-primary); min-height: 100vh; }
+
+#header {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--c-bg-controls); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--c-border-primary); padding: 12px 24px;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+#header .logo-area { display: flex; align-items: center; gap: 10px; }
+#header .logo-area svg { color: var(--c-logo-text); }
+#header .logo-area .page-label { font-size: 14px; font-weight: 600; color: var(--c-brand-blue-light); letter-spacing: -0.3px; }
+#header .nav-links { display: flex; gap: 4px; }
+#header .nav-links a {
+  padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; text-decoration: none;
+  color: var(--c-text-muted); transition: all 0.15s;
+}
+#header .nav-links a:hover { color: var(--c-text-primary); background: var(--c-bg-surface-hover); }
+#header .nav-links a.active { color: var(--c-text-white); background: var(--c-brand-blue); }
+.theme-toggle {
+  display: flex; border: 1px solid var(--c-border-secondary); border-radius: 6px; overflow: hidden; margin-left: auto;
+}
+.theme-toggle button {
+  padding: 5px 8px; border: none; background: var(--c-bg-surface); color: var(--c-text-secondary);
+  font-size: 13px; cursor: pointer; transition: all 0.15s; line-height: 1;
+}
+.theme-toggle button:hover { background: var(--c-bg-surface-hover); }
+.theme-toggle button.active { background: var(--c-brand-blue); color: var(--c-text-white); }
+
+#content { padding: 24px; max-width: 1400px; margin: 0 auto; }
+
+.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.stat-card { background: var(--c-bg-surface); border: 1px solid var(--c-border-primary); border-radius: 10px; padding: 16px; text-align: center; }
+.stat-card .stat-value { font-size: 28px; font-weight: 700; color: var(--c-brand-blue-light); }
+.stat-card .stat-value.critical { color: var(--c-brand-red); }
+.stat-card .stat-value.warning { color: var(--c-brand-amber); }
+.stat-card .stat-value.good { color: var(--c-brand-green); }
+.stat-card .stat-label { font-size: 11px; color: var(--c-text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+.stat-card .stat-target { font-size: 10px; color: var(--c-brand-green); margin-top: 4px; font-weight: 500; }
+
+.panel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.panel-grid.full-width { grid-template-columns: 1fr; }
+.panel { background: var(--c-bg-surface); border: 1px solid var(--c-border-primary); border-radius: 10px; padding: 20px; overflow: hidden; }
+.panel-title { font-size: 14px; font-weight: 600; color: var(--c-text-primary); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.panel-title .subtitle { font-size: 11px; font-weight: 400; color: var(--c-text-muted); }
+
+/* Tables */
+.data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.data-table thead { position: sticky; top: 0; background: var(--c-bg-surface); z-index: 1; }
+.data-table th {
+  text-align: left; padding: 8px 10px; font-weight: 600; font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.5px; color: var(--c-text-muted);
+  border-bottom: 2px solid var(--c-border-primary); cursor: pointer; user-select: none; white-space: nowrap;
+}
+.data-table th.num { text-align: right; }
+.data-table th:hover { color: var(--c-text-primary); }
+.data-table th .sort-arrow { font-size: 10px; margin-left: 3px; opacity: 0.3; }
+.data-table th.sorted .sort-arrow { opacity: 1; color: var(--c-brand-blue-light); }
+.data-table td { padding: 6px 10px; border-bottom: 1px solid var(--c-border-primary); }
+.data-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.data-table td.path { max-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
+.data-table tr:hover { background: var(--c-bg-surface-hover); }
+
+.scroll-container { max-height: 500px; overflow-y: auto; }
+
+.section-tag { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 9px; font-weight: 600; text-transform: uppercase; color: var(--c-text-white); }
+.section-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+
+/* Filters */
+.filter-tabs { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
+.filter-tab {
+  padding: 4px 10px; border-radius: 5px; font-size: 11px; font-weight: 500;
+  cursor: pointer; border: 1px solid var(--c-border-secondary); color: var(--c-text-muted);
+  background: transparent; transition: all 0.15s; font-family: 'Inter', sans-serif;
+}
+.filter-tab:hover { color: var(--c-text-primary); border-color: var(--c-brand-blue); }
+.filter-tab.active { background: var(--c-brand-blue); color: var(--c-text-white); border-color: var(--c-brand-blue); }
+.filter-tab .tab-count { font-weight: 400; opacity: 0.7; margin-left: 3px; }
+
+.export-btn {
+  padding: 5px 12px; border: 1px solid var(--c-border-secondary); border-radius: 6px;
+  background: var(--c-bg-surface); color: var(--c-text-secondary); font-size: 11px; cursor: pointer;
+  font-family: 'Inter', sans-serif; transition: all 0.15s;
+}
+.export-btn:hover { border-color: var(--c-brand-blue); color: var(--c-text-primary); }
+
+/* Charts */
+.chart-container svg text { font-family: 'Inter', sans-serif; }
+
+/* Phase Timeline */
+.phase-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.phase-col { position: relative; }
+.phase-header {
+  padding: 12px; border-radius: 8px; margin-bottom: 12px; text-align: center;
+  border: 1px solid var(--c-border-primary); background: var(--c-bg-surface-hover);
+}
+.phase-header .phase-num { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--c-brand-blue-light); }
+.phase-header .phase-name { font-size: 14px; font-weight: 600; color: var(--c-text-primary); margin: 4px 0; }
+.phase-header .phase-days { font-size: 11px; color: var(--c-text-muted); }
+.phase-header .phase-count { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; background: var(--c-brand-blue); color: var(--c-text-white); margin-top: 6px; }
+
+.phase-items { display: flex; flex-direction: column; gap: 6px; }
+.phase-item {
+  padding: 8px 10px; border-radius: 6px; font-size: 11px; color: var(--c-text-secondary);
+  background: var(--c-bg-body); border-left: 3px solid var(--c-text-dim);
+  line-height: 1.4;
+}
+.phase-item.critical { border-left-color: var(--c-brand-red); }
+.phase-item.high { border-left-color: var(--c-brand-amber); }
+.phase-item.medium { border-left-color: var(--c-brand-blue); }
+.phase-item.low { border-left-color: var(--c-text-dim); }
+.phase-item .item-action {
+  display: inline-block; padding: 1px 5px; border-radius: 3px; font-size: 9px;
+  font-weight: 600; margin-right: 4px; text-transform: uppercase; color: var(--c-text-white);
+}
+.phase-item .item-action.create { background: var(--c-brand-green); }
+.phase-item .item-action.technical { background: var(--c-section-docs); }
+.phase-item .item-action.convert { background: var(--c-brand-amber); }
+.phase-item .item-action.redirect { background: var(--c-brand-red); }
+
+/* Type badges for gap table */
+.type-badge {
+  display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 9px;
+  font-weight: 600; text-transform: uppercase; color: var(--c-text-white);
+}
+.type-badge.create { background: var(--c-brand-green); }
+.type-badge.technical { background: var(--c-section-docs); }
+.type-badge.convert { background: var(--c-brand-amber); }
+.type-badge.redirect { background: var(--c-brand-red); }
+
+/* Priority badges */
+.priority-badge {
+  display: inline-block; padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: 600;
+}
+.priority-badge.critical { background: var(--c-brand-red); color: var(--c-text-white); }
+.priority-badge.high { background: var(--c-brand-amber); color: #000; }
+.priority-badge.medium { background: var(--c-brand-blue); color: var(--c-text-white); }
+.priority-badge.low { background: var(--c-text-dim); color: var(--c-bg-body); }
+
+/* Health bar */
+.health-bar-container { display: flex; align-items: center; gap: 8px; }
+.health-bar { width: 60px; height: 8px; border-radius: 4px; background: var(--c-border-primary); overflow: hidden; }
+.health-bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+.health-score { font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; min-width: 24px; }
+
+/* Gap bar chart */
+.gap-bar-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--c-border-primary); }
+.gap-bar-label { font-size: 11px; color: var(--c-text-secondary); min-width: 200px; flex-shrink: 0; }
+.gap-bar-track { flex: 1; height: 18px; border-radius: 4px; background: var(--c-border-primary); position: relative; overflow: hidden; }
+.gap-bar-current { height: 100%; border-radius: 4px 0 0 4px; background: var(--c-brand-blue); position: absolute; left: 0; top: 0; }
+.gap-bar-target { position: absolute; right: 4px; top: 1px; font-size: 9px; font-weight: 600; color: var(--c-text-muted); }
+.gap-bar-value { font-size: 11px; font-weight: 600; color: var(--c-text-secondary); min-width: 80px; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .phase-grid { grid-template-columns: 1fr 1fr; }
+  .panel-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .phase-grid { grid-template-columns: 1fr; }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div class="logo-area">
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+      <rect width="32" height="32" rx="6" fill="currentColor" fill-opacity="0.1"/>
+      <path d="M8 12 L16 8 L24 12 L16 16Z" fill="currentColor" opacity="0.7"/>
+      <path d="M8 12 L16 16 L16 24 L8 20Z" fill="currentColor" opacity="0.5"/>
+      <path d="M24 12 L16 16 L16 24 L24 20Z" fill="currentColor" opacity="0.3"/>
+    </svg>
+    <span class="page-label">IA Roadmap</span>
+  </div>
+  <div class="nav-links">
+    <a href="index.html">Site Map</a>
+    <a href="links.html">Internal Links</a>
+    <a href="backlinks.html">Backlinks</a>
+    <a href="roadmap.html" class="active">IA Roadmap</a>
+  </div>
+  <div class="theme-toggle">
+    <button onclick="setTheme('light')" title="Light">&#9788;</button>
+    <button onclick="setTheme('dark')" title="Dark">&#9790;</button>
+    <button onclick="setTheme('system')" title="System">&#9881;</button>
+  </div>
+</div>
+
+<div id="content">
+  <!-- A. Stats Row -->
+  <div class="stats-row" id="stats-row"></div>
+
+  <!-- B. Phase Timeline -->
+  <div class="panel-grid full-width">
+    <div class="panel">
+      <div class="panel-title">90-Day Execution Roadmap <span class="subtitle">Phased action plan from strategy documents</span></div>
+      <div class="phase-grid" id="phase-grid"></div>
+    </div>
+  </div>
+
+  <!-- C. IA Comparison -->
+  <div class="panel-grid">
+    <div class="panel">
+      <div class="panel-title">Current State <span class="subtitle">Pages by section with orphan breakdown</span></div>
+      <div class="chart-container" id="current-state-chart"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Future State <span class="subtitle">New content architecture</span></div>
+      <div class="chart-container" id="future-state-chart"></div>
+    </div>
+  </div>
+
+  <!-- D. Gap Analysis Table -->
+  <div class="panel-grid full-width">
+    <div class="panel">
+      <div class="panel-title">
+        <span>Gap Analysis — All Actions</span>
+        <button class="export-btn" id="export-gap-btn">Export CSV</button>
+      </div>
+      <div class="filter-tabs" id="gap-filters"></div>
+      <div class="scroll-container" id="gap-table-container"></div>
+    </div>
+  </div>
+
+  <!-- E. Section Health Scorecard -->
+  <div class="panel-grid full-width">
+    <div class="panel">
+      <div class="panel-title">Section Health Scorecard <span class="subtitle">Weighted: orphan rate, inbound links, backlinks, crawl coverage</span></div>
+      <div class="scroll-container" id="scorecard-container"></div>
+    </div>
+  </div>
+
+  <!-- F. Internal Linking Improvements -->
+  <div class="panel-grid full-width">
+    <div class="panel">
+      <div class="panel-title">Internal Linking Gap Analysis <span class="subtitle">Current vs recommended cross-section body links</span></div>
+      <div id="linking-bars-container"></div>
+    </div>
+  </div>
+
+  <div class="panel-grid full-width">
+    <div class="panel">
+      <div class="panel-title">
+        <span>Linking Rules & Recommendations</span>
+        <button class="export-btn" id="export-linking-btn">Export CSV</button>
+      </div>
+      <div class="scroll-container" id="linking-table-container"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// Theme toggle
+// ============================================================
+function setTheme(pref) {
+  localStorage.setItem('theme-preference', pref);
+  const resolved = pref === 'system' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : pref;
+  document.documentElement.setAttribute('data-theme', resolved);
+  document.querySelectorAll('.theme-toggle button').forEach((b, i) => {
+    b.classList.toggle('active', ['light','dark','system'][i] === pref);
+  });
+}
+(function(){
+  const p = localStorage.getItem('theme-preference') || 'dark';
+  setTheme(p);
+})();
+
+const SECTION_COLORS = {
+  product: '--c-section-product', docs: '--c-section-docs', blog: '--c-section-blog',
+  learn: '--c-section-learn', customers: '--c-section-customers', competitors: '--c-section-competitors',
+  integrations: '--c-section-integrations', events: '--c-section-events',
+  core: '--c-section-core', other: '--c-section-other'
+};
+function sColor(s) { return getComputedStyle(document.documentElement).getPropertyValue(SECTION_COLORS[s] || '--c-text-dim').trim(); }
+function fmt(n) { return n >= 1000 ? n.toLocaleString() : String(n); }
+function healthColor(score) { return score >= 60 ? 'var(--c-brand-green)' : score >= 30 ? 'var(--c-brand-amber)' : 'var(--c-brand-red)'; }
+
+// ============================================================
+// Load data and render
+// ============================================================
+fetch('roadmap_data.json').then(r => r.json()).then(data => {
+  renderStats(data.stats);
+  renderPhases(data.phases);
+  renderCurrentState(data.current_state.sections);
+  renderFutureState(data.future_state);
+  renderGapTable(data);
+  renderScorecard(data.section_scorecard);
+  renderLinkingBars(data.linking_recommendations);
+  renderLinkingTable(data.linking_recommendations);
+}).catch(e => {
+  document.getElementById('content').innerHTML = `<div class="panel" style="text-align:center;padding:60px;"><h2 style="color:var(--c-brand-red);">Error loading roadmap_data.json</h2><p style="color:var(--c-text-muted);margin-top:12px;">${e.message}</p><p style="color:var(--c-text-muted);margin-top:8px;">Run: python3 generate_roadmap_data.py</p></div>`;
+});
+
+// ============================================================
+// A. Stats Row
+// ============================================================
+function renderStats(s) {
+  const cards = [
+    { value: fmt(s.total_pages), label: 'Total Pages', cls: '' },
+    { value: s.orphan_rate + '%', label: 'Orphan Rate', cls: 'critical', target: 'Target: < 30%' },
+    { value: fmt(s.undefined_backlinks), label: '/undefined/ Backlinks', cls: 'warning', target: 'Target: 0 (redirect)' },
+    { value: fmt(s.total_actions), label: 'Total Actions', cls: '' },
+    { value: fmt(s.pages_to_create), label: 'Pages to Create', cls: 'good' },
+    { value: fmt(s.technical_fixes), label: 'Technical Fixes', cls: '' },
+    { value: fmt(s.blog_to_product_gap), label: 'Blog→Product Gap', cls: 'warning', target: 'Links to add' },
+    { value: s.current_topic_hubs + ' → ' + s.target_topic_hubs, label: 'Topic Hubs', cls: 'good', target: '6 new hubs planned' },
+  ];
+  const row = document.getElementById('stats-row');
+  row.innerHTML = cards.map(c =>
+    `<div class="stat-card"><div class="stat-value ${c.cls}">${c.value}</div><div class="stat-label">${c.label}</div>${c.target ? `<div class="stat-target">${c.target}</div>` : ''}</div>`
+  ).join('');
+}
+
+// ============================================================
+// B. Phase Timeline
+// ============================================================
+function renderPhases(phases) {
+  const grid = document.getElementById('phase-grid');
+  grid.innerHTML = phases.map(p => {
+    const items = p.items.map(item => {
+      const title = item.title || item.reason || item.path || '';
+      const priority = item.priority || 'medium';
+      const action = item.action || 'technical';
+      return `<div class="phase-item ${priority}"><span class="item-action ${action}">${action}</span>${title}</div>`;
+    }).join('');
+    const sumParts = [];
+    if (p.summary.critical) sumParts.push(`<span style="color:var(--c-brand-red)">${p.summary.critical} critical</span>`);
+    if (p.summary.high) sumParts.push(`<span style="color:var(--c-brand-amber)">${p.summary.high} high</span>`);
+    if (p.summary.medium) sumParts.push(`<span style="color:var(--c-brand-blue-light)">${p.summary.medium} med</span>`);
+    if (p.summary.low) sumParts.push(`<span style="color:var(--c-text-dim)">${p.summary.low} low</span>`);
+    return `<div class="phase-col">
+      <div class="phase-header">
+        <div class="phase-num">Phase ${p.id}</div>
+        <div class="phase-name">${p.name}</div>
+        <div class="phase-days">Days ${p.days}</div>
+        <div class="phase-count">${p.items.length} items</div>
+        <div style="font-size:10px;margin-top:4px;">${sumParts.join(' · ')}</div>
+      </div>
+      <div class="phase-items">${items}</div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// C. Current State — Horizontal Bar Chart
+// ============================================================
+function renderCurrentState(sections) {
+  const entries = Object.entries(sections).map(([k,v]) => ({key: k, ...v})).sort((a,b) => b.pages - a.pages);
+  const container = document.getElementById('current-state-chart');
+  const margin = {top: 10, right: 60, bottom: 30, left: 90};
+  const width = container.clientWidth || 500;
+  const barH = 28;
+  const height = entries.length * barH + margin.top + margin.bottom;
+
+  const svg = d3.select(container).append('svg').attr('width', width).attr('height', height);
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+  const innerW = width - margin.left - margin.right;
+
+  const maxPages = d3.max(entries, d => d.pages);
+  const x = d3.scaleLog().domain([1, maxPages * 1.2]).range([0, innerW]).clamp(true);
+  const y = d3.scaleBand().domain(entries.map(d => d.key)).range([0, entries.length * barH]).padding(0.25);
+
+  // Axis
+  g.append('g').attr('transform', `translate(0,${entries.length * barH})`)
+    .call(d3.axisBottom(x).ticks(4, '~s').tickSize(-entries.length * barH))
+    .selectAll('line').attr('stroke', 'var(--c-border-primary)');
+  g.selectAll('.domain').remove();
+
+  // Bars — non-orphan portion (solid)
+  g.selectAll('.bar-active').data(entries).join('rect')
+    .attr('class', 'bar-active')
+    .attr('x', 0).attr('y', d => y(d.key)).attr('height', y.bandwidth())
+    .attr('width', d => Math.max(0, x(Math.max(1, d.pages - d.orphans))))
+    .attr('fill', d => sColor(d.key)).attr('rx', 3);
+
+  // Bars — orphan portion (faded)
+  g.selectAll('.bar-orphan').data(entries).join('rect')
+    .attr('class', 'bar-orphan')
+    .attr('x', d => x(Math.max(1, d.pages - d.orphans)))
+    .attr('y', d => y(d.key)).attr('height', y.bandwidth())
+    .attr('width', d => Math.max(0, x(Math.max(1, d.pages)) - x(Math.max(1, d.pages - d.orphans))))
+    .attr('fill', d => sColor(d.key)).attr('opacity', 0.25).attr('rx', 3);
+
+  // Labels
+  g.selectAll('.bar-label').data(entries).join('text')
+    .attr('class', 'bar-label')
+    .attr('x', -8).attr('y', d => y(d.key) + y.bandwidth() / 2)
+    .attr('text-anchor', 'end').attr('dominant-baseline', 'central')
+    .attr('font-size', 11).attr('fill', 'var(--c-text-secondary)')
+    .text(d => d.key);
+
+  // Count labels
+  g.selectAll('.bar-count').data(entries).join('text')
+    .attr('class', 'bar-count')
+    .attr('x', d => x(Math.max(1, d.pages)) + 6)
+    .attr('y', d => y(d.key) + y.bandwidth() / 2)
+    .attr('dominant-baseline', 'central')
+    .attr('font-size', 10).attr('fill', 'var(--c-text-muted)')
+    .text(d => fmt(d.pages) + (d.orphan_rate > 20 ? ` (${d.orphan_rate}% orphan)` : ''));
+
+  // Legend
+  const legend = svg.append('g').attr('transform', `translate(${margin.left}, ${height - 8})`);
+  legend.append('rect').attr('width', 10).attr('height', 10).attr('fill', 'var(--c-brand-blue)').attr('rx', 2);
+  legend.append('text').attr('x', 14).attr('y', 9).attr('font-size', 9).attr('fill', 'var(--c-text-muted)').text('Active');
+  legend.append('rect').attr('x', 60).attr('width', 10).attr('height', 10).attr('fill', 'var(--c-brand-blue)').attr('opacity', 0.25).attr('rx', 2);
+  legend.append('text').attr('x', 74).attr('y', 9).attr('font-size', 9).attr('fill', 'var(--c-text-muted)').text('Orphans');
+}
+
+// ============================================================
+// C. Future State — Tree Diagram
+// ============================================================
+function renderFutureState(fs) {
+  // Build tree data
+  const root = {
+    name: 'rudderstack.com', children: [
+      { name: 'Topic Hubs', children: fs.topic_hubs.map(h => ({name: h.name, status: h.exists ? 'exists' : 'new', count: h.child_pages.length, phase: h.phase})) },
+      { name: 'Comparisons', children: fs.new_pages.filter(p => !p.exists).map(p => ({name: p.title, status: 'new', phase: p.phase})) },
+      { name: 'Case Studies', children: fs.case_studies_to_convert.map(c => ({name: c.title, status: c.exists ? 'exists' : 'new', phase: c.phase})) },
+      { name: 'Q&A / AEO', children: fs.qa_pages.map(q => ({name: q.title, status: q.exists ? 'exists' : 'new', phase: q.phase})) },
+      { name: 'Education', children: fs.category_education_pages.map(e => ({name: e.title, status: e.exists ? 'exists' : 'new', phase: e.phase})) }
+    ]
+  };
+
+  const container = document.getElementById('future-state-chart');
+  const width = container.clientWidth || 500;
+  const height = 400;
+  const svg = d3.select(container).append('svg').attr('width', width).attr('height', height);
+  const g = svg.append('g').attr('transform', 'translate(40, 20)');
+
+  const treeLayout = d3.tree().size([height - 40, width - 160]);
+  const hierarchy = d3.hierarchy(root);
+  treeLayout(hierarchy);
+
+  // Links
+  g.selectAll('.link').data(hierarchy.links()).join('path')
+    .attr('class', 'link')
+    .attr('d', d3.linkHorizontal().x(d => d.y).y(d => d.x))
+    .attr('fill', 'none').attr('stroke', 'var(--c-border-secondary)').attr('stroke-width', 1.2);
+
+  // Nodes
+  const node = g.selectAll('.node').data(hierarchy.descendants()).join('g')
+    .attr('class', 'node')
+    .attr('transform', d => `translate(${d.y},${d.x})`);
+
+  node.append('circle').attr('r', d => d.depth === 0 ? 6 : d.children ? 5 : 4)
+    .attr('fill', d => {
+      if (d.depth === 0) return 'var(--c-brand-blue)';
+      if (d.data.status === 'new') return 'var(--c-brand-green)';
+      if (d.data.status === 'exists') return 'var(--c-brand-blue)';
+      return 'var(--c-text-muted)';
+    })
+    .attr('stroke', 'var(--c-bg-surface)').attr('stroke-width', 2);
+
+  node.append('text')
+    .attr('x', d => d.children ? -10 : 10)
+    .attr('text-anchor', d => d.children ? 'end' : 'start')
+    .attr('dominant-baseline', 'central')
+    .attr('font-size', d => d.depth === 0 ? 12 : d.depth === 1 ? 11 : 9)
+    .attr('fill', d => d.depth <= 1 ? 'var(--c-text-primary)' : 'var(--c-text-secondary)')
+    .attr('font-weight', d => d.depth <= 1 ? 600 : 400)
+    .text(d => {
+      let label = d.data.name;
+      if (d.data.count) label += ` (+${d.data.count})`;
+      if (label.length > 30) label = label.substring(0, 28) + '…';
+      return label;
+    });
+
+  // Legend
+  const lg = svg.append('g').attr('transform', `translate(${width - 180}, ${height - 30})`);
+  [{color: 'var(--c-brand-green)', label: 'New'}, {color: 'var(--c-brand-blue)', label: 'Exists'}].forEach((item, i) => {
+    lg.append('circle').attr('cx', i * 70).attr('cy', 0).attr('r', 4).attr('fill', item.color);
+    lg.append('text').attr('x', i * 70 + 8).attr('y', 4).attr('font-size', 9).attr('fill', 'var(--c-text-muted)').text(item.label);
+  });
+}
+
+// ============================================================
+// D. Gap Analysis Table
+// ============================================================
+function renderGapTable(data) {
+  // Combine all gap items
+  let allItems = [];
+  data.gap_analysis.pages_to_create.forEach(p => allItems.push({...p, action: 'create'}));
+  data.gap_analysis.content_conversions.forEach(p => allItems.push({...p, action: 'convert'}));
+  data.gap_analysis.pages_to_redirect.forEach(p => allItems.push({path: p.source, title: `301 → ${p.target}: ${p.reason}`, type: 'redirect', phase: p.phase, priority: 'critical', action: 'redirect'}));
+  data.future_state.technical_seo_tasks.forEach(t => allItems.push({path: '', title: t.title, type: 'technical', phase: t.phase, priority: t.priority, action: 'technical', category: t.category}));
+
+  // Filter tabs
+  const types = ['all', 'create', 'convert', 'redirect', 'technical'];
+  const typeCounts = {all: allItems.length};
+  types.slice(1).forEach(t => typeCounts[t] = allItems.filter(i => i.action === t).length);
+
+  const filtersEl = document.getElementById('gap-filters');
+  filtersEl.innerHTML = types.map(t =>
+    `<button class="filter-tab ${t==='all'?'active':''}" data-type="${t}">${t.charAt(0).toUpperCase()+t.slice(1)} <span class="tab-count">${typeCounts[t]}</span></button>`
+  ).join('');
+
+  let activeFilter = 'all';
+  let sortCol = 'phase', sortAsc = true;
+
+  function renderTable() {
+    let items = activeFilter === 'all' ? allItems : allItems.filter(i => i.action === activeFilter);
+    items.sort((a, b) => {
+      const priOrder = {critical: 0, high: 1, medium: 2, low: 3};
+      let va, vb;
+      if (sortCol === 'phase') { va = a.phase; vb = b.phase; }
+      else if (sortCol === 'priority') { va = priOrder[a.priority]||2; vb = priOrder[b.priority]||2; }
+      else if (sortCol === 'title') { va = (a.title||'').toLowerCase(); vb = (b.title||'').toLowerCase(); }
+      else if (sortCol === 'type') { va = a.type||a.action; vb = b.type||b.action; }
+      else if (sortCol === 'path') { va = a.path||''; vb = b.path||''; }
+      else { va = a[sortCol]; vb = b[sortCol]; }
+      if (va < vb) return sortAsc ? -1 : 1;
+      if (va > vb) return sortAsc ? 1 : -1;
+      return 0;
+    });
+
+    const cols = ['title', 'type', 'path', 'phase', 'priority'];
+    const headers = cols.map(c => {
+      const sorted = sortCol === c;
+      const arrow = sorted ? (sortAsc ? '▲' : '▼') : '▲';
+      return `<th class="${sorted?'sorted':''} ${c==='phase'||c==='priority'?'num':''}" data-col="${c}">${c} <span class="sort-arrow">${arrow}</span></th>`;
+    }).join('');
+
+    const rows = items.map(item => {
+      const actionCls = item.action || 'technical';
+      const typeLabel = item.type || item.action || '';
+      const priCls = item.priority || 'medium';
+      return `<tr>
+        <td>${item.title || ''}</td>
+        <td><span class="type-badge ${actionCls}">${typeLabel}</span></td>
+        <td class="path" title="${item.path || ''}">${item.path || '—'}</td>
+        <td class="num">${item.phase}</td>
+        <td class="num"><span class="priority-badge ${priCls}">${priCls}</span></td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('gap-table-container').innerHTML =
+      `<table class="data-table"><thead><tr>${headers}</tr></thead><tbody>${rows}</tbody></table>`;
+
+    // Sortable headers
+    document.querySelectorAll('#gap-table-container th').forEach(th => {
+      th.onclick = () => {
+        const col = th.dataset.col;
+        if (sortCol === col) sortAsc = !sortAsc; else { sortCol = col; sortAsc = true; }
+        renderTable();
+      };
+    });
+  }
+
+  // Filter clicks
+  filtersEl.querySelectorAll('.filter-tab').forEach(btn => {
+    btn.onclick = () => {
+      filtersEl.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilter = btn.dataset.type;
+      renderTable();
+    };
+  });
+
+  renderTable();
+
+  // CSV export
+  document.getElementById('export-gap-btn').onclick = () => {
+    const rows = [['Title','Type','Path','Phase','Priority']];
+    allItems.forEach(i => rows.push([i.title||'', i.type||i.action||'', i.path||'', i.phase, i.priority||'']));
+    const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], {type: 'text/csv'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'ia_roadmap_gap_analysis.csv'; a.click();
+  };
+}
+
+// ============================================================
+// E. Section Health Scorecard
+// ============================================================
+function renderScorecard(scorecard) {
+  const sorted = [...scorecard].sort((a, b) => a.health_score - b.health_score);
+  const rows = sorted.map(s => {
+    const color = healthColor(s.health_score);
+    const pct = s.health_score + '%';
+    const issues = (s.issues || []).slice(0, 2).join('; ') || '—';
+    const improvements = (s.improvements || []).slice(0, 2).join('; ') || '—';
+    return `<tr>
+      <td><span class="section-dot" style="background:${sColor(s.section)}"></span>${s.name}</td>
+      <td class="num">${fmt(s.pages)}</td>
+      <td class="num">${s.orphan_rate}%</td>
+      <td class="num">${s.avg_inbound_body.toFixed(1)}</td>
+      <td class="num">${fmt(s.backlinks)}</td>
+      <td>
+        <div class="health-bar-container">
+          <div class="health-bar"><div class="health-bar-fill" style="width:${pct};background:${color}"></div></div>
+          <span class="health-score" style="color:${color}">${s.health_score}</span>
+        </div>
+      </td>
+      <td style="font-size:10px;color:var(--c-text-muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${issues}">${issues}</td>
+      <td style="font-size:10px;color:var(--c-brand-green);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${improvements}">${improvements}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('scorecard-container').innerHTML = `
+    <table class="data-table">
+      <thead><tr>
+        <th>Section</th><th class="num">Pages</th><th class="num">Orphan %</th>
+        <th class="num">Avg Inbound</th><th class="num">Backlinks</th>
+        <th>Health Score</th><th>Top Issues</th><th>Improvements</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+// ============================================================
+// F. Internal Linking Gap Bars
+// ============================================================
+function renderLinkingBars(recs) {
+  const filtered = recs.filter(r => r.recommended > 0);
+  const maxRec = d3.max(filtered, d => d.recommended) || 1;
+  const container = document.getElementById('linking-bars-container');
+
+  container.innerHTML = filtered.map(r => {
+    const currentPct = (r.current_links / maxRec * 100).toFixed(1);
+    const targetPct = (r.recommended / maxRec * 100).toFixed(1);
+    const gapText = r.gap > 0 ? `+${fmt(r.gap)} needed` : 'On track';
+    const gapColor = r.gap > 0 ? 'var(--c-brand-amber)' : 'var(--c-brand-green)';
+    return `<div class="gap-bar-row">
+      <div class="gap-bar-label">${r.source_section} → ${r.target_section}</div>
+      <div class="gap-bar-track" style="position:relative">
+        <div style="position:absolute;left:0;top:0;width:${targetPct}%;height:100%;background:var(--c-border-secondary);border-radius:4px;"></div>
+        <div class="gap-bar-current" style="width:${currentPct}%;z-index:1;position:relative"></div>
+        <div class="gap-bar-target">${fmt(r.recommended)}</div>
+      </div>
+      <div class="gap-bar-value" style="color:${gapColor}">${gapText}</div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// F. Linking Recommendations Table
+// ============================================================
+function renderLinkingTable(recs) {
+  const rows = recs.map(r => {
+    const gapColor = r.gap > 0 ? 'var(--c-brand-amber)' : 'var(--c-brand-green)';
+    return `<tr>
+      <td style="font-size:11px">${r.rule}</td>
+      <td><span class="section-dot" style="background:${sColor(r.source_section)}"></span>${r.source_section}</td>
+      <td><span class="section-dot" style="background:${sColor(r.target_section)}"></span>${r.target_section}</td>
+      <td class="num">${fmt(r.current_links)}</td>
+      <td class="num">${fmt(r.recommended)}</td>
+      <td class="num" style="color:${gapColor};font-weight:600">${r.gap > 0 ? '+' + fmt(r.gap) : '✓'}</td>
+      <td class="num">${r.phase}</td>
+      <td><span class="priority-badge ${r.priority}">${r.priority}</span></td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('linking-table-container').innerHTML = `
+    <table class="data-table">
+      <thead><tr>
+        <th>Linking Rule</th><th>Source</th><th>Target</th>
+        <th class="num">Current</th><th class="num">Recommended</th>
+        <th class="num">Gap</th><th class="num">Phase</th><th>Priority</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+
+  // CSV export
+  document.getElementById('export-linking-btn').onclick = () => {
+    const csvRows = [['Rule','Source','Target','Current','Recommended','Gap','Phase','Priority']];
+    recs.forEach(r => csvRows.push([r.rule, r.source_section, r.target_section, r.current_links, r.recommended, r.gap, r.phase, r.priority]));
+    const csv = csvRows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], {type: 'text/csv'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'ia_roadmap_linking_recommendations.csv'; a.click();
+  };
+}
+</script>
+</body>
+</html>
