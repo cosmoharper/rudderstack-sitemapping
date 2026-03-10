@@ -473,13 +473,26 @@ function renderFutureState(fs) {
   };
 
   const container = document.getElementById('future-state-chart');
-  const width = container.clientWidth || 500;
-  const height = 400;
-  const svg = d3.select(container).append('svg').attr('width', width).attr('height', height);
-  const g = svg.append('g').attr('transform', 'translate(40, 20)');
+  const panel = container.closest('.panel');
+  if (panel) panel.style.overflow = 'visible';
+  const containerW = container.clientWidth || 500;
+  const svgWidth = containerW;
+  const leftMargin = 90;
+  const rightLabelSpace = 190;
+  const treeWidth = Math.max(svgWidth - leftMargin - rightLabelSpace, 180);
+  const maxLabelChars = Math.max(18, Math.floor(rightLabelSpace / 5.5));
 
-  const treeLayout = d3.tree().size([height - 40, width - 160]);
+  // Count leaf nodes to size height
   const hierarchy = d3.hierarchy(root);
+  const leafCount = hierarchy.leaves().length;
+  const height = Math.max(400, leafCount * 16 + 40);
+
+  const svg = d3.select(container).append('svg')
+    .attr('width', svgWidth).attr('height', height)
+    .style('overflow', 'visible');
+  const g = svg.append('g').attr('transform', `translate(${leftMargin}, 20)`);
+
+  const treeLayout = d3.tree().size([height - 40, treeWidth]);
   treeLayout(hierarchy);
 
   // Links
@@ -512,12 +525,17 @@ function renderFutureState(fs) {
     .text(d => {
       let label = d.data.name;
       if (d.data.count) label += ` (+${d.data.count})`;
-      if (label.length > 30) label = label.substring(0, 28) + '…';
+      if (!d.children && label.length > maxLabelChars) label = label.substring(0, maxLabelChars - 1) + '…';
       return label;
+    })
+    .append('title').text(d => {
+      let full = d.data.name;
+      if (d.data.count) full += ` (+${d.data.count})`;
+      return full;
     });
 
   // Legend
-  const lg = svg.append('g').attr('transform', `translate(${width - 180}, ${height - 30})`);
+  const lg = svg.append('g').attr('transform', `translate(${svgWidth - 180}, ${height - 30})`);
   [{color: 'var(--c-brand-green)', label: 'New'}, {color: 'var(--c-brand-blue)', label: 'Exists'}].forEach((item, i) => {
     lg.append('circle').attr('cx', i * 70).attr('cy', 0).attr('r', 4).attr('fill', item.color);
     lg.append('text').attr('x', i * 70 + 8).attr('y', 4).attr('font-size', 9).attr('fill', 'var(--c-text-muted)').text(item.label);
